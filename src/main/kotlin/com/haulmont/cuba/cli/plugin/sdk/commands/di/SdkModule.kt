@@ -17,10 +17,7 @@
 package com.haulmont.cuba.cli.cubaplugin.di
 
 import com.haulmont.cuba.cli.kodein
-import com.haulmont.cuba.cli.plugin.sdk.services.FileDownloadService
-import com.haulmont.cuba.cli.plugin.sdk.services.FileDownloadServiceImpl
-import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
-import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolderImpl
+import com.haulmont.cuba.cli.plugin.sdk.services.*
 import org.kodein.di.Kodein
 import org.kodein.di.generic.bind
 import org.kodein.di.generic.singleton
@@ -33,6 +30,14 @@ private val sdkModule = Kodein.Module {
 
     bind<FileDownloadService>() with singleton {
         FileDownloadServiceImpl()
+    }
+
+    bind<NexusRepositoryManager>() with singleton {
+        NexusRepositoryManagerImpl()
+    }
+
+    bind<MavenExecutor>() with singleton {
+        MavenExecutorImpl()
     }
 }
 

@@ -16,11 +16,17 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.services
 
-import java.nio.file.Path
+import com.haulmont.cuba.cli.plugin.sdk.dto.Artifact
+import org.apache.maven.model.Model
 
-interface FileDownloadService {
+interface NexusRepositoryManager {
 
-    fun  downloadFile(url: String,
-                      downloadFile: Path,
-                      downloadProgressFun: (bytesRead: Long, contentLength: Long, isDone: Boolean) -> Unit)
+    fun readPom(artifact: Artifact): Model?
+
+    fun fetchFile(artifact: Artifact)
+
+    fun fetchWithDependencies(artifact: Artifact)
+
+    fun findDependencies(artifact: Artifact): List<Artifact>
+
 }

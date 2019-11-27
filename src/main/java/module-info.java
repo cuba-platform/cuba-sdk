@@ -31,6 +31,7 @@ module com.haulmont.cuba.cli.plugin.sdk {
     requires practicalxml;
     requires fuel;
     requires fuel.coroutines;
+    requires maven.model;
 
     opens com.haulmont.cuba.cli.plugin.sdk;
     opens com.haulmont.cuba.cli.plugin.sdk.commands;

@@ -14,13 +14,20 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.services
+package com.haulmont.cuba.cli.plugin.sdk.dto
 
-import java.nio.file.Path
+import org.apache.maven.model.Dependency
 
-interface FileDownloadService {
-
-    fun  downloadFile(url: String,
-                      downloadFile: Path,
-                      downloadProgressFun: (bytesRead: Long, contentLength: Long, isDone: Boolean) -> Unit)
+data class Artifact(
+    val group: String,
+    val name: String,
+    val version: String,
+    val classifier: String? = null,
+    val type: String? = null
+) {
+    constructor(
+        dependency: Dependency?,
+        classifier: String? = null,
+        type: String? = null
+    ) : this(dependency!!.groupId, dependency.artifactId, dependency.version, classifier, type)
 }

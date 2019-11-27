@@ -16,11 +16,15 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.services
 
-import java.nio.file.Path
+import java.io.InputStream
 
-interface FileDownloadService {
+typealias ErrorStream = InputStream
 
-    fun  downloadFile(url: String,
-                      downloadFile: Path,
-                      downloadProgressFun: (bytesRead: Long, contentLength: Long, isDone: Boolean) -> Unit)
+class CommandResult(
+    val result: InputStream,
+    val error: ErrorStream)
+
+interface MavenExecutor {
+
+    fun mvn(profile: String, command: String, commands: List<String>): CommandResult
 }

@@ -17,27 +17,20 @@
 package com.haulmont.cuba.cli.plugin.sdk.services
 
 import com.github.kittinunf.fuel.Fuel
-import com.haulmont.cuba.cli.plugin.sdk.SdkPlugin.Companion.SDK_PATH
-import java.io.File
-import java.nio.file.Files
+import java.nio.file.Path
 
 class FileDownloadServiceImpl : FileDownloadService {
 
-    val SDK_TMP_PATH = SDK_PATH.resolve("tmp").also {
-        if (!Files.exists(it)) {
-            Files.createDirectories(it)
-        }
-    }
-
     override fun downloadFile(
         url: String,
-        downloadFile: File,
+        downloadFile: Path,
         downloadProgressFun: (bytesRead: Long, contentLength: Long, isDone: Boolean) -> Unit
     ) {
-        val (request, response, result) = Fuel.download(url).fileDestination { response, Url ->
-            Files.createFile(SDK_TMP_PATH.resolve("nexus.zip")).toFile()
+        val (_, response, _) = Fuel.download(url).fileDestination { response, Url ->
+            downloadFile.toFile()
         }.progress { readBytes, totalBytes ->
-            downloadProgressFun(readBytes, totalBytes, readBytes >= totalBytes)
+            val done = readBytes >= totalBytes
+            downloadProgressFun(readBytes, totalBytes, done)
         }.response()
 
         if (response.statusCode == 200) {
