@@ -33,6 +33,7 @@ def practicalxmlVersion = "1.1.0"
 def gsonVersion = "2.3.1"
 def fuelVersion = "2.2.0"
 def mavenVersion = "3.6.2"
+def jsonVersion = "20180813"
 
 apply plugin: 'groovy'
 apply plugin: 'kotlin'
@@ -127,10 +128,19 @@ dependencies {
     }
 
     implementation("commons-logging:commons-logging:1.1.1'")
+
+    compile("org.json:json:$jsonVersion")
     compile("com.github.kittinunf.fuel:fuel:$fuelVersion") {
         exclude(group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib')
     }
     compile("com.github.kittinunf.fuel:fuel-coroutines:$fuelVersion") {
+        exclude(group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib')
+    }
+    compile("com.github.kittinunf.fuel:fuel-gson:$fuelVersion") {
+        exclude(group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib')
+        exclude(group: 'com.google.code.gson', module: 'gson')
+    }
+    compile("com.github.kittinunf.fuel:fuel-json:$fuelVersion") {
         exclude(group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib')
     }
 

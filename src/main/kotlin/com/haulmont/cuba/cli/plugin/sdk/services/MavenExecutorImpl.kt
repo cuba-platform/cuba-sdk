@@ -24,7 +24,7 @@ class MavenExecutorImpl : MavenExecutor {
 
     internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
 
-    override fun mvn(profile: String, command: String, commands: List<String>): CommandResult {
+    override fun mvn(profile: String, command: String, commands: List<String>): MavenExecutor.CommandResult {
         val rt = Runtime.getRuntime()
         val settingsFile = SdkPlugin.SDK_PATH.resolve("settings.xml")
         val cliCommandsList = ArrayList(
@@ -43,6 +43,6 @@ class MavenExecutorImpl : MavenExecutor {
 
         val proc = rt.exec(cliCommands)
 
-        return CommandResult(proc.inputStream, proc.errorStream)
+        return MavenExecutor.CommandResult(proc.inputStream, proc.errorStream)
     }
 }

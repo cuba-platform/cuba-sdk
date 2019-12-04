@@ -16,13 +16,11 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.services
 
-import java.io.InputStream
+import com.haulmont.cuba.cli.plugin.sdk.dto.SdkMetadata
 
-interface MavenExecutor {
+interface MetadataHolder {
 
-    class CommandResult(
-        val result: InputStream,
-        val error: InputStream)
+    fun getMetadata():SdkMetadata
 
-    fun mvn(profile: String, command: String, commands: List<String>): CommandResult
+    fun flushMetadata()
 }

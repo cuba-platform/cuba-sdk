@@ -14,15 +14,8 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.services
+package com.haulmont.cuba.cli.plugin.sdk.dto
 
-import java.io.InputStream
-
-interface MavenExecutor {
-
-    class CommandResult(
-        val result: InputStream,
-        val error: InputStream)
-
-    fun mvn(profile: String, command: String, commands: List<String>): CommandResult
-}
+data class SdkMetadata (
+    val components: MutableSet<Component> = HashSet()
+)

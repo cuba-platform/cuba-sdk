@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.services
+package com.haulmont.cuba.cli.plugin.sdk.dto
 
-import com.haulmont.cuba.cli.plugin.sdk.dto.Artifact
-import org.apache.maven.model.Model
-
-interface NexusRepositoryManager {
-
-    fun readPom(artifact: Artifact): Model?
-
-    fun fetchFile(artifact: Artifact)
-
-    fun fetchWithDependencies(artifact: Artifact)
-
-    fun findDependencies(artifact: Artifact): List<Artifact>
-
+open class Component(
+    val packageName: String,
+    val name: String?,
+    val version: String,
+    val type: ComponentType = ComponentType.LIB,
+    val dependencies: MutableSet<MvnArtifact> = HashSet()
+) {
+    override fun toString(): String {
+        return name?:"${packageName}:${version}"
+    }
 }

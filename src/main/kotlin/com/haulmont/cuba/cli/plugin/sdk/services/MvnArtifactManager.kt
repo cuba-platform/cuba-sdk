@@ -16,13 +16,19 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.services
 
-import java.io.InputStream
+import com.haulmont.cuba.cli.plugin.sdk.dto.MvnArtifact
+import org.apache.maven.model.Model
 
-interface MavenExecutor {
+interface MvnArtifactManager {
 
-    class CommandResult(
-        val result: InputStream,
-        val error: InputStream)
+    fun readPom(artifact: MvnArtifact): Model?
 
-    fun mvn(profile: String, command: String, commands: List<String>): CommandResult
+    fun upload(artifact: MvnArtifact)
+
+    fun downloadWithDependencies(artifact: MvnArtifact)
+
+    fun findDependencies(artifact: MvnArtifact): List<MvnArtifact>?
+
+    fun resolveClassifiers(artifact: MvnArtifact)
+
 }

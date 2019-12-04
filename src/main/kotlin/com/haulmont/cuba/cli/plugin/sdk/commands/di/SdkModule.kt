@@ -32,12 +32,20 @@ private val sdkModule = Kodein.Module {
         FileDownloadServiceImpl()
     }
 
-    bind<NexusRepositoryManager>() with singleton {
-        NexusRepositoryManagerImpl()
+    bind<MvnArtifactManager>() with singleton {
+        MvnArtifactManagerImpl()
     }
 
     bind<MavenExecutor>() with singleton {
         MavenExecutorImpl()
+    }
+
+    bind<ComponentManager>() with singleton {
+        ComponentManagerImpl()
+    }
+
+    bind<MetadataHolder>() with singleton {
+        MetadataHolderImpl()
     }
 }
 

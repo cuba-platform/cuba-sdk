@@ -16,39 +16,26 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
+import com.beust.jcommander.Parameter
 import com.beust.jcommander.Parameters
-import com.haulmont.cuba.cli.commands.AbstractCommand
-import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
-import com.haulmont.cuba.cli.plugin.sdk.dto.Artifact
-import com.haulmont.cuba.cli.plugin.sdk.services.NexusRepositoryManager
-import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
-import org.kodein.di.generic.instance
+import com.haulmont.cuba.cli.plugin.sdk.dto.Component
+import com.haulmont.cuba.cli.plugin.sdk.dto.ComponentType
+import com.haulmont.cuba.cli.plugin.sdk.dto.SearchContext
 
 @Parameters(commandDescription = "Install framework to SDK")
-class InstallFrameworkCommand : AbstractCommand() {
+class InstallFrameworkCommand : BaseInstallCommand() {
 
-    internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
+    @Parameter(description = "Framework name and version <name>:<version>")
+    private var frameworkNameVersion: String? = null
 
-    internal val repositoryManager: NexusRepositoryManager by sdkKodein.instance()
-
-    override fun run() {
-        val artifacts = HashSet<Artifact>()
-        val version = "7.1.2"
-        artifacts.addAll(resolveWithDependencies(Artifact("com.haulmont.cuba", "cuba-global", version)))
-        artifacts.addAll(resolveWithDependencies(Artifact("com.haulmont.cuba", "cuba-core", version)))
-        artifacts.addAll(resolveWithDependencies(Artifact("com.haulmont.cuba", "cuba-client", version)))
-        artifacts.addAll(resolveWithDependencies(Artifact("com.haulmont.cuba", "cuba-web", version)))
-        artifacts.addAll(resolveWithDependencies(Artifact("com.haulmont.cuba", "cuba-gui", version)))
-        artifacts.addAll(resolveWithDependencies(Artifact("com.haulmont.cuba", "cuba-web-toolkit", version)))
-        artifacts.addAll(resolveWithDependencies(Artifact("com.haulmont.cuba", "cuba-web-widgets", version)))
-
-        val s=""
-    }
-
-    private fun resolveWithDependencies(artifact: Artifact): HashSet<Artifact> {
-        val dependencies = HashSet<Artifact>()
-        dependencies.add(artifact)
-        dependencies.addAll(repositoryManager.findDependencies(artifact))
-        return dependencies
+    override fun search(): Component? {
+        frameworkNameVersion?.split(":")?.let {
+            if (it.size == 2) {
+                componentManager.search(
+                    SearchContext(ComponentType.FRAMEWORK, it[0], version = it[1])
+                )?.let { return it }
+            }
+        }
+        fail(messages["unknownFramework"].format(frameworkNameVersion))
     }
 }

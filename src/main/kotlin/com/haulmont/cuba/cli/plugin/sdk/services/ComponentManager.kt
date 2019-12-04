@@ -16,13 +16,16 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.services
 
-import java.io.InputStream
+import com.haulmont.cuba.cli.plugin.sdk.dto.Component
+import com.haulmont.cuba.cli.plugin.sdk.dto.SearchContext
 
-interface MavenExecutor {
+interface ComponentManager {
 
-    class CommandResult(
-        val result: InputStream,
-        val error: InputStream)
+    fun search(context: SearchContext): Component?
 
-    fun mvn(profile: String, command: String, commands: List<String>): CommandResult
+    fun resolve(component: Component, progress: ResolveProgressCallback? = null)
+
+    fun upload(component: Component, progress: UploadProcessCallback? = null)
+
+    fun register(component: Component)
 }

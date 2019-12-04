@@ -16,18 +16,9 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.dto
 
-import org.apache.maven.model.Dependency
+enum class ComponentType {
 
-data class Artifact(
-    val group: String,
-    val name: String,
-    val version: String,
-    val classifier: String? = null,
-    val type: String? = null
-) {
-    constructor(
-        dependency: Dependency?,
-        classifier: String? = null,
-        type: String? = null
-    ) : this(dependency!!.groupId, dependency.artifactId, dependency.version, classifier, type)
+    FRAMEWORK,
+    ADDON,
+    LIB
 }

@@ -14,15 +14,20 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.services
+package com.haulmont.cuba.cli.plugin.sdk.dto
 
-import java.io.InputStream
+data class MvnArtifact(
+    val groupId: String,
+    val artifactId: String,
+    val version: String,
 
-interface MavenExecutor {
-
-    class CommandResult(
-        val result: InputStream,
-        val error: InputStream)
-
-    fun mvn(profile: String, command: String, commands: List<String>): CommandResult
+    val classifiers: MutableList<MvnClassifier> = ArrayList()
+) {
+    fun mvnCoordinates(classifier: MvnClassifier? = null): String {
+        var coordinates = "${groupId}:${artifactId}:${version}"
+        if (classifier != null) {
+            coordinates += ":${classifier.extension}:${classifier.type}"
+        }
+        return coordinates
+    }
 }

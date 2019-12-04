@@ -32,8 +32,13 @@ module com.haulmont.cuba.cli.plugin.sdk {
     requires fuel;
     requires fuel.coroutines;
     requires maven.model;
+    requires gson;
+    requires result;
+    requires fuel.json;
+    requires org.json;
 
     opens com.haulmont.cuba.cli.plugin.sdk;
+    opens com.haulmont.cuba.cli.plugin.sdk.dto;
     opens com.haulmont.cuba.cli.plugin.sdk.commands;
     opens com.haulmont.cuba.cli.plugin.sdk.commands.artifacts;
     opens com.haulmont.cuba.cli.plugin.sdk.commands.repository;

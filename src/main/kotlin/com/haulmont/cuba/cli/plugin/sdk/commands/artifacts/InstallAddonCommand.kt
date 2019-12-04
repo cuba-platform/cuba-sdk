@@ -16,13 +16,26 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
+import com.beust.jcommander.Parameter
 import com.beust.jcommander.Parameters
-import com.haulmont.cuba.cli.commands.AbstractCommand
+import com.haulmont.cuba.cli.plugin.sdk.dto.Component
+import com.haulmont.cuba.cli.plugin.sdk.dto.ComponentType
+import com.haulmont.cuba.cli.plugin.sdk.dto.SearchContext
 
 @Parameters(commandDescription = "Install add-on to SDK")
-class InstallAddonCommand : AbstractCommand() {
+class InstallAddonCommand : BaseInstallCommand() {
 
-    override fun run() {
+    @Parameter(description = "Addon name and version <name>:<version>")
+    private var addonNameVersion: String? = null
 
+    override fun search(): Component? {
+        addonNameVersion?.split(":")?.let {
+            if (it.size == 2) {
+                componentManager.search(
+                    SearchContext(ComponentType.ADDON, it[0], version = it[1])
+                )?.let { return it }
+            }
+        }
+        fail(messages["unknownAddon"].format(addonNameVersion))
     }
 }

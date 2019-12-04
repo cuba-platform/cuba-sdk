@@ -16,13 +16,27 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
+import com.beust.jcommander.Parameter
 import com.beust.jcommander.Parameters
-import com.haulmont.cuba.cli.commands.AbstractCommand
+import com.haulmont.cuba.cli.plugin.sdk.dto.Component
+import com.haulmont.cuba.cli.plugin.sdk.dto.ComponentType
+import com.haulmont.cuba.cli.plugin.sdk.dto.SearchContext
 
 @Parameters(commandDescription = "Install library to SDK")
-class InstallLibCommand : AbstractCommand() {
+class InstallLibCommand : BaseInstallCommand() {
 
-    override fun run() {
+    @Parameter(description = "Lib group, name and version <group>:<name>:<version>")
+    private var nameVersion: String? = null
 
+    override fun search(): Component? {
+        nameVersion?.split(":")?.let {
+            if (it.size == 3) {
+                componentManager.search(
+                    SearchContext(ComponentType.LIB, it[0], it[1], it[2])
+                )?.let { return it }
+
+            }
+        }
+        fail(messages["unknownLib"].format(nameVersion))
     }
 }
