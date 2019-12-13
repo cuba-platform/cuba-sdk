@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.dto
+package com.haulmont.cuba.cli.plugin.sdk.search
 
-open class ComplexComponent(
-    packageName: String,
-    name: String?,
-    version: String,
-    dependencies: MutableSet<MvnArtifact> = HashSet(),
-    type: ComponentType,
-    val components: MutableList<Component> = ArrayList()
-) : Component(packageName, name, version, type, dependencies)
+import com.haulmont.cuba.cli.plugin.sdk.dto.Component
+
+interface RepositorySearch {
+
+    fun search(component: Component): Component?
+}

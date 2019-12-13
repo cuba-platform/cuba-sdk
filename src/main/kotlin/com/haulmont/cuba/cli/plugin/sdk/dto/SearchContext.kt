@@ -16,9 +16,11 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.dto
 
-data class SearchContext(
-    val type: ComponentType,
-    val componentPackage: String,
-    val name: String? = null,
-    val version: String
+open class SearchContext(
+    val type: String,
+    val url: String,
+    val authRequired: Boolean = false,
+    val login: String? = null,
+    val password: String? = null,
+    val subject: String
 )

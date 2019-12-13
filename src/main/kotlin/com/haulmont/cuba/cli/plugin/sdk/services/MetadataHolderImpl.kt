@@ -19,9 +19,11 @@ package com.haulmont.cuba.cli.plugin.sdk.services
 import com.google.gson.Gson
 import com.haulmont.cuba.cli.plugin.sdk.SdkPlugin
 import com.haulmont.cuba.cli.plugin.sdk.dto.SdkMetadata
+import com.haulmont.cuba.cli.plugin.sdk.dto.SearchContext
 import java.io.FileInputStream
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
+import java.nio.file.StandardOpenOption
 
 class MetadataHolderImpl : MetadataHolder {
 
@@ -35,7 +37,19 @@ class MetadataHolderImpl : MetadataHolder {
                     return@lazy Gson().fromJson(it.readText(), SdkMetadata::class.java)
                 }
         } else {
-            return@lazy SdkMetadata()
+            return@lazy initMetadata()
+        }
+    }
+
+    private fun initMetadata(): SdkMetadata {
+        return SdkMetadata().also {
+            it.searchContexts.add(
+                SearchContext(
+                    type = "bintray",
+                    url = "https://api.bintray.com/search/packages/maven?",
+                    subject = "cuba-platform"
+                )
+            )
         }
     }
 
@@ -45,7 +59,12 @@ class MetadataHolderImpl : MetadataHolder {
 
     override fun flushMetadata() {
         createFileIfNotExists()
-        Files.writeString(SDK_METADATA_PATH, Gson().toJson(sdkMetadata))
+        Files.writeString(
+            SDK_METADATA_PATH,
+            Gson().toJson(sdkMetadata),
+            StandardOpenOption.WRITE,
+            StandardOpenOption.TRUNCATE_EXISTING
+        )
     }
 
     private fun createFileIfNotExists() {

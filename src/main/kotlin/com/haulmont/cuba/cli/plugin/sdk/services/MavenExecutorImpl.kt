@@ -19,9 +19,11 @@ package com.haulmont.cuba.cli.plugin.sdk.services
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.SdkPlugin
 import org.kodein.di.generic.instance
+import java.util.logging.Logger
 
 class MavenExecutorImpl : MavenExecutor {
 
+    private val log: Logger = Logger.getLogger(MavenExecutorImpl::class.java.name)
     internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
 
     override fun mvn(profile: String, command: String, commands: List<String>): MavenExecutor.CommandResult {
@@ -41,6 +43,7 @@ class MavenExecutorImpl : MavenExecutor {
         val cliCommands = arrayOfNulls<String>(cliCommandsList.size)
         cliCommandsList.toArray(cliCommands)
 
+        log.fine("Execute maven:${cliCommands.joinToString(separator = " ")}")
         val proc = rt.exec(cliCommands)
 
         return MavenExecutor.CommandResult(proc.inputStream, proc.errorStream)

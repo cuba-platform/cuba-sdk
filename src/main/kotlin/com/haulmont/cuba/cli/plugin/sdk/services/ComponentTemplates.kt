@@ -18,17 +18,6 @@ package com.haulmont.cuba.cli.plugin.sdk.services
 
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 
-interface ComponentManager {
-
-    fun isAlreadyInstalled(component: Component): Boolean
-
-    fun searchInMetadata(component: Component): Component?
-
-    fun search(component: Component): Component?
-
-    fun resolve(component: Component, progress: ResolveProgressCallback? = null)
-
-    fun upload(component: Component, progress: UploadProcessCallback? = null)
-
-    fun register(component: Component)
+interface ComponentTemplates {
+    fun getTemplates(): Collection<Component>
 }

@@ -18,25 +18,52 @@ package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
 import com.beust.jcommander.Parameter
 import com.beust.jcommander.Parameters
+import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
+import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.ComponentType
-import com.haulmont.cuba.cli.plugin.sdk.dto.SearchContext
+import com.haulmont.cuba.cli.plugin.sdk.dto.MvnArtifact
+import com.haulmont.cuba.cli.plugin.sdk.services.MvnArtifactManager
+import org.kodein.di.generic.instance
 
 @Parameters(commandDescription = "Install library to SDK")
 class InstallLibCommand : BaseInstallCommand() {
 
+    internal val mvnArtifactManager: MvnArtifactManager by sdkKodein.instance()
+
     @Parameter(description = "Lib group, name and version <group>:<name>:<version>")
     private var nameVersion: String? = null
 
-    override fun search(): Component? {
+    override fun createSearchContext(): Component? {
         nameVersion?.split(":")?.let {
             if (it.size == 3) {
-                componentManager.search(
-                    SearchContext(ComponentType.LIB, it[0], it[1], it[2])
-                )?.let { return it }
-
+                return Component(it[0], it[1], it[2], ComponentType.LIB)
+            }
+            if (it.size == 4) {
+                return Component(
+                    it[0],
+                    it[1],
+                    it[2],
+                    ComponentType.LIB,
+                    classifiers = arrayListOf(Classifier.pom(), Classifier(it[3]))
+                )
+            }
+            if (it.size == 5) {
+                return Component(
+                    it[0],
+                    it[1],
+                    it[2],
+                    ComponentType.LIB,
+                    classifiers = arrayListOf(Classifier.pom(), Classifier(it[3], it[4]))
+                )
             }
         }
         fail(messages["unknownLib"].format(nameVersion))
+    }
+
+    override fun search(component: Component): Component? {
+        mvnArtifactManager.readPom(MvnArtifact(component.packageName, component.name as String, component.version))
+            ?: return null
+        return component
     }
 }

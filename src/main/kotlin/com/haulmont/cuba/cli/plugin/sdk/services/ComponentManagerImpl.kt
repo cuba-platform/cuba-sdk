@@ -16,165 +16,239 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.services
 
-import com.github.kittinunf.fuel.core.Headers
-import com.github.kittinunf.fuel.httpGet
-import com.github.kittinunf.fuel.json.responseJson
+import com.google.gson.Gson
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
+import com.haulmont.cuba.cli.generation.VelocityHelper
 import com.haulmont.cuba.cli.plugin.sdk.dto.*
-import org.json.JSONArray
-import org.json.JSONObject
+import com.haulmont.cuba.cli.plugin.sdk.search.BintraySearch
+import com.haulmont.cuba.cli.plugin.sdk.search.RepositorySearch
 import org.kodein.di.generic.instance
+import java.util.logging.Logger
 import java.util.stream.Collectors
 
-typealias ResolveProgressCallback = (component: Component, resolved: Int, total: Int) -> Unit
-typealias UploadProcessCallback = (artifact: MvnArtifact, uploaded: Int, total: Int) -> Unit
+typealias ResolveProgressCallback = (component: Component, resolved: Float, total: Int) -> Unit
+typealias UploadProcessCallback = (artifact: MvnArtifact, uploaded: Float, total: Int) -> Unit
 
 class ComponentManagerImpl : ComponentManager {
 
-    internal val metadataHolder: MetadataHolder by sdkKodein.instance()
-    internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
-    internal val mvnArtifactManager: MvnArtifactManager by sdkKodein.instance()
+    private val log: Logger = Logger.getLogger(ComponentManagerImpl::class.java.name)
 
-    override fun search(context: SearchContext): Component? {
-        return searchInMetadata(context) ?: searchInExternalRepo(context)
+    private val componentTemplates: ComponentTemplates by sdkKodein.instance()
+    private val metadataHolder: MetadataHolder by sdkKodein.instance()
+    private val mvnArtifactManager: MvnArtifactManager by sdkKodein.instance()
+    private val velocityHelper: VelocityHelper = VelocityHelper()
+
+    private fun localProgress(component: Component) =
+        1f / (3 + getClassifiersToResolve(component).size)
+
+    override fun search(component: Component): Component? {
+        val componentTemplate = findTemplate(component) ?: component
+        return searchInExternalRepo(componentTemplate)?.let { resolved ->
+            if (resolved.name == null || resolved.name.isBlank()) {
+                resolved.components.find { it.name != null && it.name.endsWith("-global") }?.let {
+                    return resolved.copy(name = it.name?.substringBefore("-global"))
+                }
+            }
+            return resolved
+        }
     }
 
-    private fun searchInMetadata(context: SearchContext): Component? {
+    private fun matchTemplate(it: Component, component: Component) =
+        listOfNotNull(it.name, it.packageName)
+            .intersect(
+                listOfNotNull(
+                    component.name,
+                    component.packageName
+                )
+            ).isNotEmpty() && it.type == component.type
+
+    override fun isAlreadyInstalled(component: Component): Boolean {
+        val componentTemplate = findTemplate(component) ?: component
+        return metadataHolder.getMetadata().installedComponents.stream()
+            .filter {
+                it.type == componentTemplate.type &&
+                        it.name == componentTemplate.name &&
+                        it.packageName == componentTemplate.packageName &&
+                        it.version == componentTemplate.version
+            }
+            .findAny()
+            .isPresent
+    }
+
+    override fun searchInMetadata(component: Component): Component? {
+        val componentTemplate = findTemplate(component) ?: component
         return metadataHolder.getMetadata().components.stream()
             .filter {
-                it.type == context.type &&
-                        it.name == context.name &&
-                        it.packageName == context.componentPackage &&
-                        it.version == context.version
+                it.type == componentTemplate.type &&
+                        it.name == componentTemplate.name &&
+                        it.packageName == componentTemplate.packageName &&
+                        it.version == componentTemplate.version
             }
             .findAny()
             .orElse(null)
     }
 
-    private fun searchInExternalRepo(context: SearchContext): Component? {
-        return when (sdkSettings.getProperty("search-repo-type")) {
-            "bintray" -> searchBintray(context)
-            else -> throw IllegalStateException("Unsupported source repo type: ${sdkSettings.getProperty("search-repo-type")}")
+    private fun findTemplate(component: Component): Component? =
+        componentTemplates.getTemplates().searchTemplate(component)?.let {
+            log.fine("Template for $component found")
+            processComponentTemplate(component, it)
         }
+
+    private fun processComponentTemplate(
+        component: Component,
+        template: Component
+    ): Component? = Gson().fromJson<Component>(
+        velocityHelper.generate(
+            Gson().toJson(template), component.packageName,
+            mapOf(
+                "version" to component.version,
+                "name" to (component.name ?: ""),
+                "packageName" to component.packageName
+            )
+        ), Component::class.java
+    )
+
+
+    private fun Collection<Component>.searchTemplate(component: Component): Component? = find {
+        matchTemplate(it, component)
     }
 
+    private fun searchInExternalRepo(component: Component): Component? {
+        log.info("Search component in external repo: ${component}")
+        for (searchContext in metadataHolder.getMetadata().searchContexts) {
+            initSearch(searchContext).search(component)?.let { return it }
+        }
+        return null
+    }
+
+    private fun initSearch(searchContext: SearchContext): RepositorySearch = when (searchContext.type) {
+        "bintray" -> BintraySearch(searchContext)
+        else -> throw IllegalStateException("Unsupported search context")
+    }
+
+
     override fun resolve(component: Component, progress: ResolveProgressCallback?) {
-        if (component is ComplexComponent) {
+        if (component.components.isNotEmpty()) {
+            log.info("Resolve complex component: ${component}")
             val resolvedComponents = ArrayList<Component>()
             val total = component.components.size
-            var resolved = 0
+            var resolved = 0f
             component.components.parallelStream().forEach { componentToResolve ->
-                val resolvedComponent = searchInMetadata(
-                    SearchContext(
-                        ComponentType.LIB,
-                        componentToResolve.packageName,
-                        componentToResolve.name,
-                        componentToResolve.version
-                    )
-                ) ?: resolveDependencies(componentToResolve)
-                resolvedComponent?.let { resolvedComponents.add(it) }
-                resolved++
                 progress?.let { it(componentToResolve, resolved, total) }
+                val resolvedComponent = resolveDependencies(componentToResolve) { _, localProgress, _ ->
+                    progress?.let { it(componentToResolve, resolved + localProgress, total) }
+                }
+                resolved++
+                resolvedComponent?.let { resolvedComponents.add(it) }
             }
             component.components.clear()
             component.components.addAll(resolvedComponents)
         } else {
-            resolveDependencies(component)
+            log.info("Resolve component: ${component}")
+            resolveDependencies(component, progress)
         }
     }
 
     override fun upload(component: Component, progress: UploadProcessCallback?) {
-        val artifacts = if (component is ComplexComponent) {
-            component.components.stream()
-                .flatMap { it.dependencies.stream() }
-                .collect(Collectors.toSet())
-        } else {
-            component.dependencies
-        }
+        val artifacts = component.components.stream()
+            .flatMap { it.dependencies.stream() }
+            .collect(Collectors.toSet())
+
+        artifacts.addAll(component.dependencies)
 
         val total = artifacts.size
-        var uploaded = 0
+        var uploaded = 0f
 
         artifacts.parallelStream().forEach { artifact ->
             mvnArtifactManager.upload(artifact)
             uploaded++
             progress?.let { it(artifact, uploaded, total) }
         }
+
+        metadataHolder.getMetadata().installedComponents.add(
+            component.copy(
+                dependencies = HashSet(),
+                components = HashSet()
+            )
+        )
+        metadataHolder.flushMetadata()
     }
 
     override fun register(component: Component) {
         metadataHolder.getMetadata().components.add(component)
-//        if (component is ComplexComponent) {
-//            component.components.forEach {
-//                metadataHolder.getMetadata().components.add(it)
-//            }
-//        }
         metadataHolder.flushMetadata()
     }
 
-    private fun resolveDependencies(component: Component): Component? {
-        if (component.name != null) {
-            val artifact = MvnArtifact(component.packageName, component.name, component.version)
-            val dependencies = mvnArtifactManager.findDependencies(artifact) ?: return null
+    private fun resolveDependencies(component: Component, progress: ResolveProgressCallback?): Component? {
+        if (ComponentType.LIB == component.type && component.name != null) {
+            var progressCount = 0
+            log.info("Resolve component dependencies: ${component}")
+            val artifact = MvnArtifact(
+                component.packageName,
+                component.name,
+                component.version
+            )
+
+            if (mvnArtifactManager.readPom(artifact) == null) {
+                log.info("Component not found: ${component}")
+                progress?.let { it(component, 1f, 1) }
+                return null
+            }
+
+            for (classifier in component.classifiers) {
+                mvnArtifactManager.getArtifact(artifact, classifier)
+                artifact.classifiers.add(classifier)
+            }
+
+            val dependencies = mvnArtifactManager.resolve(artifact)
+
+            log.fine("Component ${component} dependencies: ${dependencies}")
+            progress?.let { it(component, localProgressCount(progressCount++, component), 1) }
 
             component.dependencies.add(artifact)
             component.dependencies.addAll(dependencies)
 
-            mvnArtifactManager.downloadWithDependencies(artifact)
+            progress?.let { it(component, localProgressCount(progressCount++, component), 1) }
+            val additionalDependencies = component.dependencies.parallelStream()
+                .flatMap { mvnArtifactManager.searchAdditionalDependencies(it).stream() }
+                .collect(Collectors.toSet())
 
+            component.dependencies.addAll(additionalDependencies)
+
+            for (classifier in getClassifiersToResolve(component)) {
+                if (classifier.type != "" || classifier.extension == "sdk") {
+                    progress?.let { it(component, localProgressCount(progressCount++, component), 1) }
+                    if (dependencies.isNotEmpty()) {
+                        log.info("Resolve ${component.packageName} classifier \"${classifier}\" dependencies")
+                        mvnArtifactManager.resolve(artifact, classifier)
+                    }
+                }
+                component.dependencies.forEach { it.classifiers.add(classifier.copy()) }
+            }
+
+            progress?.let { it(component, localProgressCount(progressCount++, component), 1) }
+            log.fine("Resolve ${component.packageName} classifiers")
             component.dependencies.parallelStream().forEach {
                 mvnArtifactManager.resolveClassifiers(it)
             }
-
 
             return component
         }
         return null
     }
 
-    private fun searchBintray(context: SearchContext): ComplexComponent? {
-        val (_, _, result) = sdkSettings.getProperty("search-url")
-            .httpGet(
-                listOf(
-                    "g" to context.componentPackage,
-                    "a" to "*",
-                    "subject" to sdkSettings.getProperty("search-subject")
-                )
-            )
-            .header(Headers.CONTENT_TYPE, "application/json")
-            .header(Headers.ACCEPT, "application/json")
-            .header(Headers.CACHE_CONTROL, "no-cache")
-            .responseJson()
-
-        result.fold(
-            success = {
-                val array = it.array()
-                if (array.isEmpty) {
-                    throw IllegalStateException("Unknown framework: ${context.componentPackage}")
-                }
-                val json = array.get(0) as JSONObject
-                val versions = json.get("versions") as JSONArray
-                if (!versions.contains(context.version)) {
-                    throw IllegalStateException("Unknown version: ${context.version}")
-                }
-
-                val systemIds = json.get("system_ids") as JSONArray
-                return ComplexComponent(
-                    packageName = context.componentPackage,
-                    name = context.name,
-                    version = context.version,
-                    type = context.type,
-                    components = systemIds.toList().stream()
-                        .map { it as String }
-                        .map {
-                            val split = it.split(":")
-                            return@map Component(split[0], split[1], context.version)
-                        }.collect(Collectors.toList())
-                )
-            },
-            failure = { error ->
-                throw IllegalStateException("Framework request error: $error")
-            }
+    private fun getClassifiersToResolve(component: Component): List<Classifier> {
+        return listOf(
+            Classifier.pom(),
+            Classifier.default(),
+            Classifier.sources(),
+            Classifier.javadoc(),
+            Classifier.client()
         )
     }
+
+    private fun localProgressCount(
+        progressCount: Int,
+        component: Component
+    ) = progressCount * localProgress(component)
 }

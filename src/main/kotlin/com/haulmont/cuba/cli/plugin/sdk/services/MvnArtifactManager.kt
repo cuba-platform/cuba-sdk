@@ -16,6 +16,7 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.services
 
+import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
 import com.haulmont.cuba.cli.plugin.sdk.dto.MvnArtifact
 import org.apache.maven.model.Model
 
@@ -25,10 +26,12 @@ interface MvnArtifactManager {
 
     fun upload(artifact: MvnArtifact)
 
-    fun downloadWithDependencies(artifact: MvnArtifact)
+    fun getArtifact(artifact: MvnArtifact, classifier: Classifier)
 
-    fun findDependencies(artifact: MvnArtifact): List<MvnArtifact>?
+    fun resolve(artifact: MvnArtifact, classifier: Classifier = Classifier.default()): List<MvnArtifact>
 
     fun resolveClassifiers(artifact: MvnArtifact)
+
+    fun searchAdditionalDependencies(artifact: MvnArtifact): List<MvnArtifact>
 
 }

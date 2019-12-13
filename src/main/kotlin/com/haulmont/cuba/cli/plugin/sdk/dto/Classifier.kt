@@ -16,12 +16,16 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.dto
 
-data class MvnClassifier(
+data class Classifier(
     val type: String,
     val extension: String = "jar"
 ) {
     companion object {
-        fun pom() = MvnClassifier("", "pom").copy()
-        fun default() = MvnClassifier("", "jar").copy()
+        fun pom() = Classifier("", "pom").copy()
+        fun sdk() = Classifier("", "sdk").copy()
+        fun sources() = Classifier("sources").copy()
+        fun javadoc() = Classifier("javadoc").copy()
+        fun client() = Classifier("client").copy()
+        fun default() = Classifier("", "jar").copy()
     }
 }

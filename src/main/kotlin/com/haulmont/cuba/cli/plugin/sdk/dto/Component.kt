@@ -16,14 +16,22 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.dto
 
-open class Component(
+data class Component(
     val packageName: String,
-    val name: String?,
+    val name: String? = null,
     val version: String,
     val type: ComponentType = ComponentType.LIB,
+    val classifiers: MutableList<Classifier> = arrayListOf(
+        Classifier.pom(),
+        Classifier.default(),
+        Classifier.sources(),
+        Classifier.javadoc(),
+        Classifier.client()
+    ),
+    val components: MutableSet<Component> = HashSet(),
     val dependencies: MutableSet<MvnArtifact> = HashSet()
 ) {
     override fun toString(): String {
-        return name?:"${packageName}:${version}"
+        return name ?: "${packageName}:${name ?: ""}:${version}"
     }
 }

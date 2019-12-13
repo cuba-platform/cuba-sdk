@@ -16,6 +16,8 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.dto
 
-data class SdkMetadata (
-    val components: MutableSet<Component> = HashSet()
+data class SdkMetadata(
+    val components: MutableSet<Component> = HashSet(),
+    val searchContexts: MutableSet<SearchContext> = HashSet(),
+    val installedComponents: MutableSet<Component> = HashSet()
 )

@@ -16,18 +16,36 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.dto
 
+
 data class MvnArtifact(
     val groupId: String,
     val artifactId: String,
     val version: String,
 
-    val classifiers: MutableList<MvnClassifier> = ArrayList()
+    val classifiers: MutableList<Classifier> = ArrayList()
 ) {
-    fun mvnCoordinates(classifier: MvnClassifier? = null): String {
+    fun mvnCoordinates(classifier: Classifier? = null): String {
         var coordinates = "${groupId}:${artifactId}:${version}"
         if (classifier != null) {
             coordinates += ":${classifier.extension}:${classifier.type}"
         }
         return coordinates
     }
+
+    fun mainClassifier(): Classifier {
+        for (classifier in classifiers) {
+            if (classifier.type == "" && classifier.extension != "pom") {
+                return classifier
+            }
+        }
+        for (classifier in classifiers) {
+            if (classifier.extension != "pom") {
+                return classifier
+            }
+        }
+        return Classifier.pom()
+    }
+
+    fun pomClassifiers(): List<Classifier> =
+        classifiers.filter { it.extension == "pom" || it.extension == "sdk" }.ifEmpty { listOf(Classifier.pom()) }
 }

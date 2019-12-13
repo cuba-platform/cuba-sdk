@@ -47,6 +47,10 @@ private val sdkModule = Kodein.Module {
     bind<MetadataHolder>() with singleton {
         MetadataHolderImpl()
     }
+
+    bind<ComponentTemplates>() with singleton {
+        ComponentTemplatesImpl()
+    }
 }
 
 internal val sdkKodein = Kodein {

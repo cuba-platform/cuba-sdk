@@ -20,7 +20,6 @@ import com.beust.jcommander.Parameter
 import com.beust.jcommander.Parameters
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.ComponentType
-import com.haulmont.cuba.cli.plugin.sdk.dto.SearchContext
 
 @Parameters(commandDescription = "Install framework to SDK")
 class InstallFrameworkCommand : BaseInstallCommand() {
@@ -28,14 +27,14 @@ class InstallFrameworkCommand : BaseInstallCommand() {
     @Parameter(description = "Framework name and version <name>:<version>")
     private var frameworkNameVersion: String? = null
 
-    override fun search(): Component? {
+    override fun createSearchContext(): Component? {
         frameworkNameVersion?.split(":")?.let {
             if (it.size == 2) {
-                componentManager.search(
-                    SearchContext(ComponentType.FRAMEWORK, it[0], version = it[1])
-                )?.let { return it }
+                return Component(packageName = it[0], version = it[1], type = ComponentType.FRAMEWORK)
             }
         }
         fail(messages["unknownFramework"].format(frameworkNameVersion))
     }
+
+
 }
