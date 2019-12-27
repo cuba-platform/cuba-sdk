@@ -20,8 +20,8 @@ import com.beust.jcommander.Parameter
 import com.beust.jcommander.Parameters
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 
-@Parameters(commandDescription = "Install add-on to SDK")
-class InstallAddonCommand : BaseInstallCommand() {
+@Parameters(commandDescription = "Resolve add-on dependencies and download to local SDK repository")
+class ResolveAddonCommand : BaseResolveCommand() {
 
     @Parameter(description = "Addon name and version <name>:<version> or in full coordinates format <group>:<name>:<version>")
     private var addonNameVersion: String? = null

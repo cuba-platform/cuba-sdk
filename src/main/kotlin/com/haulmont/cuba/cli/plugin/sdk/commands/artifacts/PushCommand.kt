@@ -14,13 +14,19 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.services
+package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
-import com.haulmont.cuba.cli.plugin.sdk.dto.SdkMetadata
+import com.beust.jcommander.Parameters
+import com.haulmont.cuba.cli.commands.AbstractCommand
+import org.kodein.di.generic.instance
+import java.io.PrintWriter
 
-interface MetadataHolder {
+@Parameters(commandDescription = "Upload artifact to SDK target repository")
+class PushCommand : AbstractCommand() {
 
-    fun getMetadata(): SdkMetadata
+    private val printWriter: PrintWriter by kodein.instance()
 
-    fun flushMetadata()
+    override fun run() {
+        printWriter.println("Use 'framework', 'addon' or 'lib' subcommands.")
+    }
 }

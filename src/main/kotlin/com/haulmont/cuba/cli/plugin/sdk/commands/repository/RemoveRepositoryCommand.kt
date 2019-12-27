@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.services
+package com.haulmont.cuba.cli.plugin.sdk.commands.repository
 
-import com.haulmont.cuba.cli.plugin.sdk.dto.SdkMetadata
+import com.beust.jcommander.Parameters
+import com.haulmont.cuba.cli.commands.AbstractCommand
 
-interface MetadataHolder {
+@Parameters(commandDescription = "Add source repository for SDK")
+class RemoveRepositoryCommand : AbstractCommand() {
 
-    fun getMetadata(): SdkMetadata
+    override fun run() {
 
-    fun flushMetadata()
+    }
 }

@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.services
+package com.haulmont.cuba.cli.plugin.sdk.dto
 
-import com.haulmont.cuba.cli.plugin.sdk.dto.SdkMetadata
-
-interface MetadataHolder {
-
-    fun getMetadata(): SdkMetadata
-
-    fun flushMetadata()
-}
+data class Authentication(
+    val login: String,
+    val password: String
+)

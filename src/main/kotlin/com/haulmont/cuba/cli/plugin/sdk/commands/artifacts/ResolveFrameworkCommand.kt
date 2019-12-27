@@ -20,13 +20,19 @@ import com.beust.jcommander.Parameter
 import com.beust.jcommander.Parameters
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 
-@Parameters(commandDescription = "Install add-on to SDK")
-class InstallAddonCommand : BaseInstallCommand() {
+@Parameters(commandDescription = "Resolve framework dependencies and download to local SDK repository")
+class ResolveFrameworkCommand : BaseResolveCommand() {
 
-    @Parameter(description = "Addon name and version <name>:<version> or in full coordinates format <group>:<name>:<version>")
-    private var addonNameVersion: String? = null
+    @Parameter(description = "Framework name and version <name>:<version>")
+    private var frameworkNameVersion: String? = null
 
     override fun createSearchContext(): Component? {
-        return addonNameVersion?.resolveAddonCoordinates() ?: fail(messages["unknownAddon"].format(addonNameVersion))
+        return frameworkNameVersion?.resolveFrameworkCoordinates() ?: fail(
+            messages["unknownFramework"].format(
+                frameworkNameVersion
+            )
+        )
     }
+
+
 }

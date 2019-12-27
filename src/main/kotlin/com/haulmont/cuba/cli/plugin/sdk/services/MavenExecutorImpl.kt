@@ -17,18 +17,18 @@
 package com.haulmont.cuba.cli.plugin.sdk.services
 
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
-import com.haulmont.cuba.cli.plugin.sdk.SdkPlugin
 import org.kodein.di.generic.instance
 import java.util.logging.Logger
 
 class MavenExecutorImpl : MavenExecutor {
 
     private val log: Logger = Logger.getLogger(MavenExecutorImpl::class.java.name)
-    internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
+    private val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
+    private val repositoryManager: RepositoryManager by sdkKodein.instance()
 
     override fun mvn(profile: String, command: String, commands: List<String>): MavenExecutor.CommandResult {
         val rt = Runtime.getRuntime()
-        val settingsFile = SdkPlugin.SDK_PATH.resolve("settings.xml")
+        val settingsFile = repositoryManager.mvnSettingFile()
         val cliCommandsList = ArrayList(
             arrayOf(
                 sdkSettings.getProperty("mvn-install-path") + "\\apache-maven-3.6.2\\bin\\mvn.cmd",

@@ -17,13 +17,13 @@
 package com.haulmont.cuba.cli.plugin.sdk.services
 
 import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.core.Request
-import com.github.kittinunf.fuel.core.extensions.AuthenticatedRequest
 import com.github.kittinunf.fuel.core.extensions.authentication
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.generation.VelocityHelper
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
 import com.haulmont.cuba.cli.plugin.sdk.dto.MvnArtifact
+import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
+import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
 import org.apache.maven.model.Model
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
 import org.kodein.di.generic.instance
@@ -42,6 +42,7 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
     internal val printWriter: PrintWriter by sdkKodein.instance()
     internal val velocityHelper = VelocityHelper()
     internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
+    private val repositoryManager: RepositoryManager by sdkKodein.instance()
     internal val mavenExecutor: MavenExecutor by sdkKodein.instance()
 
     private fun repoUrl(endpoint: String) = sdkSettings.getProperty("sdk-repo-url") + endpoint
@@ -67,16 +68,14 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
         }
     }
 
-    private fun Request.repositoryAuthentication(): Request = AuthenticatedRequest(this)
-        .basic(sdkSettings.getProperty("login"), sdkSettings.getProperty("password"))
-
     override fun readPom(artifact: MvnArtifact): Model? {
         log.info("Read POM: ${artifact.mvnCoordinates(Classifier.pom())}")
         val pomFile = getArtifactPomFile(artifact)
 
         if (!Files.exists(pomFile)) {
             val commandResult = mavenExecutor.mvn(
-                "external", "org.apache.maven.plugins:maven-dependency-plugin:3.1.1:get",
+                RepositoryTarget.SOURCE.getId(),
+                "org.apache.maven.plugins:maven-dependency-plugin:3.1.1:get",
                 arrayListOf("-Dartifact=${artifact.mvnCoordinates(Classifier.pom())}")
             )
             commandResult.result.read {
@@ -97,14 +96,7 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
     }
 
     private fun printMvnResultToCommandLine(it: String?): String? {
-        var s = it
-        if (s != null) {
-            if (s.startsWith("Progress ")) {
-                s = "\r" + s
-            } else {
-                s += "\n"
-            }
-        }
+        val s = if (it != null && it.startsWith("Progress ")) "\r" + it else it + "\n"
         log.fine("mvn:$s")
         return s
     }
@@ -123,6 +115,12 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
     }
 
     override fun upload(artifact: MvnArtifact) {
+        for (repository in repositoryManager.getRepositories(RepositoryTarget.TARGET)) {
+            uploadToRepository(repository, artifact)
+        }
+    }
+
+    private fun uploadToRepository(repository: Repository, artifact: MvnArtifact) {
         val mainClassifier = artifact.mainClassifier()
         log.info("Uploading: ${artifact.mvnCoordinates(mainClassifier)}")
 
@@ -146,7 +144,7 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
 
         val artifactFile = getOrDownloadArtifactFile(artifact, mainClassifier)
 
-//        printWriter.println("Upload ${artifact.mvnCoordinates(mainClassifier)}, file $artifactFile")
+        //        printWriter.println("Upload ${artifact.mvnCoordinates(mainClassifier)}, file $artifactFile")
         if (Files.exists(artifactFile)) {
 
             val tempCopy = Files.createTempFile(
@@ -164,10 +162,10 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
                     "-Dversion=${artifact.version}",
                     "-Dpackaging=${mainClassifier.extension}",
                     "-Dfile=$tempCopy",
-                    "-DrepositoryId=sdk.internal",
+                    "-DrepositoryId=${repositoryManager.getRepositoryId(RepositoryTarget.TARGET, repository.name)}",
                     "-DgeneratePom=false",
                     "-Dpackaging=${mainClassifier.extension}",
-                    "-Durl=http://localhost:8081/repository/cuba-hosted/"
+                    "-Durl=${repository.url}"
                 ).also {
                     val artifactPomFile = getArtifactPomFile(artifact)
                     if (mainClassifier.type.isNotEmpty()) {
@@ -187,7 +185,7 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
                 }
 
                 val commandResult = mavenExecutor.mvn(
-                    "sdk",
+                    RepositoryTarget.TARGET.getId(),
                     "org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file",
                     commands
                 )
@@ -237,7 +235,7 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
     ): List<MvnArtifact> {
         log.info("Resolve dependencies ${artifact.mvnCoordinates(classifier)}")
         val commandResult = mavenExecutor.mvn(
-            "external",
+            RepositoryTarget.SOURCE.getId(),
             "dependency:resolve",
             arrayListOf(
                 "-Dtransitive=true",
@@ -283,7 +281,7 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
     override fun getArtifact(artifact: MvnArtifact, classifier: Classifier) {
         log.info("Get with dependencies ${artifact.mvnCoordinates(classifier)}")
         val commandResult = mavenExecutor.mvn(
-            "external",
+            RepositoryTarget.SOURCE.getId(),
             "org.apache.maven.plugins:maven-dependency-plugin:3.1.1:get",
             arrayListOf(
                 "-Dartifact=${artifact.mvnCoordinates(classifier)}"

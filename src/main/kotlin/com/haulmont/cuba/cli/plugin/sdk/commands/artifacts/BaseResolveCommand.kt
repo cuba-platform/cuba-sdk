@@ -16,24 +16,24 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
-abstract class BaseInstallCommand : BaseComponentCommand() {
+abstract class BaseResolveCommand : BaseComponentCommand() {
 
     override fun run() {
         createSearchContext()?.let {
-            if (force || !componentManager.isAlreadyInstalled(it)) {
-                var component = searchInMetadata(it)
-                if (force || component == null) {
-                    component = search(it)?.also {
-                        resolve(it)
-                        register(it)
-                    }
-                }
-                component?.let { upload(it) }
-                printWriter.println()
-                printWriter.println(messages["installed"])
+            var component = searchInMetadata(it)
+
+            if (force || component == null) {
+                component = search(it)
             } else {
-                printWriter.println(messages["alreadyInstalled"])
+                printWriter.println(messages["alreadyResolved"])
+                return
             }
+            component?.let {
+                resolve(component)
+                register(component)
+            }
+            printWriter.println()
+            printWriter.println(messages["resolved"])
         }
     }
 }

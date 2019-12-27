@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.dto
+package com.haulmont.cuba.cli.plugin.sdk.commands.repository
 
-open class SearchContext(
-    val type: String,
-    val url: String,
-    val authRequired: Boolean = false,
-    val login: String? = null,
-    val password: String? = null,
-    val subject: String
-)
+import com.beust.jcommander.Parameters
+import com.haulmont.cuba.cli.commands.AbstractCommand
+
+@Parameters(commandDescription = "Add source repository for SDK")
+class ListRepositoryCommand : AbstractCommand() {
+
+    override fun run() {
+
+    }
+}

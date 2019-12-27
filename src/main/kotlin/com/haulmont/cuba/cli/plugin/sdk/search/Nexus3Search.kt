@@ -23,12 +23,16 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 import org.json.JSONArray
 import org.json.JSONObject
 
-class Nexus2Search(repository: Repository) : AbstractRepositorySearch(repository) {
-    override fun searchParameters(component: Component): List<Pair<String, String>> = listOf(
-        "g" to component.packageName,
-        "a" to (component.name ?: ""),
-        "v" to component.version
-    )
+class Nexus3Search(repository: Repository) : AbstractRepositorySearch(repository) {
+
+    override fun searchParameters(component: Component): List<Pair<String, String>> {
+        return listOf(
+            "group" to component.packageName,
+            "name" to (component.name ?: "*"),
+            "version" to component.version,
+            "repository" to repository.repositoryName
+        )
+    }
 
     override fun handleResultJson(it: FuelJson, component: Component): Component {
         val array = it.array()
@@ -36,27 +40,25 @@ class Nexus2Search(repository: Repository) : AbstractRepositorySearch(repository
             throw IllegalStateException("Unknown ${component.type}: ${component.packageName}")
         }
         val json = array.get(0) as JSONObject
-        val dataArray = json.get("data") as JSONArray
-        if (dataArray.isEmpty) {
+        val itemsArray = json.get("items") as JSONArray
+        if (itemsArray.isEmpty) {
             throw IllegalStateException("Unknown version: ${component.version}")
         }
-        dataArray
+        itemsArray
             .map { it as JSONObject }
             .map { dataObj ->
-                val groupId = dataObj.getString("groupId")
-                val artifactId = dataObj.getString("artifactId")
-                val version = dataObj.getString("latestRelease")
-                val classifiers = dataObj.getJSONArray("artifactHits")
+                val groupId = dataObj.getString("group")
+                val artifactId = dataObj.getString("name")
+                val version = dataObj.getString("version")
+                val classifiers = dataObj.getJSONArray("assets")
                     .map { it as JSONObject }
-                    .flatMap { artifactHit ->
-                        return@flatMap artifactHit.getJSONArray("artifactLinks")
-                            .map { it as JSONObject }
-                            .map { classifier ->
-                                Classifier(
-                                    classifier.getString("classifier"),
-                                    classifier.getString("extension")
-                                )
-                            }
+                    .map { asset ->
+                        val path = asset.getString("path")
+                        val classifierAndExtension = path.substringAfterLast("${groupId}-${version}")
+                        val classifier = if (classifierAndExtension.isNotEmpty())
+                            classifierAndExtension.substringAfter("-").substringBefore(".") else ""
+                        val extension = classifierAndExtension.substringAfter(".")
+                        Classifier(classifier, extension)
                     }
                     .toMutableList()
                 return@map Component(groupId, artifactId, version, classifiers = classifiers)

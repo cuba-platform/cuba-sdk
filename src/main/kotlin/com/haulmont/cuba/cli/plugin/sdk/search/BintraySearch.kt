@@ -16,83 +16,45 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.search
 
-import com.github.kittinunf.fuel.core.Headers
-import com.github.kittinunf.fuel.httpGet
-import com.github.kittinunf.fuel.json.responseJson
+import com.github.kittinunf.fuel.json.FuelJson
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
-import com.haulmont.cuba.cli.plugin.sdk.dto.SearchContext
+import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 import org.json.JSONArray
 import org.json.JSONObject
-import java.util.logging.Logger
 
-class BintraySearch : RepositorySearch {
+class BintraySearch(repository: Repository) : AbstractRepositorySearch(repository) {
+    override fun searchParameters(component: Component): List<Pair<String, String>> = listOf(
+        "g" to component.packageName,
+        "a" to (component.name ?: "*"),
+        "subject" to repository.repositoryName
+    )
 
-    private val log: Logger = Logger.getLogger(BintraySearch::class.java.name)
-    internal val searchContext: SearchContext
-
-    constructor(searchContext: SearchContext) {
-        this.searchContext = searchContext
-    }
-
-    override fun search(component: Component): Component? {
-        val (_, _, result) = searchContext.url
-            .httpGet(
-                listOf(
-                    "g" to component.packageName,
-                    "a" to "${component.name}*",
-                    "subject" to searchContext.subject
-                )
-            )
-            .header(Headers.CONTENT_TYPE, "application/json")
-            .header(Headers.ACCEPT, "application/json")
-            .header(Headers.CACHE_CONTROL, "no-cache")
-            .responseJson()
-
-        result.fold(
-            success = {
-                val array = it.array()
-                if (array.isEmpty) {
-                    throw IllegalStateException("Unknown framework: ${component.packageName}")
-                }
-                val json = array.get(0) as JSONObject
-                val versions = json.get("versions") as JSONArray
-                if (!versions.contains(component.version)) {
-                    throw IllegalStateException("Unknown version: ${component.version}")
-                }
-
-                val systemIds = json.get("system_ids") as JSONArray
-                systemIds.toList().stream()
-                    .map { it as String }
-                    .map {
-                        val split = it.split(":")
-                        return@map Component(split[0], split[1], component.version)
-                    }.forEach {
-                        if (!componentAlreadyExists(component.components,it)) {
-                            component.components.add(it)
-                        }
-                    }
-
-                log.info("Component found in ${searchContext}: ${component}")
-                return component
-            },
-            failure = { error ->
-                log.info("Component not found in ${searchContext}: ${component}")
-                return null
-            }
-        )
-    }
-
-    fun componentAlreadyExists(componentsList: Collection<Component>, toAdd: Component): Boolean {
-        for (component in componentsList) {
-            if (component.packageName == toAdd.packageName
-                && component.name == toAdd.name
-                && component.version == toAdd.version
-                && component.type == toAdd.type
-            ) {
-                return true
-            }
+    override fun handleResultJson(it: FuelJson, component: Component): Component {
+        val array = it.array()
+        if (array.isEmpty) {
+            throw IllegalStateException("Unknown ${component.type}: ${component.packageName}")
         }
-        return false
+        val json = array.get(0) as JSONObject
+        val versions = json.get("versions") as JSONArray
+        if (!versions.contains(component.version)) {
+            throw IllegalStateException("Unknown version: ${component.version}")
+        }
+
+        val systemIds = json.get("system_ids") as JSONArray
+        systemIds.toList().stream()
+            .map { it as String }
+            .map {
+                val split = it.split(":")
+                return@map Component(split[0], split[1], component.version)
+            }.forEach {
+                if (!componentAlreadyExists(component.components, it)) {
+                    component.components.add(it)
+                }
+            }
+
+        log.info("Component found in ${repository}: ${component}")
+        return component
     }
+
 
 }

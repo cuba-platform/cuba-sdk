@@ -141,9 +141,10 @@ class ComponentTemplatesImpl : ComponentTemplates {
     private fun initAddonTemplate(obj: JsonObject): Component {
         val packageName = obj.get("groupId").asString
         val name = obj.get("artifactId").asString.substringBefore("-global")
+        val componentName = obj.get("id").asString
         return Component(
             packageName = packageName,
-            name = name,
+            name = componentName,
             version = "\${version}",
             type = ComponentType.ADDON,
             components =

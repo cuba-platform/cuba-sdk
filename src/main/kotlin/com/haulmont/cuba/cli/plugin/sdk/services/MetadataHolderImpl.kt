@@ -19,7 +19,6 @@ package com.haulmont.cuba.cli.plugin.sdk.services
 import com.google.gson.Gson
 import com.haulmont.cuba.cli.plugin.sdk.SdkPlugin
 import com.haulmont.cuba.cli.plugin.sdk.dto.SdkMetadata
-import com.haulmont.cuba.cli.plugin.sdk.dto.SearchContext
 import java.io.FileInputStream
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
@@ -43,13 +42,13 @@ class MetadataHolderImpl : MetadataHolder {
 
     private fun initMetadata(): SdkMetadata {
         return SdkMetadata().also {
-            it.searchContexts.add(
-                SearchContext(
-                    type = "bintray",
-                    url = "https://api.bintray.com/search/packages/maven?",
-                    subject = "cuba-platform"
-                )
-            )
+//            it.repositories.add(
+//                Repository(
+//                    type = "bintray",
+//                    url = "https://api.bintray.com/search/packages/maven?",
+//                    repositoryName = "cuba-platform"
+//                )
+//            )
         }
     }
 

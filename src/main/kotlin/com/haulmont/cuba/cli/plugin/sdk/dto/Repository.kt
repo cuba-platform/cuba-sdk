@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.services
+package com.haulmont.cuba.cli.plugin.sdk.dto
 
-import com.haulmont.cuba.cli.plugin.sdk.dto.SdkMetadata
-
-interface MetadataHolder {
-
-    fun getMetadata(): SdkMetadata
-
-    fun flushMetadata()
-}
+open class Repository(
+    val name: String,
+    val type: RepositoryType,
+    val url: String,
+    val searchUrl: String? = null,
+    val authentication: Authentication? = null,
+    val repositoryName: String = ""
+)

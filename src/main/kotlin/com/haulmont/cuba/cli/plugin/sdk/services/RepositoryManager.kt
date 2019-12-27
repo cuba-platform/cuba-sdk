@@ -16,11 +16,23 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.services
 
-import com.haulmont.cuba.cli.plugin.sdk.dto.SdkMetadata
+import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
+import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
+import java.nio.file.Path
 
-interface MetadataHolder {
+interface RepositoryManager {
 
-    fun getMetadata(): SdkMetadata
+    fun getRepositoryId(target: RepositoryTarget, name: String): String
 
-    fun flushMetadata()
+    fun getRepository(name: String,target: RepositoryTarget): Repository
+
+    fun addRepository(repository: Repository, target: RepositoryTarget)
+
+    fun removeRepository(name: String,target: RepositoryTarget)
+
+    fun getRepositories(target: RepositoryTarget): Collection<Repository>
+
+    fun buildMavenSettingsFile()
+
+    fun mvnSettingFile(): Path
 }

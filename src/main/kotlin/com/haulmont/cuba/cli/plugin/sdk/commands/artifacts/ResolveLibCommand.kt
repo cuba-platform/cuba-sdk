@@ -24,8 +24,8 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.MvnArtifact
 import com.haulmont.cuba.cli.plugin.sdk.services.MvnArtifactManager
 import org.kodein.di.generic.instance
 
-@Parameters(commandDescription = "Install library to SDK")
-class InstallLibCommand : BaseInstallCommand() {
+@Parameters(commandDescription = "Resolve library with dependencies and download to local SDK repository")
+class ResolveLibCommand : BaseResolveCommand() {
 
     internal val mvnArtifactManager: MvnArtifactManager by sdkKodein.instance()
 

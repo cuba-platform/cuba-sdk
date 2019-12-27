@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.services
+package com.haulmont.cuba.cli.plugin.sdk.dto
 
-import com.haulmont.cuba.cli.plugin.sdk.dto.SdkMetadata
-
-interface MetadataHolder {
-
-    fun getMetadata(): SdkMetadata
-
-    fun flushMetadata()
+enum class RepositoryType {
+    LOCAL,
+    BINTRAY,
+    NEXUS2,
+    NEXUS3
 }

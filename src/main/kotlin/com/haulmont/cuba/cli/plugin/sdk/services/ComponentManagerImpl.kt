@@ -21,6 +21,8 @@ import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.generation.VelocityHelper
 import com.haulmont.cuba.cli.plugin.sdk.dto.*
 import com.haulmont.cuba.cli.plugin.sdk.search.BintraySearch
+import com.haulmont.cuba.cli.plugin.sdk.search.Nexus2Search
+import com.haulmont.cuba.cli.plugin.sdk.search.Nexus3Search
 import com.haulmont.cuba.cli.plugin.sdk.search.RepositorySearch
 import org.kodein.di.generic.instance
 import java.util.logging.Logger
@@ -35,6 +37,7 @@ class ComponentManagerImpl : ComponentManager {
 
     private val componentTemplates: ComponentTemplates by sdkKodein.instance()
     private val metadataHolder: MetadataHolder by sdkKodein.instance()
+    private val repositoryManager: RepositoryManager by sdkKodein.instance()
     private val mvnArtifactManager: MvnArtifactManager by sdkKodein.instance()
     private val velocityHelper: VelocityHelper = VelocityHelper()
 
@@ -115,14 +118,16 @@ class ComponentManagerImpl : ComponentManager {
 
     private fun searchInExternalRepo(component: Component): Component? {
         log.info("Search component in external repo: ${component}")
-        for (searchContext in metadataHolder.getMetadata().searchContexts) {
+        for (searchContext in repositoryManager.getRepositories(RepositoryTarget.SOURCE)) {
             initSearch(searchContext).search(component)?.let { return it }
         }
         return null
     }
 
-    private fun initSearch(searchContext: SearchContext): RepositorySearch = when (searchContext.type) {
-        "bintray" -> BintraySearch(searchContext)
+    private fun initSearch(repository: Repository): RepositorySearch = when (repository.type) {
+        RepositoryType.BINTRAY -> BintraySearch(repository)
+        RepositoryType.NEXUS2 -> Nexus2Search(repository)
+        RepositoryType.NEXUS3 -> Nexus3Search(repository)
         else -> throw IllegalStateException("Unsupported search context")
     }
 

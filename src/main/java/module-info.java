@@ -37,6 +37,7 @@ module com.haulmont.cuba.cli.plugin.sdk {
     requires fuel.json;
     requires org.json;
     requires java.logging;
+    requires kotlin.xml.builder;
 
     opens com.haulmont.cuba.cli.plugin.sdk;
     opens com.haulmont.cuba.cli.plugin.sdk.dto;
