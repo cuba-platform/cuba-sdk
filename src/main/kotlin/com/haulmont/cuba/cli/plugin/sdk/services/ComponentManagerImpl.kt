@@ -118,7 +118,7 @@ class ComponentManagerImpl : ComponentManager {
 
     private fun searchInExternalRepo(component: Component): Component? {
         log.info("Search component in external repo: ${component}")
-        for (searchContext in repositoryManager.getRepositories(RepositoryTarget.SOURCE)) {
+        for (searchContext in repositoryManager.getRepositories(RepositoryTarget.SEARCH)) {
             initSearch(searchContext).search(component)?.let { return it }
         }
         return null

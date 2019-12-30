@@ -39,24 +39,20 @@ abstract class AbstractRepositorySearch : RepositorySearch {
     abstract fun searchParameters(component: Component): List<Pair<String, String>>
 
     override fun search(component: Component): Component? {
-        val searchUrl = repository.searchUrl
-        if (searchUrl != null) {
-            val result = createSearchRequest(searchUrl, component)
-                .responseJson()
-                .third
+        val result = createSearchRequest(repository.url, component)
+            .responseJson()
+            .third
 
-            result.fold(
-                success = {
-                    log.info("Component found in ${repository}: ${component}")
-                    return handleResultJson(it, component)
-                },
-                failure = { error ->
-                    log.info("Component not found in ${repository}: ${component}")
-                    return null
-                }
-            )
-        }
-        return null
+        result.fold(
+            success = {
+                log.info("Component found in ${repository}: ${component}")
+                return handleResultJson(it, component)
+            },
+            failure = { error ->
+                log.info("Component not found in ${repository}: ${component}")
+                return null
+            }
+        )
     }
 
     abstract fun handleResultJson(

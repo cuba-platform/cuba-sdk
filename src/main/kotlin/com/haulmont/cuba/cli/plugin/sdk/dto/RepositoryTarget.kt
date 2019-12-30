@@ -17,10 +17,21 @@
 package com.haulmont.cuba.cli.plugin.sdk.dto
 
 enum class RepositoryTarget {
+    SEARCH,
     SOURCE,
     TARGET;
 
-    fun getId():String{
+    fun getId(): String {
         return toString()
     }
+
+    companion object {
+        fun getTarget(target: String): RepositoryTarget = when (target) {
+            "source" -> SOURCE
+            "sdk" -> TARGET
+            "search" -> SEARCH
+            else -> throw IllegalStateException("Unsupported repository target ${target}")
+        }
+    }
+
 }

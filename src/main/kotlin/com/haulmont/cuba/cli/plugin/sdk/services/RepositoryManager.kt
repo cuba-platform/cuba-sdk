@@ -24,11 +24,11 @@ interface RepositoryManager {
 
     fun getRepositoryId(target: RepositoryTarget, name: String): String
 
-    fun getRepository(name: String,target: RepositoryTarget): Repository
+    fun getRepository(name: String, target: RepositoryTarget): Repository?
 
     fun addRepository(repository: Repository, target: RepositoryTarget)
 
-    fun removeRepository(name: String,target: RepositoryTarget)
+    fun removeRepository(name: String, target: RepositoryTarget)
 
     fun getRepositories(target: RepositoryTarget): Collection<Repository>
 

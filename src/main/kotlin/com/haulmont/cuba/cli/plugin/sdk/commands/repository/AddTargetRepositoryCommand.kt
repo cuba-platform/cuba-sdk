@@ -14,19 +14,15 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
+package com.haulmont.cuba.cli.plugin.sdk.commands.repository
 
 import com.beust.jcommander.Parameters
-import com.haulmont.cuba.cli.commands.AbstractCommand
-import org.kodein.di.generic.instance
-import java.io.PrintWriter
+import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
 
-@Parameters(commandDescription = "Remove artifacts from SDK")
-class RemoveCommand : AbstractCommand() {
+@Parameters(commandDescription = "Add source repository for SDK")
+class AddTargetRepositoryCommand() : AddRepositoryCommand() {
 
-    private val printWriter: PrintWriter by kodein.instance()
-
-    override fun run() {
-        printWriter.println("Use 'framework', 'addon' or 'lib' subcommands.")
+    init {
+        target = RepositoryTarget.TARGET
     }
 }

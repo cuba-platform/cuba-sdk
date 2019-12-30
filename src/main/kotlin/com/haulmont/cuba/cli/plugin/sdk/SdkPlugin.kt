@@ -17,16 +17,13 @@
 package com.haulmont.cuba.cli.plugin.sdk
 
 import com.google.common.eventbus.Subscribe
-import com.haulmont.cuba.cli.Cli
 import com.haulmont.cuba.cli.CliPlugin
 import com.haulmont.cuba.cli.event.InitPluginEvent
 import com.haulmont.cuba.cli.plugin.sdk.commands.SdkCommand
 import com.haulmont.cuba.cli.plugin.sdk.commands.artifacts.*
 import com.haulmont.cuba.cli.plugin.sdk.commands.repository.*
-import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.util.*
 
 class SdkPlugin : CliPlugin {
 
@@ -48,7 +45,14 @@ class SdkPlugin : CliPlugin {
                 command("setup", SetupCommand())
                 command("start", StartCommand())
                 command("stop", StopCommand())
-                command("add-repository", AddRepositoryCommand())
+                command("add", RepositoryCommandGroup()) {
+                    command("repository",AddRepositoryCommand()) {
+                        command("sdk repository", AddTargetRepositoryCommand())
+                        command("source repository", AddSourceRepositoryCommand())
+                        command("search repository", AddSearchRepositoryCommand())
+                    }
+                }
+                command("list repository", ListRepositoryCommand())
                 command("set-license", LicenseCommand())
                 command("clean", CleanCommand())
                 command("docker", DockerCommand())
@@ -56,26 +60,44 @@ class SdkPlugin : CliPlugin {
                 command("import", ImportCommand())
                 command("export", ExportCommand())
 
+                command("resolve", ResolveCommand()) {
+                    command("framework", ResolveFrameworkCommand())
+                    command("addon", ResolveAddonCommand())
+                    command("lib", ResolveLibCommand())
+                }
+
+                command("push", PushCommand()) {
+                    command("framework", PushFrameworkCommand())
+                    command("addon", PushAddonCommand())
+                    command("lib", PushLibCommand())
+                }
+
                 command("install", InstallCommand()) {
                     command("framework", InstallFrameworkCommand())
                     command("addon", InstallAddonCommand())
                     command("lib", InstallLibCommand())
                 }
 
-                command("remove", RemoveCommand()) {
+                command("remove", RemoveCommandGroup()) {
                     command("framework", RemoveFrameworkCommand())
                     command("addon", RemoveAddonCommand())
                     command("lib", RemoveLibCommand())
+                    command("repository", RemoveRepositoryCommand())
+                    command("search repository", RemoveSearchRepositoryCommand())
+                    command("target repository", RemoveTargetRepositoryCommand())
+                    command("source repository", RemoveSourceRepositoryCommand())
                 }
 
-                command("list", ListCommand()) {
+                command("list", ListCommandGroup()) {
                     command("framework", ListFrameworkCommand())
                     command("addon", ListAddonCommand())
                     command("lib", ListLibsCommand())
+                    command("repository", ListRepositoryCommand())
+                    command("search repository", ListRepositoryCommand())
+                    command("target repository", ListRepositoryCommand())
+                    command("source repository", ListRepositoryCommand())
                 }
             }
         }
     }
-
-
 }

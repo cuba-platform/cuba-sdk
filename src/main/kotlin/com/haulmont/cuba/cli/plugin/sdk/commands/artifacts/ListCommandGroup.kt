@@ -14,12 +14,19 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.dto
+package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
-open class Repository(
-    val name: String,
-    val type: RepositoryType,
-    val url: String,
-    val authentication: Authentication? = null,
-    val repositoryName: String = ""
-)
+import com.beust.jcommander.Parameters
+import com.haulmont.cuba.cli.commands.AbstractCommand
+import org.kodein.di.generic.instance
+import java.io.PrintWriter
+
+@Parameters(commandDescription = "List artifacts in SDK")
+class ListCommandGroup : AbstractCommand() {
+
+    private val printWriter: PrintWriter by kodein.instance()
+
+    override fun run() {
+        printWriter.println("Use 'framework', 'addon', 'lib' or 'repository' subcommands.")
+    }
+}

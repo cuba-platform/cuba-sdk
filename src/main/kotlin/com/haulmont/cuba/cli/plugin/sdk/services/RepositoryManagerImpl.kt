@@ -31,6 +31,7 @@ import java.io.FileInputStream
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 
 class RepositoryManagerImpl : RepositoryManager {
@@ -62,19 +63,40 @@ class RepositoryManagerImpl : RepositoryManager {
 
     private fun defaultRepositories(): Map<RepositoryTarget, MutableList<Repository>> {
         return mapOf(
-            RepositoryTarget.SOURCE to mutableListOf(
+            RepositoryTarget.SEARCH to mutableListOf(
+                Repository(
+                    name = "local",
+                    type = RepositoryType.LOCAL,
+                    url = Paths.get(System.getProperty("user.home")).resolve(".m2").toString()
+                ),
                 Repository(
                     name = "cuba-bintray",
                     type = RepositoryType.BINTRAY,
-                    searchUrl = "https://api.bintray.com/search/packages/maven?",
-                    url = "https://dl.bintray.com/cuba-platform/main",
+                    url = "https://api.bintray.com/search/packages/maven?",
                     repositoryName = "cuba-platform"
                 ),
                 Repository(
                     name = "cuba-nexus",
                     type = RepositoryType.NEXUS2,
+                    url = "https://repo.cuba-platform.com/service/local/lucene/search",
+                    authentication = Authentication(login = "cuba", password = "cuba123")
+                )
+            ),
+            RepositoryTarget.SOURCE to mutableListOf(
+                Repository(
+                    name = "local",
+                    type = RepositoryType.LOCAL,
+                    url = Paths.get(System.getProperty("user.home")).resolve(".m2").toString()
+                ),
+                Repository(
+                    name = "cuba-bintray",
+                    type = RepositoryType.BINTRAY,
+                    url = "https://dl.bintray.com/cuba-platform/main"
+                ),
+                Repository(
+                    name = "cuba-nexus",
+                    type = RepositoryType.NEXUS2,
                     url = "https://repo.cuba-platform.com/content/groups/work",
-                    searchUrl = "https://repo.cuba-platform.com/service/local/lucene/search",
                     authentication = Authentication(login = "cuba", password = "cuba123")
                 )
             ),
@@ -82,16 +104,12 @@ class RepositoryManagerImpl : RepositoryManager {
         )
     }
 
-    override fun getRepository(name: String, target: RepositoryTarget): Repository {
-        return findRepository(name, target) ?: throw IllegalStateException("Repository $name not found in sdk context")
-    }
-
-    fun findRepository(name: String, target: RepositoryTarget): Repository? {
+    override fun getRepository(name: String, target: RepositoryTarget): Repository? {
         return getRepositories(target).firstOrNull { getRepositoryId(target, it.name) == getRepositoryId(target, name) }
     }
 
     override fun addRepository(repository: Repository, target: RepositoryTarget) {
-        if (findRepository(repository.name, target) != null) {
+        if (getRepository(repository.name, target) != null) {
             throw IllegalStateException("Repository with name ${repository.name} already exist")
         }
         getRepositories(target).add(repository)
@@ -171,10 +189,11 @@ class RepositoryManagerImpl : RepositoryManager {
     }
 
     override fun mvnSettingFile(): Path {
-        if (!Files.exists(MVN_SETTINGS_PATH)) {
-            buildMavenSettingsFile()
+        return MVN_SETTINGS_PATH.also {
+            if (!Files.exists(it)) {
+                buildMavenSettingsFile()
+            }
         }
-        return MVN_SETTINGS_PATH
     }
 
     private fun addRepositories(target: RepositoryTarget): Node = xml("repositories") {
