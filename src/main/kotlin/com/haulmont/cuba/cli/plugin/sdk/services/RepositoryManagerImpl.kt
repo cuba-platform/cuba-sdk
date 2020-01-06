@@ -17,6 +17,7 @@
 package com.haulmont.cuba.cli.plugin.sdk.services
 
 import com.google.gson.Gson
+import com.google.gson.internal.LinkedTreeMap
 import com.google.gson.reflect.TypeToken
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.SdkPlugin
@@ -54,7 +55,7 @@ class RepositoryManagerImpl : RepositoryManager {
             FileInputStream(SDK_REPOSITORIES_PATH.toString())
                 .bufferedReader(StandardCharsets.UTF_8)
                 .use {
-                    return@lazy fromJson(it.readText()) as Map<RepositoryTarget, MutableList<Repository>>
+                    return@lazy fromJson(it.readText()) as LinkedTreeMap<RepositoryTarget, MutableList<Repository>>
                 }
         } else {
             return@lazy defaultRepositories()
@@ -67,7 +68,7 @@ class RepositoryManagerImpl : RepositoryManager {
                 Repository(
                     name = "local",
                     type = RepositoryType.LOCAL,
-                    url = Paths.get(System.getProperty("user.home")).resolve(".m2").toString()
+                    url = "file:///" + Paths.get(System.getProperty("user.home")).resolve(".m2").toString()
                 ),
                 Repository(
                     name = "cuba-bintray",
@@ -86,7 +87,7 @@ class RepositoryManagerImpl : RepositoryManager {
                 Repository(
                     name = "local",
                     type = RepositoryType.LOCAL,
-                    url = Paths.get(System.getProperty("user.home")).resolve(".m2").toString()
+                    url = "file:///" + Paths.get(System.getProperty("user.home")).resolve(".m2").toString()
                 ),
                 Repository(
                     name = "cuba-bintray",
@@ -128,7 +129,8 @@ class RepositoryManagerImpl : RepositoryManager {
     }
 
     override fun getRepositories(target: RepositoryTarget): MutableList<Repository> {
-        return sdkRepositories.get(target) ?: throw IllegalStateException("Unknown repository target $target")
+        return (sdkRepositories.get(target) ?: throw IllegalStateException("Unknown repository target $target"))
+            .filter { it.active }.toMutableList()
     }
 
     fun flushMetadata() {
@@ -156,7 +158,7 @@ class RepositoryManagerImpl : RepositoryManager {
                     "activation" {
                         "activeByDefault" { -"true" }
                     }
-                    addRepositories(RepositoryTarget.SOURCE)
+                    this.addNode(addRepositories(RepositoryTarget.SOURCE))
                 }
                 "profile" {
                     "id" { -RepositoryTarget.TARGET.getId() }
@@ -167,7 +169,7 @@ class RepositoryManagerImpl : RepositoryManager {
                         "downloadSources" { -"true" }
                         "downloadJavadocs" { -"true" }
                     }
-                    addRepositories(RepositoryTarget.TARGET)
+                    this.addNode(addRepositories(RepositoryTarget.TARGET))
                 }
             }
             "servers" {

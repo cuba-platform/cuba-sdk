@@ -18,24 +18,35 @@ package com.haulmont.cuba.cli.plugin.sdk.utils
 
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
 class FileUtils {
     companion object {
-        fun unzip(zipFileName: Path, targetDir: Path): Path {
+        fun unzip(zipFileName: Path, targetDir: Path, skipFirstEntry: Boolean = false): Path {
+            var firstZipEntry: ZipEntry? = null;
             ZipFile(zipFileName.toFile()).use { zip ->
                 zip.entries().asSequence().forEach { entry ->
+                    if (firstZipEntry == null) {
+                        firstZipEntry = entry
+                    }
                     zip.getInputStream(entry).use { input ->
-                        targetDir.resolve(entry.name).also {
+                        var entryName = entry.name
+                        if (skipFirstEntry && firstZipEntry != null) {
+                            entryName = entryName.replaceFirst(firstZipEntry!!.getName(), "")
+                        }
+                        targetDir.resolve(entryName).also {
                             Files.createDirectories(it.parent)
                             if (Files.exists(it)) {
                                 Files.delete(it)
                             }
                         }.also {
-                            Files.createFile(it)
-                                .toFile().outputStream().use { output ->
-                                    input.copyTo(output)
-                                }
+                            if (!entry.isDirectory) {
+                                Files.createFile(it)
+                                    .toFile().outputStream().use { output ->
+                                        input.copyTo(output)
+                                    }
+                            }
                         }
                     }
                 }

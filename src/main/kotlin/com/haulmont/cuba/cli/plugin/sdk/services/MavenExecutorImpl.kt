@@ -18,6 +18,7 @@ package com.haulmont.cuba.cli.plugin.sdk.services
 
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import org.kodein.di.generic.instance
+import java.nio.file.Path
 import java.util.logging.Logger
 
 class MavenExecutorImpl : MavenExecutor {
@@ -31,7 +32,7 @@ class MavenExecutorImpl : MavenExecutor {
         val settingsFile = repositoryManager.mvnSettingFile()
         val cliCommandsList = ArrayList(
             arrayOf(
-                sdkSettings.getProperty("mvn-install-path") + "\\apache-maven-3.6.2\\bin\\mvn.cmd",
+                Path.of(sdkSettings.getProperty("mvn-install-path")).resolve("bin").resolve("mvn.cmd").toString(),
                 command,
                 "-s",
                 "\"$settingsFile\"",

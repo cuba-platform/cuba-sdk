@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.dto
+package com.haulmont.cuba.cli.plugin.sdk.commands.repository
 
-open class Repository(
-    val active: Boolean = true,
-    val name: String,
-    val type: RepositoryType,
-    val url: String,
-    val authentication: Authentication? = null,
-    val repositoryName: String = ""
-)
+import com.beust.jcommander.Parameters
+import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
 
+@Parameters(commandDescription = "List target SDK repositories")
+class ListTargetRepositoryCommand : ListRepositoryCommand() {
+
+    override fun getTargets(): Collection<RepositoryTarget> {
+        return listOf(RepositoryTarget.TARGET)
+    }
+}

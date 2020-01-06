@@ -63,7 +63,7 @@ open class AddRepositoryCommand : AbstractCommand() {
         val repository = Repository(
             name = name,
             type = type ?: RepositoryType.NEXUS2,
-            url = url,
+            url = if (isLocal) "file:///$url" else url,
             authentication = authentication,
             repositoryName = repositoryName ?: ""
         )

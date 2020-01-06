@@ -45,14 +45,25 @@ class SdkPlugin : CliPlugin {
                 command("setup", SetupCommand())
                 command("start", StartCommand())
                 command("stop", StopCommand())
-                command("add", RepositoryCommandGroup()) {
-                    command("repository",AddRepositoryCommand()) {
-                        command("sdk repository", AddTargetRepositoryCommand())
-                        command("source repository", AddSourceRepositoryCommand())
-                        command("search repository", AddSearchRepositoryCommand())
+
+                command("repository", RepositoryCommandGroup()) {
+                    command("list", ListRepositoryCommand()) {
+                        command("sdk", ListTargetRepositoryCommand())
+                        command("source", ListSourceRepositoryCommand())
+                        command("search", ListSearchRepositoryCommand())
+                    }
+                    command("add", AddRepositoryCommand()) {
+                        command("sdk", AddTargetRepositoryCommand())
+                        command("source", AddSourceRepositoryCommand())
+                        command("search", AddSearchRepositoryCommand())
+                    }
+                    command("remove", RemoveRepositoryCommand()) {
+                        command("sdk", RemoveTargetRepositoryCommand())
+                        command("source", RemoveSourceRepositoryCommand())
+                        command("search", RemoveSearchRepositoryCommand())
                     }
                 }
-                command("list repository", ListRepositoryCommand())
+
                 command("set-license", LicenseCommand())
                 command("clean", CleanCommand())
                 command("docker", DockerCommand())
@@ -82,20 +93,12 @@ class SdkPlugin : CliPlugin {
                     command("framework", RemoveFrameworkCommand())
                     command("addon", RemoveAddonCommand())
                     command("lib", RemoveLibCommand())
-                    command("repository", RemoveRepositoryCommand())
-                    command("search repository", RemoveSearchRepositoryCommand())
-                    command("target repository", RemoveTargetRepositoryCommand())
-                    command("source repository", RemoveSourceRepositoryCommand())
                 }
 
                 command("list", ListCommandGroup()) {
                     command("framework", ListFrameworkCommand())
                     command("addon", ListAddonCommand())
                     command("lib", ListLibsCommand())
-                    command("repository", ListRepositoryCommand())
-                    command("search repository", ListRepositoryCommand())
-                    command("target repository", ListRepositoryCommand())
-                    command("source repository", ListRepositoryCommand())
                 }
             }
         }

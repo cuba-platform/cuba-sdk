@@ -18,11 +18,46 @@ package com.haulmont.cuba.cli.plugin.sdk.commands.repository
 
 import com.beust.jcommander.Parameters
 import com.haulmont.cuba.cli.commands.AbstractCommand
+import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
+import com.haulmont.cuba.cli.localMessages
+import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
+import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryType
+import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
+import org.kodein.di.generic.instance
+import java.io.PrintWriter
 
 @Parameters(commandDescription = "Add source repository for SDK")
-class ListRepositoryCommand : AbstractCommand() {
+open class ListRepositoryCommand : AbstractCommand() {
+
+    internal val messages by localMessages()
+    internal val repositoryManager: RepositoryManager by sdkKodein.instance()
+    internal val printWriter: PrintWriter by sdkKodein.instance()
 
     override fun run() {
+        for (target in getTargets()) {
+            printWriter.println(messages["repository.$target"])
+            printWriter.println("==============================")
+            for (repository in repositoryManager.getRepositories(target)) {
+                printWriter.println("Name: ${repository.name}")
+                if (RepositoryType.LOCAL != repository.type) {
+                    printWriter.println("URL: ${repository.url}")
+                } else {
+                    printWriter.println("Path: ${repository.url}")
+                }
+                if (repository.authentication != null) {
+                    printWriter.println("Login: ${repository.authentication.login}")
+                    printWriter.println("Password: ${repository.authentication.password}")
+                }
+                if (repository.repositoryName.isNotBlank()) {
+                    printWriter.println("Repository name: ${repository.repositoryName}")
+                }
+                printWriter.println()
+            }
+            printWriter.println()
+        }
+    }
 
+    internal open fun getTargets(): Collection<RepositoryTarget> {
+        return RepositoryTarget.values().toList()
     }
 }

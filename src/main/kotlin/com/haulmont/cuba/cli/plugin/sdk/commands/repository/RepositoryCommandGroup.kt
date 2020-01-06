@@ -22,12 +22,12 @@ import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import org.kodein.di.generic.instance
 import java.io.PrintWriter
 
-@Parameters(commandDescription = "Add repository command group")
+@Parameters(commandDescription = "Repository command group")
 class RepositoryCommandGroup : AbstractCommand() {
 
     private val printWriter: PrintWriter by sdkKodein.instance()
 
     override fun run() {
-        printWriter.println("Use 'repository', 'sdk repository', 'source repository', 'search repository' subcommands.")
+        printWriter.println("Use 'list', 'add', 'remove' subcommands.")
     }
 }

@@ -6,7 +6,12 @@ import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.localMessages
 import com.haulmont.cuba.cli.plugin.sdk.SdkPlugin
 import com.haulmont.cuba.cli.plugin.sdk.SdkPlugin.Companion.SDK_PATH
+import com.haulmont.cuba.cli.plugin.sdk.dto.Authentication
+import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
+import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
+import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryType
 import com.haulmont.cuba.cli.plugin.sdk.services.FileDownloadService
+import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
 import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
 import com.haulmont.cuba.cli.plugin.sdk.utils.FileUtils
 import com.haulmont.cuba.cli.prompting.Answer
@@ -25,7 +30,9 @@ class SetupCommand : AbstractCommand() {
 
     internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
     internal val fileDownloadService: FileDownloadService by sdkKodein.instance()
+    internal val repositoryManager: RepositoryManager by sdkKodein.instance()
     private val printWriter: PrintWriter by kodein.instance()
+    private val messages by localMessages()
 
     private val applicationProperties by lazy {
         val properties = Properties()
@@ -43,7 +50,7 @@ class SetupCommand : AbstractCommand() {
         applicationProperties["repositoryUrl"]!! as String
     }
 
-    private val messages by localMessages()
+
 
     override fun run() {
         Prompts.create(kodein) { askRepositorySettings() }
@@ -80,12 +87,8 @@ class SetupCommand : AbstractCommand() {
         question("password", messages["repositoryPasswordCaption"]) {
             default("admin")
         }
-        question("maven-install-path", messages["mavenInstallPathCaption"]) {
-            default(SDK_PATH.resolve("mvn").toString())
-        }
-        confirmation("rewrite-maven-install-path", messages["mavenRewriteInstallPathCaption"]) {
-            default(false)
-            askIf { !mavenPathIsEmpty(it) }
+        question("repository-name", messages["repositoryName"]) {
+            default("cuba-sdk")
         }
     }
 
@@ -94,7 +97,7 @@ class SetupCommand : AbstractCommand() {
     }
 
     private fun mavenPathIsEmpty(answers: Map<String, Answer>): Boolean {
-        return !Files.exists(Path.of((answers["maven-install-path"] as String)))
+        return !Files.exists(Path.of(sdkSettings.getProperty("mvn-install-path")))
     }
 
     private fun isRemoteRepository(it: Answers) = it["repoType"] == "remote"
@@ -102,21 +105,87 @@ class SetupCommand : AbstractCommand() {
     private fun setupRepository(answers: Answers) {
         createSdkDir()
         createSdkRepoSettingsFile(answers)
-
+        downloadAndConfigureMaven(answers)
         if (needToInstallRepository(answers)) {
-            downloadRepository(answers).also {
-                if (repositoryPathIsEmpty(answers)) {
-                    Files.createDirectory(Path.of((answers["install-path"] as String)))
-                }
-                unzipRepository(answers, it)
-            }.also {
-                configureRepository(answers, it)
+            downloadAndConfigureNexus(answers)
+        }
+        addTargetSdkRepository(answers)
+    }
+
+    private fun downloadAndConfigureMaven(answers: Answers) {
+        downloadMaven(answers).also {
+            if (mavenPathIsEmpty(answers)) {
+                Files.createDirectory(Path.of((answers["mvn-install-path"] as String)))
+                unzipMaven(answers, it)
             }
+        }.also {
+            configureMaven(answers, it)
         }
     }
 
-    private fun configureRepository(answers: Map<String, Answer>, path: Path): Any {
-        return path
+    private fun downloadAndConfigureNexus(answers: Answers) {
+        downloadRepository(answers).also {
+            if (repositoryPathIsEmpty(answers)) {
+                val installPath = answers["install-path"] as String
+                Files.createDirectory(Path.of(installPath))
+                unzipRepository(answers, it)
+                Files.move(Path.of(installPath).resolve("nexus-3.19.1-01"), Path.of(installPath).resolve("nexus3"))
+            }
+        }.also {
+            configureRepository(answers, it)
+        }
+    }
+
+    private fun configureMaven(answers: Map<String, Answer>, it: Path) {
+        repositoryManager.mvnSettingFile()
+    }
+
+    private fun unzipMaven(answers: Map<String, Answer>, it: Path) {
+        printWriter.println(messages["unzipMavenCaption"])
+        FileUtils.unzip(it, Path.of(sdkSettings.getProperty("mvn-install-path")), true)
+    }
+
+    private fun downloadMaven(answers: Map<String, Answer>): Path {
+        val archive = SDK_PATH.resolve("maven.zip")
+        if (!Files.exists(archive)) {
+            printWriter.println(messages["downloadMaven"])
+            val file = Files.createFile(archive)
+            fileDownloadService.downloadFile(
+                mavenDownloadLink(),
+                file
+            ) { bytesRead: Long, contentLength: Long, isDone: Boolean ->
+                val progress = 100 * bytesRead.toFloat() / contentLength.toFloat()
+                printWriter.print(messages["downloadProgress"].format(progress))
+            }
+
+        }
+        printWriter.println()
+        return archive
+    }
+
+    private fun mavenDownloadLink() = applicationProperties["mavenDownloadLink"] as String
+
+    private fun addTargetSdkRepository(answers: Answers) {
+        val repositoryName = answers["repository-name"] as String
+        repositoryManager.getRepository(repositoryName, RepositoryTarget.TARGET)
+            ?.let { repositoryManager.removeRepository(repositoryName, RepositoryTarget.TARGET) }
+        repositoryManager.addRepository(
+            Repository(
+                name = repositoryName,
+                type = RepositoryType.NEXUS2,
+                url = if (!isRemoteRepository(answers)) {
+                    SDK_LOCAL_REPOSITORY_URL.format(answers["port"])
+                } else {
+                    answers["url"] as String
+                },
+                authentication = Authentication(answers["login"] as String, answers["password"] as String)
+            ), RepositoryTarget.TARGET
+        )
+
+    }
+
+    private fun configureRepository(answers: Map<String, Answer>, path: Path) {
+        StartCommand().execute()
     }
 
     private fun unzipRepository(answers: Answers, it: Path) {
@@ -126,7 +195,7 @@ class SetupCommand : AbstractCommand() {
 
     private fun needToInstallRepository(answers: Map<String, Answer>): Boolean {
         if (!isRemoteRepository(answers)) {
-            if (repositoryPathIsEmpty(answers) || answers["rewrite-install-path"] as Boolean) {
+            if (repositoryPathIsEmpty(answers) || false != answers["rewrite-install-path"]) {
                 return true;
             }
         }
@@ -140,6 +209,8 @@ class SetupCommand : AbstractCommand() {
         if (!isRemoteRepository(answers)) {
             sdkSettings.setProperty("url", SDK_LOCAL_REPOSITORY_URL.format(answers["port"]))
         }
+        sdkSettings.setProperty("mvn-local-repo", SDK_PATH.resolve(".m2").toString())
+        sdkSettings.setProperty("mvn-install-path", SDK_PATH.resolve("mvn").toString())
         sdkSettings.flushAppProperties()
     }
 
@@ -152,21 +223,21 @@ class SetupCommand : AbstractCommand() {
     private fun downloadRepository(answers: Answers): Path {
         val repositoryArchive = SDK_PATH.resolve("nexus.zip")
         if (!Files.exists(repositoryArchive)) {
+            printWriter.println(messages["downloadNexus"])
             val file = Files.createFile(repositoryArchive)
             fileDownloadService.downloadFile(
-                applicationProperties["nexusDownloadLink_win64"] as String,
+                nexusDownloadLink(),
                 file
             ) { bytesRead: Long, contentLength: Long, isDone: Boolean ->
                 val progress = 100 * bytesRead.toFloat() / contentLength.toFloat()
-                printWriter.print(messages["nexusDownloadProgress"].format(progress))
-                if (isDone) {
-                    printWriter.println()
-                }
+                printWriter.print(messages["downloadProgress"].format(progress))
             }
-
         }
+        printWriter.println()
         return repositoryArchive
     }
+
+    private fun nexusDownloadLink() = applicationProperties["nexusDownloadLink_win64"] as String
 
 
 }
