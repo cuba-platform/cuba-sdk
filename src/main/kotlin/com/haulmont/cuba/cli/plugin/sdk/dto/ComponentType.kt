@@ -20,5 +20,6 @@ enum class ComponentType {
 
     FRAMEWORK,
     ADDON,
-    LIB
+    LIB,
+    RAW
 }

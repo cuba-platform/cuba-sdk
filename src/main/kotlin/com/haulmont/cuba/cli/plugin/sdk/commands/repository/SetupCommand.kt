@@ -185,21 +185,25 @@ class SetupCommand : AbstractCommand() {
 
     private fun addTargetSdkRepository(answers: Answers) {
         val repositoryName = answers["repository-name"] as String
+        addRepository(repositoryName, RepositoryType.NEXUS3, answers)
+    }
+
+    private fun addRepository(repositoryName: String, repositoryType: RepositoryType, answers: Answers) {
         repositoryManager.getRepository(repositoryName, RepositoryTarget.TARGET)
             ?.let { repositoryManager.removeRepository(repositoryName, RepositoryTarget.TARGET) }
         repositoryManager.addRepository(
-            repositoryFromAnswers(answers), RepositoryTarget.TARGET
+            repositoryFromAnswers(repositoryName, repositoryType, answers), RepositoryTarget.TARGET
         )
-
     }
 
     private fun repositoryFromAnswers(
+        repositoryName: String,
+        repositoryType: RepositoryType,
         answers: Answers
     ): Repository {
-        val repositoryName = answers["repository-name"] as String
         return Repository(
             name = repositoryName,
-            type = RepositoryType.NEXUS3,
+            type = repositoryType,
             url = if (!isRemoteRepository(answers)) {
                 sdkSettings["local-repo-url"] + "repository/${repositoryName}/"
             } else {

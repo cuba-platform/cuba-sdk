@@ -26,7 +26,7 @@ import org.json.JSONObject
 class Nexus2Search(repository: Repository) : AbstractRepositorySearch(repository) {
     override fun searchParameters(component: Component): List<Pair<String, String>> = listOf(
         "g" to component.packageName,
-        "a" to (component.name ?: ""),
+        "a" to "",
         "v" to component.version
     )
 

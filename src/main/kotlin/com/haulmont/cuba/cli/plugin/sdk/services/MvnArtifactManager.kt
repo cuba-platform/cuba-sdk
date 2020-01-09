@@ -22,7 +22,7 @@ import org.apache.maven.model.Model
 
 interface MvnArtifactManager {
 
-    fun readPom(artifact: MvnArtifact): Model?
+    fun readPom(artifact: MvnArtifact, classifier: Classifier = Classifier.pom()): Model?
 
     fun upload(artifact: MvnArtifact)
 

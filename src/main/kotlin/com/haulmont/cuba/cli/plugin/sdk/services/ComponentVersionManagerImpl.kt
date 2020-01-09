@@ -16,7 +16,6 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.services
 
-import com.github.kittinunf.fuel.Fuel
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
@@ -25,6 +24,7 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.MarketplaceAddon
 import org.kodein.di.generic.instance
 import java.util.logging.Logger
 import kotlin.concurrent.thread
+
 
 class ComponentVersionManagerImpl : ComponentVersionManager {
 
@@ -35,22 +35,23 @@ class ComponentVersionManagerImpl : ComponentVersionManager {
     var addons: List<MarketplaceAddon>? = null
 
     private fun loadSync(): List<MarketplaceAddon> {
-        val result = Fuel.get(sdkSettings.getApplicationProperty("addonsMarketplaceUrl"))
-            .responseString().third
+        //TODO load addons from cuba-site
+//        val result = Fuel.get(sdkSettings.getApplicationProperty("addonsMarketplaceUrl"))
+//            .responseString().third
+//
+//        result.fold(
+//            success = {
+//                return readAddons(it)
+//            },
+//            failure = { error ->
+//                log.severe("error: ${error}")
+//            }
+//        )
 
-        result.fold(
-            success = {
-                return readAddons(it)
-            },
-            failure = { error ->
-                log.severe("error: ${error}")
-            }
-        )
-
-        return readAddons(SdkPlugin::class.java
-            .getResourceAsStream("app-components.json")
-            .bufferedReader()
-            .use { it.readText() })
+        return readAddons(
+            SdkPlugin::class.java.getResourceAsStream("app-components.json")
+                .bufferedReader()
+                .use { it.readText() })
     }
 
     private fun readAddons(json: String): List<MarketplaceAddon> {
@@ -66,7 +67,7 @@ class ComponentVersionManagerImpl : ComponentVersionManager {
 
     override fun load(loadCompletedFun: (addons: List<MarketplaceAddon>) -> Unit) {
         thread {
-            loadCompletedFun(loadSync())
+            loadCompletedFun(loadSync().also { addons = it })
         }
     }
 }

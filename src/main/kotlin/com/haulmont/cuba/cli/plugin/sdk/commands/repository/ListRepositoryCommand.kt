@@ -44,6 +44,7 @@ open class ListRepositoryCommand : AbstractCommand() {
                 } else {
                     printWriter.println("Path: ${repository.url}")
                 }
+                printWriter.println("Type: ${repository.type}")
                 if (repository.authentication != null) {
                     printWriter.println("Login: ${repository.authentication.login}")
                     printWriter.println("Password: ${repository.authentication.password}")

@@ -28,6 +28,7 @@ data class Component(
         Classifier.javadoc(),
         Classifier.client()
     ),
+    val url: String? = null,
     val components: MutableSet<Component> = HashSet(),
     val dependencies: MutableSet<MvnArtifact> = HashSet()
 ) {

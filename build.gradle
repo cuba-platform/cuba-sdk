@@ -10,7 +10,7 @@ buildscript {
             kodein              : "5.0.0",
             practicalxml        : "1.1.0",
             gson                : "2.3.1",
-            fuel                : "2.2.0",
+            fuel                : "2.2.1",
             maven               : "3.6.2",
             json                : "20180813",
             nxrm3               : "3.20.1-01",

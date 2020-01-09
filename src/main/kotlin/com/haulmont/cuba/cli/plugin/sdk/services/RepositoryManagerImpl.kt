@@ -123,8 +123,7 @@ class RepositoryManagerImpl : RepositoryManager {
     }
 
     override fun removeRepository(name: String, target: RepositoryTarget) {
-        getRepositories(target)
-            .remove(getRepository(name, target))
+        getInternalRepositories(target).remove(getRepository(name, target))
         flush()
     }
 
@@ -134,9 +133,12 @@ class RepositoryManagerImpl : RepositoryManager {
     }
 
     override fun getRepositories(target: RepositoryTarget): MutableList<Repository> {
-        return (sdkRepositories.get(target) ?: throw IllegalStateException("Unknown repository target $target"))
+        return getInternalRepositories(target)
             .filter { it.active }.toMutableList()
     }
+
+    private fun getInternalRepositories(target: RepositoryTarget) =
+        (sdkRepositories.get(target) ?: throw IllegalStateException("Unknown repository target $target"))
 
     fun flushMetadata() {
         writeToFile(SDK_REPOSITORIES_PATH, Gson().toJson(sdkRepositories))

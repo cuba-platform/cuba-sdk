@@ -28,7 +28,7 @@ class Nexus3Search(repository: Repository) : AbstractRepositorySearch(repository
     override fun searchParameters(component: Component): List<Pair<String, String>> {
         return listOf(
             "group" to component.packageName,
-            "name" to (component.name ?: "*"),
+            "name" to "*",
             "version" to component.version,
             "repository" to repository.repositoryName
         )

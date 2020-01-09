@@ -58,8 +58,8 @@ open class RemoveRepositoryCommand : AbstractCommand() {
     }
 
     private fun QuestionsList.askRepositorySettings() {
-        textOptions("target", messages["repository.target"], listOf("source", "sdk", "search")) {
-            askIf { target == null }
+        if (target != null) {
+            textOptions("target", messages["repository.target"], listOf("source", "sdk", "search"))
         }
     }
 }

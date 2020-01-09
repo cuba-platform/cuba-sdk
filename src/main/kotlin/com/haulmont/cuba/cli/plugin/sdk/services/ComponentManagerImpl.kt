@@ -16,6 +16,7 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.services
 
+import com.github.kittinunf.fuel.Fuel
 import com.google.gson.Gson
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.generation.VelocityHelper
@@ -25,6 +26,7 @@ import com.haulmont.cuba.cli.plugin.sdk.search.Nexus2Search
 import com.haulmont.cuba.cli.plugin.sdk.search.Nexus3Search
 import com.haulmont.cuba.cli.plugin.sdk.search.RepositorySearch
 import org.kodein.di.generic.instance
+import java.nio.file.Files
 import java.util.logging.Logger
 import java.util.stream.Collectors
 
@@ -39,6 +41,7 @@ class ComponentManagerImpl : ComponentManager {
     private val metadataHolder: MetadataHolder by sdkKodein.instance()
     private val repositoryManager: RepositoryManager by sdkKodein.instance()
     private val mvnArtifactManager: MvnArtifactManager by sdkKodein.instance()
+    private val sdkSettingsHolder: SdkSettingsHolder by sdkKodein.instance()
     private val velocityHelper: VelocityHelper = VelocityHelper()
 
     private fun localProgress(component: Component) =
@@ -134,6 +137,9 @@ class ComponentManagerImpl : ComponentManager {
 
     override fun resolve(component: Component, progress: ResolveProgressCallback?) {
         if (component.components.isNotEmpty()) {
+            if (ComponentType.FRAMEWORK == component.type) {
+                resolveSdkBom(component)
+            }
             log.info("Resolve complex component: ${component}")
             val resolvedComponents = ArrayList<Component>()
             val total = component.components.size
@@ -143,14 +149,79 @@ class ComponentManagerImpl : ComponentManager {
                 val resolvedComponent = resolveDependencies(componentToResolve) { _, localProgress, _ ->
                     progress?.let { it(componentToResolve, resolved + localProgress, total) }
                 }
-                resolved++
                 resolvedComponent?.let { resolvedComponents.add(it) }
+                resolved++
+
             }
             component.components.clear()
             component.components.addAll(resolvedComponents)
         } else {
             log.info("Resolve component: ${component}")
             resolveDependencies(component, progress)
+        }
+    }
+
+    private fun resolveRawComponent(component: Component): Component? {
+        for (classifier in component.classifiers) {
+            val componentPath = sdkSettingsHolder.sdkHome
+                .resolve(sdkSettingsHolder["mvn-local-repo"])
+                .resolve(component.packageName)
+                .resolve(component.name)
+                .resolve(component.version)
+                .resolve("${component.name}-${component.version}.${classifier.extension}")
+            Files.createDirectories(componentPath.parent)
+            if (component.url != null) {
+                val (_, response, _) = Fuel.download(component.url)
+                    .fileDestination { response, Url ->
+                        componentPath.toFile()
+                    }
+                    .response()
+                if (response.statusCode == 200) {
+                    component.dependencies.add(
+                        MvnArtifact(
+                            component.packageName,
+                            component.name!!,
+                            component.version,
+                            classifiers = component.classifiers
+                        )
+                    )
+                    return component
+                }
+            }
+        }
+        return null
+    }
+
+    private fun resolveSdkBom(component: Component) {
+        val model = mvnArtifactManager.readPom(
+            MvnArtifact("com.haulmont.gradle", "cuba-plugin", component.version),
+            Classifier.sdk()
+        )
+        if (model != null) {
+            val tomcatVersion = model.properties["tomcat.version"] as String?
+            if (tomcatVersion != null) {
+                component.components.add(
+                    Component(
+                        "org.apache.tomcat", "tomcat", tomcatVersion, classifiers = mutableListOf(
+                            Classifier.pom(),
+                            Classifier("", "zip")
+                        )
+                    )
+                )
+            }
+            val gradleVersion = model.properties["gradle.version"] as String?
+            if (gradleVersion != null) {
+                component.components.add(
+                    Component(
+                        packageName = "gradle",
+                        name = "gradle",
+                        url = sdkSettingsHolder.getApplicationProperty("gradleDownloadLink").format(gradleVersion),
+                        version = gradleVersion,
+                        classifiers = mutableListOf(Classifier("", "zip")),
+                        type = ComponentType.RAW
+                    )
+                )
+            }
         }
     }
 
@@ -184,7 +255,7 @@ class ComponentManagerImpl : ComponentManager {
         metadataHolder.flushMetadata()
     }
 
-    private fun resolveDependencies(component: Component, progress: ResolveProgressCallback?): Component? {
+    private fun resolveDependencies(component: Component, progress: ResolveProgressCallback? = null): Component? {
         if (ComponentType.LIB == component.type && component.name != null) {
             var progressCount = 0
             log.info("Resolve component dependencies: ${component}")
@@ -238,6 +309,9 @@ class ComponentManagerImpl : ComponentManager {
             }
 
             return component
+        }
+        if (ComponentType.RAW == component.type) {
+            resolveRawComponent(component)?.let { return it }
         }
         return null
     }

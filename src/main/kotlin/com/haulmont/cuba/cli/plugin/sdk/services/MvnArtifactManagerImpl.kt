@@ -19,10 +19,7 @@ package com.haulmont.cuba.cli.plugin.sdk.services
 import com.github.kittinunf.fuel.Fuel
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.generation.VelocityHelper
-import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
-import com.haulmont.cuba.cli.plugin.sdk.dto.MvnArtifact
-import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
-import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
+import com.haulmont.cuba.cli.plugin.sdk.dto.*
 import com.haulmont.cuba.cli.plugin.sdk.utils.authorizeIfRequired
 import org.apache.maven.model.Model
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
@@ -68,15 +65,15 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
         }
     }
 
-    override fun readPom(artifact: MvnArtifact): Model? {
-        log.info("Read POM: ${artifact.mvnCoordinates(Classifier.pom())}")
-        val pomFile = getArtifactPomFile(artifact)
+    override fun readPom(artifact: MvnArtifact, classifier: Classifier): Model? {
+        log.info("Read POM: ${artifact.mvnCoordinates(classifier)}")
+        val pomFile = getArtifactPomFile(artifact, classifier)
 
         if (!Files.exists(pomFile)) {
             val commandResult = mavenExecutor.mvn(
                 RepositoryTarget.SOURCE.getId(),
                 "org.apache.maven.plugins:maven-dependency-plugin:3.1.1:get",
-                arrayListOf("-Dartifact=${artifact.mvnCoordinates(Classifier.pom())}")
+                arrayListOf("-Dartifact=${artifact.mvnCoordinates(classifier)}")
             )
             commandResult.result.read {
                 if (it != null) {
@@ -90,7 +87,7 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
                 return MavenXpp3Reader().read(it)
             }
         }
-        log.info("POM does not exist: ${artifact.mvnCoordinates(Classifier.pom())}")
+        log.info("POM does not exist: ${artifact.mvnCoordinates(classifier)}")
         return null
 
     }
@@ -115,7 +112,14 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
     }
 
     override fun upload(artifact: MvnArtifact) {
-        for (repository in repositoryManager.getRepositories(RepositoryTarget.TARGET)) {
+        for (repository in repositoryManager.getRepositories(RepositoryTarget.TARGET)
+            .filter {
+                it.type in listOf(
+                    RepositoryType.NEXUS3,
+                    RepositoryType.NEXUS2,
+                    RepositoryType.BINTRAY
+                )
+            }) {
             uploadToRepository(repository, artifact)
         }
     }

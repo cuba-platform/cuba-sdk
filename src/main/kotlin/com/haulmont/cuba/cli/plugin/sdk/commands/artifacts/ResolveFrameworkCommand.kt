@@ -18,13 +18,44 @@ package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
 import com.beust.jcommander.Parameter
 import com.beust.jcommander.Parameters
+import com.haulmont.cuba.cli.cubaplugin.model.PlatformVersionsManager
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
+import com.haulmont.cuba.cli.prompting.Prompts
+import org.kodein.di.generic.instance
 
 @Parameters(commandDescription = "Resolve framework dependencies and download to local SDK repository")
 class ResolveFrameworkCommand : BaseResolveCommand() {
 
-    @Parameter(description = "Framework name and version <name>:<version>")
+    private val platformVersionsManager: PlatformVersionsManager by kodein.instance()
+
+    @Parameter(description = "Framework name and version <name>:<version>", hidden = false)
     private var frameworkNameVersion: String? = null
+
+    override fun run() {
+        if (frameworkNameVersion == null) {
+            val addonAnswers = Prompts.create {
+                textOptions("name", messages["framework.name"], listOf("cuba"))
+            }.ask()
+
+            val name = addonAnswers["name"] as String
+
+            val versionAnswers = Prompts.create {
+                textOptions(
+                    "version",
+                    messages["framework.version"],
+                    platformVersionsManager.versions
+                )
+            }.ask()
+            installAddonCommand(name, versionAnswers["version"] as String)
+        } else {
+            super.run()
+        }
+    }
+
+    private fun installAddonCommand(name: String, version: String) {
+        frameworkNameVersion = "$name:$version"
+        super.run()
+    }
 
     override fun createSearchContext(): Component? {
         return frameworkNameVersion?.resolveFrameworkCoordinates() ?: fail(

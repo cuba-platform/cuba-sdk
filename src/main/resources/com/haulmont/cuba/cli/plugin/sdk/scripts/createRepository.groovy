@@ -43,7 +43,6 @@ if (user == null) {
 if (repository.getRepositoryManager().get(repoName) == null) {
     repository.createMavenHosted(repoName, BlobStoreManager.DEFAULT_BLOBSTORE_NAME, true, VersionPolicy.MIXED,
             WritePolicy.ALLOW, LayoutPolicy.STRICT)
-
     log.info("Repository $repoName created")
 } else {
     log.info("Repository $repoName already created")
