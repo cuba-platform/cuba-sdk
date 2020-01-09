@@ -16,19 +16,43 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.services
 
-import com.haulmont.cuba.cli.plugin.sdk.SdkPlugin.Companion.SDK_PATH
+import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
+import com.haulmont.cuba.cli.plugin.sdk.SdkPlugin
+import org.kodein.di.generic.instance
 import java.io.FileInputStream
 import java.io.FileWriter
 import java.io.InputStreamReader
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 import java.util.*
 
 class SdkSettingsHolderImpl : SdkSettingsHolder {
 
-    val SDK_PROPERTIES_PATH = SDK_PATH.resolve("sdk.properties")
+    internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
+
+    val SDK_PROPERTIES_PATH by lazy {
+        Paths.get(
+            System.getProperty(
+                "user.home"
+            ), ".haulmont", "cli", "sdk"
+        ).resolve("sdk.properties")
+    }
 
     private val applicationProperties by lazy {
+        val properties = Properties()
+
+        val propertiesInputStream = SdkPlugin::class.java.getResourceAsStream("application.properties")
+        propertiesInputStream.use {
+            val inputStreamReader = java.io.InputStreamReader(propertiesInputStream, StandardCharsets.UTF_8)
+            properties.load(inputStreamReader)
+        }
+
+        properties
+    }
+
+    private val sdkProperties by lazy {
         val properties = Properties()
 
         createSdkPropertiesFileIfNotExists()
@@ -42,25 +66,45 @@ class SdkSettingsHolderImpl : SdkSettingsHolder {
         properties
     }
 
-    override fun getProperty(property: String): String {
+    override val sdkHome: Path = getSdkPath().also {
+        if (!Files.exists(it)) {
+            Files.createDirectories(it)
+        }
+    }
+
+    override fun getApplicationProperty(property: String): String {
         return applicationProperties.getProperty(property)
     }
 
+    private fun getSdkPath() =
+        if (sdkProperties.contains("sdk_home"))
+            Path.of(getProperty("sdk_home"))
+        else Paths.get(
+            System.getProperty(
+                "user.home"
+            ), ".haulmont", "cli", "sdk"
+        )
+
+
+    override fun getProperty(property: String): String {
+        return sdkProperties.getProperty(property)
+    }
+
     override fun setProperty(property: String, value: String) {
-        applicationProperties.put(property, value)
+        sdkProperties.put(property, value)
     }
 
     override fun flushAppProperties() {
         createSdkPropertiesFileIfNotExists()
 
         FileWriter(SDK_PROPERTIES_PATH.toString()).use {
-            applicationProperties.store(it, "SDK properties")
+            sdkProperties.store(it, "SDK properties")
         }
 
     }
 
     override fun sdkConfigured(): Boolean {
-        return Files.exists(SDK_PROPERTIES_PATH) && applicationProperties.getProperty("repoType")!=null
+        return Files.exists(SDK_PROPERTIES_PATH) && sdkProperties.getProperty("repoType") != null
     }
 
 

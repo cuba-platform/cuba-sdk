@@ -18,7 +18,7 @@ package com.haulmont.cuba.cli.plugin.sdk.services
 
 import com.google.gson.Gson
 import com.google.gson.JsonObject
-import com.haulmont.cuba.cli.plugin.sdk.SdkPlugin
+import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier.Companion.default
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier.Companion.javadoc
@@ -27,6 +27,7 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier.Companion.sdk
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier.Companion.sources
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.ComponentType
+import org.kodein.di.generic.instance
 import java.nio.file.Files
 import java.util.logging.Logger
 
@@ -34,15 +35,21 @@ class ComponentTemplatesImpl : ComponentTemplates {
 
     private val log: Logger = Logger.getLogger(ComponentTemplatesImpl::class.java.name)
 
+    private val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
+
+    private val componentDescriptorFile by lazy {
+        val file = sdkSettings.sdkHome.resolve("AppComponents11_1.json")
+    }
+
     private val templates: List<Component> by lazy {
         val templates = ArrayList<Component>()
         templates.addAll(getBaseTemplates())
 
-        val componentDescriptorFile = SdkPlugin.SDK_PATH.resolve("AppComponents11_1.json")
+        val componentDescriptorFile = sdkSettings.sdkHome.resolve("AppComponents11_1.json")
 //        val (_, response, _) = Fuel.download("http://www.cuba-platform.com/AppComponents11_1.json")
 //            .fileDestination { response, Url ->
 //                componentDescriptorFile.toFile()
-//            }.response()mdsdk install
+//            }.response()
 
         if (Files.exists(componentDescriptorFile)) {
             componentDescriptorFile.toFile().readText().let {

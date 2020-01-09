@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Haulmont.
+ * Copyright (c) 2008-2020 Haulmont.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,17 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.dto
+package com.haulmont.cuba.cli.plugin.sdk.utils
 
 import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.core.extensions.authentication
+import com.haulmont.cuba.cli.plugin.sdk.dto.Authentication
+import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 
-open class Repository(
-    val active: Boolean = true,
-    val name: String,
-    val type: RepositoryType,
-    val url: String,
-    val authentication: Authentication? = null,
-    val repositoryName: String = ""
-) {
-    public fun Request.authorizeIfRequired(repository: Repository): Request {
-        if (repository.authentication != null) {
-            val authentication: Authentication = repository.authentication
-            this.authentication().basic(authentication.login, authentication.password)
-        }
-        return this
+fun Request.authorizeIfRequired(repository: Repository): Request {
+    if (repository.authentication != null) {
+        val authentication: Authentication = repository.authentication
+        this.authentication().basic(authentication.login, authentication.password)
     }
+    return this
 }
-

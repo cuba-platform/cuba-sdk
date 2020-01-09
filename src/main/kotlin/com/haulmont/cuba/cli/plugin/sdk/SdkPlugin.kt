@@ -18,22 +18,23 @@ package com.haulmont.cuba.cli.plugin.sdk
 
 import com.google.common.eventbus.Subscribe
 import com.haulmont.cuba.cli.CliPlugin
+import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
+import com.haulmont.cuba.cli.cubaplugin.model.PlatformVersionsManager
 import com.haulmont.cuba.cli.event.InitPluginEvent
 import com.haulmont.cuba.cli.plugin.sdk.commands.SdkCommand
 import com.haulmont.cuba.cli.plugin.sdk.commands.artifacts.*
 import com.haulmont.cuba.cli.plugin.sdk.commands.repository.*
-import java.nio.file.Files
-import java.nio.file.Paths
+import com.haulmont.cuba.cli.plugin.sdk.services.ComponentTemplates
+import com.haulmont.cuba.cli.plugin.sdk.services.ComponentVersionManager
+import org.kodein.di.generic.instance
 
 class SdkPlugin : CliPlugin {
 
-    companion object {
-        val SDK_PATH = Paths.get(System.getProperty("user.home"), ".haulmont", "cli", "sdk").also {
-            if (!Files.exists(it)) {
-                Files.createDirectories(it)
-            }
-        }
-    }
+    private val componentTemplates: ComponentTemplates by sdkKodein.instance()
+
+    private val platformVersionsManager: PlatformVersionsManager by sdkKodein.instance()
+
+    private val componentVersionsManager: ComponentVersionManager by sdkKodein.instance()
 
     override val apiVersion: Int
         get() = 5
@@ -73,7 +74,20 @@ class SdkPlugin : CliPlugin {
 
                 command("resolve", ResolveCommand()) {
                     command("framework", ResolveFrameworkCommand())
-                    command("addon", ResolveAddonCommand())
+                    command("addon", ResolveAddonCommand()) {
+                        componentVersionsManager.load {
+                            it.forEach { addon ->
+                                addon.compatibilityList.forEach { compatibility ->
+                                    compatibility.artifactVersions.forEach { version ->
+                                        val nameVersion = "${addon.id}:${version}"
+                                        val addonCommand = ResolveAddonCommand()
+                                        addonCommand.addonNameVersion = nameVersion
+                                        command(nameVersion, addonCommand)
+                                    }
+                                }
+                            }
+                        }
+                    }
                     command("lib", ResolveLibCommand())
                 }
 
@@ -103,4 +117,5 @@ class SdkPlugin : CliPlugin {
             }
         }
     }
+
 }

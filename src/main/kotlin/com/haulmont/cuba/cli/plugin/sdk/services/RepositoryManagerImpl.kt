@@ -20,7 +20,6 @@ import com.google.gson.Gson
 import com.google.gson.internal.LinkedTreeMap
 import com.google.gson.reflect.TypeToken
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
-import com.haulmont.cuba.cli.plugin.sdk.SdkPlugin
 import com.haulmont.cuba.cli.plugin.sdk.dto.Authentication
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
@@ -37,10 +36,15 @@ import java.nio.file.StandardOpenOption
 
 class RepositoryManagerImpl : RepositoryManager {
 
-    val SDK_REPOSITORIES_PATH: Path = SdkPlugin.SDK_PATH.resolve("sdk.repositories")
-    val MVN_SETTINGS_PATH: Path = SdkPlugin.SDK_PATH.resolve("sdk-settings.xml")
-
     internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
+
+    val SDK_REPOSITORIES_PATH by lazy {
+        sdkSettings.sdkHome.resolve("sdk.repositories")
+    }
+
+    val MVN_SETTINGS_PATH by lazy {
+        sdkSettings.sdkHome.resolve("sdk-settings.xml")
+    }
 
     inline fun <reified T> fromJson(json: String): T {
         return Gson().fromJson(json, object : TypeToken<T>() {}.type)
@@ -113,7 +117,8 @@ class RepositoryManagerImpl : RepositoryManager {
         if (getRepository(repository.name, target) != null) {
             throw IllegalStateException("Repository with name ${repository.name} already exist")
         }
-        getRepositories(target).add(repository)
+        (sdkRepositories.get(target)
+            ?: throw IllegalStateException("Unknown repository target $target")).add(repository)
         flush()
     }
 
@@ -151,7 +156,9 @@ class RepositoryManagerImpl : RepositoryManager {
 
     override fun buildMavenSettingsFile() {
         val settings = xml("settings") {
-            "localRepository" { -sdkSettings.getProperty("mvn-local-repo") }
+            "localRepository" {
+                -sdkSettings.sdkHome.resolve(sdkSettings["mvn-local-repo"]).toString()
+            }
             "profiles" {
                 "profile" {
                     "id" { -RepositoryTarget.SOURCE.getId() }

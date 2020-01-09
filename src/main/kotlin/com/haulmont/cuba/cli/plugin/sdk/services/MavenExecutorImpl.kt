@@ -32,7 +32,13 @@ class MavenExecutorImpl : MavenExecutor {
         val settingsFile = repositoryManager.mvnSettingFile()
         val cliCommandsList = ArrayList(
             arrayOf(
-                Path.of(sdkSettings.getProperty("mvn-install-path")).resolve("bin").resolve("mvn.cmd").toString(),
+                sdkSettings.sdkHome.resolve(
+                    Path.of(
+                        sdkSettings["mvn-install-path"],
+                        "bin",
+                        "mvn.cmd"
+                    )
+                ).toString(),
                 command,
                 "-s",
                 "\"$settingsFile\"",

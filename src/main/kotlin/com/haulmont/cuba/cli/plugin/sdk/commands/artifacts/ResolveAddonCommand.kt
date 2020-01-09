@@ -24,7 +24,7 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 class ResolveAddonCommand : BaseResolveCommand() {
 
     @Parameter(description = "Addon name and version <name>:<version> or in full coordinates format <group>:<name>:<version>")
-    private var addonNameVersion: String? = null
+    var addonNameVersion: String? = null
 
     override fun createSearchContext(): Component? {
         return addonNameVersion?.resolveAddonCoordinates() ?: fail(messages["unknownAddon"].format(addonNameVersion))

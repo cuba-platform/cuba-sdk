@@ -19,6 +19,7 @@ package com.haulmont.cuba.cli.plugin.sdk.commands.repository
 import com.beust.jcommander.Parameters
 import com.haulmont.cuba.cli.commands.AbstractCommand
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
+import com.haulmont.cuba.cli.green
 import com.haulmont.cuba.cli.localMessages
 import com.haulmont.cuba.cli.plugin.sdk.dto.Authentication
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
@@ -68,7 +69,7 @@ open class AddRepositoryCommand : AbstractCommand() {
             repositoryName = repositoryName ?: ""
         )
         repositoryManager.addRepository(repository, target)
-        printWriter.println(messages["repository.created"])
+        printWriter.println(messages["repository.created"].green())
     }
 
     private fun QuestionsList.askRepositorySettings() {

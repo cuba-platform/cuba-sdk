@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Haulmont.
+ * Copyright (c) 2008-2020 Haulmont.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,11 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.services
 
-import java.nio.file.Path
+import com.haulmont.cuba.cli.plugin.sdk.dto.MarketplaceAddon
 
-interface SdkSettingsHolder {
+interface ComponentVersionManager {
 
-    val sdkHome: Path
+    fun addons(): List<MarketplaceAddon>
 
-    fun getApplicationProperty(property: String): String
-
-    fun getProperty(property: String): String
-
-    fun setProperty(property: String, value: String)
-
-    fun flushAppProperties()
-
-    fun sdkConfigured(): Boolean
-
-    operator fun get(property: String): String = getProperty(property)
-    operator fun set(property: String, value: String) = setProperty(property, value)
+    fun load(loadCompletedFun: (addons: List<MarketplaceAddon>) -> Unit)
 }

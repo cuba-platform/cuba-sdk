@@ -14,14 +14,39 @@
 // * limitations under the License.
 // */
 //
-//package com.haulmont.cuba.cli.plugin.sdk.scripts
-//
-//import org.sonatype.nexus.blobstore.api.BlobStoreManager
-//import org.sonatype.nexus.repository.storage.WritePolicy
-//import org.sonatype.nexus.repository.maven.VersionPolicy
-//import org.sonatype.nexus.repository.maven.LayoutPolicy
-//
-//repository.createMavenHosted('private')
-//
-//repository.createMavenHosted('private-again', BlobStoreManager.DEFAULT_BLOBSTORE_NAME, true, VersionPolicy.RELEASE,
-//        WritePolicy.ALLOW_ONCE, LayoutPolicy.STRICT)
+package com.haulmont.cuba.cli.plugin.sdk.scripts
+
+import groovy.json.JsonSlurper
+import org.sonatype.nexus.blobstore.api.BlobStoreManager
+import org.sonatype.nexus.repository.maven.LayoutPolicy
+import org.sonatype.nexus.repository.maven.VersionPolicy
+import org.sonatype.nexus.repository.storage.WritePolicy
+
+def sdkConfig = new JsonSlurper().parseText(args)
+
+def login = sdkConfig.login
+def password = sdkConfig.password
+def repoName = sdkConfig.repoName
+
+security.setAnonymousAccess(false)
+log.info('Anonymous access disabled')
+
+def user = security.getSecuritySystem().getUser(login)
+if (user == null) {
+    security.addUser(login, login, '', null, true, password, ['nx-admin'])
+    log.info("User $login created")
+} else {
+    security.getSecuritySystem().changePassword(login, password)
+    log.info("User $login updated")
+}
+
+if (repository.getRepositoryManager().get(repoName) == null) {
+    repository.createMavenHosted(repoName, BlobStoreManager.DEFAULT_BLOBSTORE_NAME, true, VersionPolicy.MIXED,
+            WritePolicy.ALLOW, LayoutPolicy.STRICT)
+
+    log.info("Repository $repoName created")
+} else {
+    log.info("Repository $repoName already created")
+}
+
+return groovy.json.JsonOutput.toJson([result: 'SDK configuration completed'])

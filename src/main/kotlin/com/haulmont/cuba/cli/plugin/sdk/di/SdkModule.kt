@@ -55,6 +55,10 @@ private val sdkModule = Kodein.Module {
     bind<RepositoryManager>() with singleton {
         RepositoryManagerImpl()
     }
+
+    bind<ComponentVersionManager>() with singleton {
+        ComponentVersionManagerImpl()
+    }
 }
 
 internal val sdkKodein = Kodein {

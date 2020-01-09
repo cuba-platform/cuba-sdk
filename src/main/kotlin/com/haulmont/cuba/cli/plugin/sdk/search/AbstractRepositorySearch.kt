@@ -18,13 +18,12 @@ package com.haulmont.cuba.cli.plugin.sdk.search
 
 import com.github.kittinunf.fuel.core.Headers
 import com.github.kittinunf.fuel.core.Request
-import com.github.kittinunf.fuel.core.extensions.authentication
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.json.FuelJson
 import com.github.kittinunf.fuel.json.responseJson
-import com.haulmont.cuba.cli.plugin.sdk.dto.Authentication
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
+import com.haulmont.cuba.cli.plugin.sdk.utils.authorizeIfRequired
 import java.util.logging.Logger
 
 abstract class AbstractRepositorySearch : RepositorySearch {
@@ -42,6 +41,12 @@ abstract class AbstractRepositorySearch : RepositorySearch {
         val result = createSearchRequest(repository.url, component)
             .responseJson()
             .third
+        val (data, error) = result
+
+        if (error != null) {
+            log.severe("error: ${error}")
+            return null
+        }
 
         result.fold(
             success = {
@@ -66,14 +71,6 @@ abstract class AbstractRepositorySearch : RepositorySearch {
             .header(Headers.CONTENT_TYPE, "application/json")
             .header(Headers.ACCEPT, "application/json")
             .header(Headers.CACHE_CONTROL, "no-cache")
-    }
-
-    fun Request.authorizeIfRequired(repository: Repository): Request {
-        if (repository.authentication != null) {
-            val authentication: Authentication = repository.authentication
-            this.authentication().basic(authentication.login, authentication.password)
-        }
-        return this
     }
 
     fun componentAlreadyExists(componentsList: Collection<Component>, toAdd: Component): Boolean {

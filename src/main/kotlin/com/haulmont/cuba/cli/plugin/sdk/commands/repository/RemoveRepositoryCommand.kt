@@ -20,6 +20,7 @@ import com.beust.jcommander.Parameter
 import com.beust.jcommander.Parameters
 import com.haulmont.cuba.cli.commands.AbstractCommand
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
+import com.haulmont.cuba.cli.green
 import com.haulmont.cuba.cli.localMessages
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
 import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
@@ -53,7 +54,7 @@ open class RemoveRepositoryCommand : AbstractCommand() {
     private fun removeRepository(answers: Answers) {
         val target = target ?: RepositoryTarget.getTarget(answers["target"] as String)
         name?.let { repositoryManager.removeRepository(it, target) }
-        printWriter.println(messages["repository.removed"])
+        printWriter.println(messages["repository.removed"].green())
     }
 
     private fun QuestionsList.askRepositorySettings() {

@@ -17,8 +17,9 @@
 package com.haulmont.cuba.cli.plugin.sdk.services
 
 import com.google.gson.Gson
-import com.haulmont.cuba.cli.plugin.sdk.SdkPlugin
+import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.dto.SdkMetadata
+import org.kodein.di.generic.instance
 import java.io.FileInputStream
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
@@ -26,7 +27,11 @@ import java.nio.file.StandardOpenOption
 
 class MetadataHolderImpl : MetadataHolder {
 
-    val SDK_METADATA_PATH = SdkPlugin.SDK_PATH.resolve("sdk.metadata")
+    private val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
+
+    val SDK_METADATA_PATH by lazy {
+        sdkSettings.sdkHome.resolve("sdk.metadata")
+    }
 
     private val sdkMetadata by lazy {
         if (Files.exists(SDK_METADATA_PATH)) {
@@ -42,7 +47,7 @@ class MetadataHolderImpl : MetadataHolder {
 
     private fun initMetadata(): SdkMetadata {
         return SdkMetadata().also {
-//            it.repositories.add(
+            //            it.repositories.add(
 //                Repository(
 //                    type = "bintray",
 //                    url = "https://api.bintray.com/search/packages/maven?",

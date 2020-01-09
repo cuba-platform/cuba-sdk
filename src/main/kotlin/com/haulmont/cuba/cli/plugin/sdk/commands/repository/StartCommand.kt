@@ -20,8 +20,10 @@ import com.beust.jcommander.Parameters
 import com.github.kittinunf.fuel.httpHead
 import com.haulmont.cuba.cli.commands.AbstractCommand
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
+import com.haulmont.cuba.cli.green
 import com.haulmont.cuba.cli.localMessages
 import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
+import com.haulmont.cuba.cli.red
 import org.kodein.di.generic.instance
 import java.io.PrintWriter
 import java.nio.file.Path
@@ -34,7 +36,7 @@ class StartCommand : AbstractCommand() {
     private val messages by localMessages()
 
     override fun run() {
-        if (sdkSettings.getProperty("repoType") != "local") {
+        if (sdkSettings["repoType"] != "local") {
             printWriter.println(messages["start.sdkConfiguredForRemote"])
             return
         }
@@ -56,9 +58,9 @@ class StartCommand : AbstractCommand() {
         }
         printWriter.println()
         if (!repositoryStarted()) {
-            printWriter.println(messages["start.repositoryNotStarted"])
+            printWriter.println(messages["start.repositoryNotStarted"].red())
         } else {
-            printWriter.println(messages["start.repositoryStarted"])
+            printWriter.println(messages["start.repositoryStarted"].format(sdkSettings["local-repo-url"]).green())
         }
     }
 
@@ -84,7 +86,7 @@ class StartCommand : AbstractCommand() {
         Runtime.getRuntime().exec(
             arrayOf(
                 "cmd", "/c", "start", "\"cuba-sdk-nexus\"", "cmd", "/k",
-                Path.of(sdkSettings.getProperty("install-path"))
+                Path.of(sdkSettings["repository-install-path"])
                     .resolve("nexus3")
                     .resolve("bin")
                     .resolve("nexus").toString(),
@@ -94,7 +96,9 @@ class StartCommand : AbstractCommand() {
     }
 
     private fun repositoryStarted(): Boolean {
-        val (_, response, _) = sdkSettings.getProperty("url").httpHead().response()
+        val (_, response, _) = sdkSettings["local-repo-url"]
+            .httpHead()
+            .response()
         return response.statusCode == 200
     }
 

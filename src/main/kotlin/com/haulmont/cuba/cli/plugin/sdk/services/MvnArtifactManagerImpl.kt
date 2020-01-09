@@ -17,13 +17,13 @@
 package com.haulmont.cuba.cli.plugin.sdk.services
 
 import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.core.extensions.authentication
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.generation.VelocityHelper
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
 import com.haulmont.cuba.cli.plugin.sdk.dto.MvnArtifact
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
+import com.haulmont.cuba.cli.plugin.sdk.utils.authorizeIfRequired
 import org.apache.maven.model.Model
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
 import org.kodein.di.generic.instance
@@ -45,7 +45,7 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
     private val repositoryManager: RepositoryManager by sdkKodein.instance()
     internal val mavenExecutor: MavenExecutor by sdkKodein.instance()
 
-    private fun repoUrl(endpoint: String) = sdkSettings.getProperty("sdk-repo-url") + endpoint
+    private fun repoUrl(repository: Repository, endpoint: String) = repository.url + endpoint
 
     private fun componentUrl(
         artifact: MvnArtifact,
@@ -102,7 +102,7 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
     }
 
     private fun getArtifactFile(artifact: MvnArtifact, classifier: Classifier): Path {
-        var pomDirectory: Path = Path.of(sdkSettings.getProperty("mvn-local-repo"))
+        var pomDirectory: Path = sdkSettings.sdkHome.resolve(sdkSettings["mvn-local-repo"])
         for (groupPart in artifact.groupId.split(".")) {
             pomDirectory = pomDirectory.resolve(groupPart)
         }
@@ -124,7 +124,7 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
         val mainClassifier = artifact.mainClassifier()
         log.info("Uploading: ${artifact.mvnCoordinates(mainClassifier)}")
 
-        if (alreadyUploaded(artifact)) {
+        if (alreadyUploaded(repository, artifact)) {
             log.info("${artifact.mvnCoordinates(mainClassifier)} already uploaded")
             return
         }
@@ -200,9 +200,9 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
         }
     }
 
-    private fun alreadyUploaded(artifact: MvnArtifact): Boolean {
+    private fun alreadyUploaded(repository: Repository, artifact: MvnArtifact): Boolean {
         for (classifier in artifact.classifiers) {
-            if (!alreadyUploaded(artifact, classifier)) {
+            if (!alreadyUploaded(repository, artifact, classifier)) {
                 return false
             }
         }
@@ -210,13 +210,14 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
     }
 
     private fun alreadyUploaded(
+        repository: Repository,
         artifact: MvnArtifact,
         classifier: Classifier
     ): Boolean {
-        val (_, response, _) = Fuel.head(repoUrl(componentUrl(artifact, classifier)))
-            .authentication()
-            .basic(sdkSettings.getProperty("sdk-repo-login"), sdkSettings.getProperty("sdk-repo-password"))
-            .response()
+        val (_, response, _) =
+            Fuel.head(repoUrl(repository, componentUrl(artifact, classifier)))
+                .authorizeIfRequired(repository)
+                .response()
         return response.statusCode == 200
     }
 

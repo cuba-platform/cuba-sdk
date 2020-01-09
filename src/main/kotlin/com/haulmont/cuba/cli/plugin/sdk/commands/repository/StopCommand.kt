@@ -19,6 +19,7 @@ package com.haulmont.cuba.cli.plugin.sdk.commands.repository
 import com.beust.jcommander.Parameters
 import com.haulmont.cuba.cli.commands.AbstractCommand
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
+import com.haulmont.cuba.cli.green
 import com.haulmont.cuba.cli.localMessages
 import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
 import org.kodein.di.generic.instance
@@ -35,7 +36,7 @@ class StopCommand : AbstractCommand() {
         stopRepository()
         Thread.sleep(500)
         stopRepository()
-        printWriter.println(messages["stop.repositoryStopped"])
+        printWriter.println(messages["stop.repositoryStopped"].green())
     }
 
     private fun stopRepository() {
