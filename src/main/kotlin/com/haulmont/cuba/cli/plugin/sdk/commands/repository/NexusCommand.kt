@@ -51,4 +51,13 @@ abstract class NexusCommand : AbstractCommand() {
         Thread.sleep(period)
         printWriter.print(msg)
     }
+
+    internal fun waitTask(msg: String, waitConditionFun: () -> Boolean) {
+        printProgressMessage(msg)
+        var i = 0
+        while (waitConditionFun()) {
+            printProgressMessage(msg, i++)
+        }
+        printWriter.println()
+    }
 }

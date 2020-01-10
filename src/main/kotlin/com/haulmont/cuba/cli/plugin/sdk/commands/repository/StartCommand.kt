@@ -33,13 +33,9 @@ class StartCommand : NexusCommand() {
             return
         }
         startRepository()
-        var i = 0
-        val msg = messages["start.startingRepository"]
-        printProgressMessage(msg)
-        while (!repositoryStarted() && isRepositoryStarting()) {
-            printProgressMessage(msg, i++)
+        waitTask(messages["start.startingRepository"]) {
+            !repositoryStarted() && isRepositoryStarting()
         }
-        printWriter.println()
         if (!repositoryStarted()) {
             printWriter.println(messages["start.repositoryNotStarted"].red())
         } else {

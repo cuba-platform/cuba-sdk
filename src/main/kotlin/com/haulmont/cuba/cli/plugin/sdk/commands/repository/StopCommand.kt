@@ -29,13 +29,9 @@ class StopCommand : NexusCommand() {
             return
         }
         nexusManager.stopRepository()
-        var i = 0
-        val msg = messages["stop.stoppingRepository"]
-        printProgressMessage(msg)
-        while (repositoryStarted() && nexusManager.isStarted()) {
-            printProgressMessage(msg, i++)
+        waitTask(messages["stop.stoppingRepository"]) {
+            repositoryStarted() && nexusManager.isStarted()
         }
-        printWriter.println()
         if (!repositoryStarted()) {
             printWriter.println(messages["stop.repositoryStopped"].green())
         } else {
