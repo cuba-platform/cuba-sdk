@@ -21,6 +21,7 @@ import com.haulmont.cuba.cli.plugin.sdk.SdkPlugin
 import org.kodein.di.generic.instance
 import java.io.FileInputStream
 import java.io.FileWriter
+import java.io.InputStream
 import java.io.InputStreamReader
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
@@ -40,40 +41,30 @@ class SdkSettingsHolderImpl : SdkSettingsHolder {
         ).resolve("sdk.properties")
     }
 
-    private val applicationProperties by lazy {
-        val properties = Properties()
-
-        val propertiesInputStream = SdkPlugin::class.java.getResourceAsStream("application.properties")
-        propertiesInputStream.use {
-            val inputStreamReader = java.io.InputStreamReader(propertiesInputStream, StandardCharsets.UTF_8)
-            properties.load(inputStreamReader)
-        }
-
-        properties
+    private val sdkProperties by lazy {
+        createSdkPropertiesFileIfNotExists()
+        readProperties(
+            FileInputStream(SDK_PROPERTIES_PATH.toString()),
+            readProperties(SdkPlugin::class.java.getResourceAsStream("application.properties"))
+        )
     }
 
-    private val sdkProperties by lazy {
-        val properties = Properties()
-
-        createSdkPropertiesFileIfNotExists()
-
-        val propertiesInputStream = FileInputStream(SDK_PROPERTIES_PATH.toString())
+    private fun readProperties(
+        propertiesInputStream: InputStream,
+        defaultProperties: Properties = Properties()
+    ): Properties {
+        val properties = Properties(defaultProperties)
         propertiesInputStream.use {
             val inputStreamReader = InputStreamReader(propertiesInputStream, StandardCharsets.UTF_8)
             properties.load(inputStreamReader)
         }
-
-        properties
+        return properties
     }
 
     override val sdkHome: Path = getSdkPath().also {
         if (!Files.exists(it)) {
             Files.createDirectories(it)
         }
-    }
-
-    override fun getApplicationProperty(property: String): String {
-        return applicationProperties.getProperty(property)
     }
 
     private fun getSdkPath() =
@@ -90,6 +81,10 @@ class SdkSettingsHolderImpl : SdkSettingsHolder {
         return sdkProperties.getProperty(property)
     }
 
+    override fun hasProperty(property: String): Boolean {
+        return sdkProperties[property]!=null
+    }
+
     override fun setProperty(property: String, value: String) {
         sdkProperties.put(property, value)
     }
@@ -100,13 +95,11 @@ class SdkSettingsHolderImpl : SdkSettingsHolder {
         FileWriter(SDK_PROPERTIES_PATH.toString()).use {
             sdkProperties.store(it, "SDK properties")
         }
-
     }
 
     override fun sdkConfigured(): Boolean {
-        return Files.exists(SDK_PROPERTIES_PATH) && sdkProperties.getProperty("repoType") != null
+        return Files.exists(SDK_PROPERTIES_PATH) && sdkProperties.getProperty("repository.type") != null
     }
-
 
     private fun createSdkPropertiesFileIfNotExists() {
         if (!Files.exists(SDK_PROPERTIES_PATH)) {

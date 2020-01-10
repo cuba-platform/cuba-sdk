@@ -19,35 +19,62 @@ package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 import com.beust.jcommander.Parameter
 import com.haulmont.cuba.cli.commands.AbstractCommand
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
+import com.haulmont.cuba.cli.green
 import com.haulmont.cuba.cli.localMessages
+import com.haulmont.cuba.cli.plugin.sdk.commands.CommonSdkParameters
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.ComponentType
+import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 import com.haulmont.cuba.cli.plugin.sdk.services.ComponentManager
+import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
 import com.haulmont.cuba.cli.prompting.ValidationException
 import org.kodein.di.generic.instance
 import java.io.PrintWriter
 
 abstract class BaseComponentCommand : AbstractCommand() {
 
+    @Parameter(names = ["--print-maven"], description = "Print maven output", hidden = true)
+    var printMaven: Boolean = false
+        private set
+
     @Parameter(names = ["--force"], description = "Force resolve and upload component with dependencies", hidden = true)
     var force: Boolean = false
+        private set
+
+    @Parameter(
+        names = ["--parallel"],
+        description = "Resolve component dependencies in parallel",
+        hidden = true
+    )
+    var parallel: Boolean = true
         private set
 
     internal val PROGRESS_LINE_LENGHT = 110
 
     internal val componentManager: ComponentManager by sdkKodein.instance()
 
+    internal val repositoryManager: RepositoryManager by sdkKodein.instance()
+
     internal val printWriter: PrintWriter by sdkKodein.instance()
 
     internal val messages by localMessages()
 
+    override fun postExecute() {
+        CommonSdkParameters.reset()
+    }
+
+    override fun preExecute() {
+        CommonSdkParameters.printMaven = printMaven
+        CommonSdkParameters.singleThread = printMaven || !parallel
+    }
+
     abstract fun createSearchContext(): Component?
 
-    internal fun upload(component: Component) {
+    internal fun upload(component: Component, repository: Repository?) {
         printWriter.println()
         printWriter.println("Uploading dependencies...")
-        componentManager.upload(component) { artifact, uploaded, total ->
+        componentManager.upload(component, repository) { artifact, uploaded, total ->
             printWriter.print(
                 printProgress(
                     messages["dependencyUploadProgress"].format(artifact.mvnCoordinates()),
@@ -88,7 +115,7 @@ abstract class BaseComponentCommand : AbstractCommand() {
     }
 
     internal fun printProgress(message: String, progress: Float): String {
-        val progressStr = messages["progress"].format(progress)
+        val progressStr = messages["progress"].format(progress).green()
         return "\r" + message.padEnd(PROGRESS_LINE_LENGHT - progressStr.length) + progressStr;
     }
 

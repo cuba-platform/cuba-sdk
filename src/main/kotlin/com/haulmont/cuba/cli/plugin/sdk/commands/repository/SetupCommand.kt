@@ -45,7 +45,7 @@ class SetupCommand : AbstractCommand() {
     private val messages by localMessages()
 
     val SDK_LOCAL_REPOSITORY_URL: String by lazy {
-        sdkSettings.getApplicationProperty("repositoryUrl")
+        sdkSettings["template.repositoryUrl"]
     }
 
 
@@ -57,7 +57,7 @@ class SetupCommand : AbstractCommand() {
 
 
     private fun QuestionsList.askRepositorySettings() {
-        question("repoType", messages["remoteOrLocalQuestionCaption"]) {
+        question("repository.type", messages["remoteOrLocalQuestionCaption"]) {
             validate {
                 value.toLowerCase() == "remote" || value.toLowerCase() == "local"
             }
@@ -66,7 +66,7 @@ class SetupCommand : AbstractCommand() {
         question("url", messages["remoteRepositoryURLCaption"]) {
             askIf { isRemoteRepository(it) }
         }
-        question("repository-install-path", messages["localRepositoryLocationCaption"]) {
+        question("repository.path", messages["localRepositoryLocationCaption"]) {
             default(sdkSettings.sdkHome.resolve("repository").toString())
             askIf { !isRemoteRepository(it) }
         }
@@ -92,18 +92,18 @@ class SetupCommand : AbstractCommand() {
     private fun repositoryPathIsEmpty(answers: Map<String, Answer>): Boolean {
         return !Files.exists(
             Path.of(
-                answers["repository-install-path"] as String
+                answers["repository.path"] as String
             )
         )
     }
 
     private fun mavenPathIsEmpty(answers: Map<String, Answer>): Boolean {
         return !Files.exists(
-            sdkSettings.sdkHome.resolve(sdkSettings["mvn-install-path"])
+            sdkSettings.sdkHome.resolve(sdkSettings["mvn.path"])
         )
     }
 
-    private fun isRemoteRepository(it: Answers) = it["repoType"] == "remote"
+    private fun isRemoteRepository(it: Answers) = it["repository.type"] == "remote"
 
     private fun setupRepository(answers: Answers) {
         createSdkDir()
@@ -113,13 +113,14 @@ class SetupCommand : AbstractCommand() {
             downloadAndConfigureNexus(answers)
         }
         addTargetSdkRepository(answers)
+        printWriter.println(messages["setup.sdkConfigured"].green())
     }
 
     private fun downloadAndConfigureMaven(answers: Answers) {
         downloadMaven(answers).also {
             if (mavenPathIsEmpty(answers)) {
                 Files.createDirectory(
-                    sdkSettings.sdkHome.resolve(sdkSettings["mvn-install-path"])
+                    sdkSettings.sdkHome.resolve(sdkSettings["mvn.path"])
                 )
                 unzipMaven(
                     answers, it
@@ -133,11 +134,11 @@ class SetupCommand : AbstractCommand() {
     private fun downloadAndConfigureNexus(answers: Answers) {
         downloadRepository(answers).also {
             if (repositoryPathIsEmpty(answers)) {
-                val installPath = answers["repository-install-path"] as String
+                val installPath = answers["repository.path"] as String
                 Files.createDirectory(Path.of(installPath))
                 unzipRepository(answers, it)
                 Files.move(
-                    Path.of(installPath).resolve("nexus-" + sdkSettings.getApplicationProperty("nexusVersion")),
+                    Path.of(installPath).resolve("nexus-" + sdkSettings["nexus.version"]),
                     Path.of(installPath).resolve("nexus3")
                 )
             }
@@ -154,7 +155,7 @@ class SetupCommand : AbstractCommand() {
         printWriter.println(messages["unzipMavenCaption"])
         FileUtils.unzip(
             it,
-            sdkSettings.sdkHome.resolve(sdkSettings["mvn-install-path"]),
+            sdkSettings.sdkHome.resolve(sdkSettings["mvn.path"]),
             true
         )
     }
@@ -177,10 +178,10 @@ class SetupCommand : AbstractCommand() {
         return archive
     }
 
-    private fun mavenDownloadLink() = sdkSettings.getApplicationProperty("mavenDownloadLink")
+    private fun mavenDownloadLink() = sdkSettings["maven.downloadLink"]
         .format(
-            sdkSettings.getApplicationProperty("mavenVersion"),
-            sdkSettings.getApplicationProperty("mavenVersion")
+            sdkSettings["maven.version"],
+            sdkSettings["maven.version"]
         )
 
     private fun addTargetSdkRepository(answers: Answers) {
@@ -205,7 +206,7 @@ class SetupCommand : AbstractCommand() {
             name = repositoryName,
             type = repositoryType,
             url = if (!isRemoteRepository(answers)) {
-                sdkSettings["local-repo-url"] + "repository/${repositoryName}/"
+                sdkSettings["repository.url"] + "repository/${repositoryName}/"
             } else {
                 answers["url"] as String
             },
@@ -229,11 +230,11 @@ class SetupCommand : AbstractCommand() {
     private fun configureNexus(answers: Answers) {
         printWriter.println(messages["setup.applyRepositoryCredentials"])
         val adminPassword =
-            Path.of(answers["repository-install-path"] as String, "sonatype-work", "nexus3", "admin.password")
+            Path.of(answers["repository.path"] as String, "sonatype-work", "nexus3", "admin.password")
         if (Files.exists(adminPassword)) {
             runNexusConfigurationScript(answers, "admin", adminPassword.toFile().readText(StandardCharsets.UTF_8))
         } else {
-            runNexusConfigurationScript(answers, sdkSettings["login"], sdkSettings["password"])
+            runNexusConfigurationScript(answers, sdkSettings["repository.login"], sdkSettings["repository.password"])
         }
         persistSdkCredentials(answers)
         if (Files.exists(adminPassword)) {
@@ -253,7 +254,7 @@ class SetupCommand : AbstractCommand() {
     }
 
     private fun dropNexusScript(answers: Map<String, Answer>) {
-        "${sdkSettings["local-repo-url"]}service/rest/v1/script/sdk-init"
+        "${sdkSettings["repository.url"]}service/rest/v1/script/sdk-init"
             .httpDelete()
             .authentication()
             .basic(answers["login"] as String, answers["password"] as String)
@@ -268,7 +269,7 @@ class SetupCommand : AbstractCommand() {
             .put("content", script)
         val payload = jsonObject.toString()
         val (_, response, _) =
-            "${sdkSettings["local-repo-url"]}service/rest/v1/script"
+            "${sdkSettings["repository.url"]}service/rest/v1/script"
                 .httpPost()
                 .authentication()
                 .basic(login, password)
@@ -286,7 +287,7 @@ class SetupCommand : AbstractCommand() {
 
     private fun runNexusScript(answers: Answers, login: String, password: String): Boolean {
         val (_, response, _) =
-            "${sdkSettings["local-repo-url"]}service/rest/v1/script/sdk-init/run"
+            "${sdkSettings["repository.url"]}service/rest/v1/script/sdk-init/run"
                 .httpPost()
                 .authentication()
                 .basic(login, password)
@@ -311,15 +312,15 @@ class SetupCommand : AbstractCommand() {
     }
 
     private fun persistSdkCredentials(answers: Answers) {
-        sdkSettings["login"] = answers["login"] as String
-        sdkSettings["password"] = answers["password"] as String
+        sdkSettings["repository.login"] = answers["login"] as String
+        sdkSettings["repository.password"] = answers["password"] as String
         sdkSettings.flushAppProperties()
     }
 
     private fun configureNexusProperties(answers: Map<String, Answer>) {
         printWriter.println(messages["setup.configureNexus"])
         val nexusConfig =
-            Path.of(answers["repository-install-path"] as String, "sonatype-work", "nexus3", "etc", "nexus.properties")
+            Path.of(answers["repository.path"] as String, "sonatype-work", "nexus3", "etc", "nexus.properties")
                 .also {
                     if (!Files.exists(it)) {
                         Files.createDirectories(it.parent)
@@ -341,8 +342,8 @@ class SetupCommand : AbstractCommand() {
     }
 
     private fun unzipRepository(answers: Answers, it: Path) {
-        printWriter.println(messages["unzipRepositoryCaption"].format(answers["repository-install-path"]))
-        FileUtils.unzip(it, Path.of((answers["repository-install-path"]) as String))
+        printWriter.println(messages["unzipRepositoryCaption"].format(answers["repository.path"]))
+        FileUtils.unzip(it, Path.of((answers["repository.path"]) as String))
     }
 
     private fun needToInstallRepository(answers: Map<String, Answer>): Boolean {
@@ -356,13 +357,13 @@ class SetupCommand : AbstractCommand() {
 
     private fun createSdkRepoSettingsFile(answers: Answers) {
         if (!isRemoteRepository(answers)) {
-            sdkSettings["local-repo-url"] = SDK_LOCAL_REPOSITORY_URL.format(answers["port"])
+            sdkSettings["repository.url"] = SDK_LOCAL_REPOSITORY_URL.format(answers["port"])
         }
-        sdkSettings["repoType"] = answers["repoType"] as String
-        sdkSettings["repository-install-path"] = answers["repository-install-path"] as String
-        sdkSettings["sdk-home"] = sdkSettings.sdkHome.toString()
-        sdkSettings["mvn-local-repo"] = ".m2"
-        sdkSettings["mvn-install-path"] = "mvn"
+        sdkSettings["repository.type"] = answers["repository.type"] as String
+        sdkSettings["repository.path"] = answers["repository.path"] as String
+        sdkSettings["sdk.home"] = sdkSettings.sdkHome.toString()
+        sdkSettings["mvn.local.repo"] = sdkSettings.sdkHome.resolve(".m2").toString()
+        sdkSettings["mvn.path"] = sdkSettings.sdkHome.resolve("mvn").toString()
         sdkSettings.flushAppProperties()
     }
 
@@ -390,8 +391,8 @@ class SetupCommand : AbstractCommand() {
     }
 
     private fun nexusDownloadLink(): String {
-        val dowloadLink = sdkSettings.getApplicationProperty("nexusDownloadLink_win64")
-        val nexusVersion = sdkSettings.getApplicationProperty("nexusVersion")
+        val dowloadLink = sdkSettings["nexus.downloadLink.win64"]
+        val nexusVersion = sdkSettings["nexus.version"]
         return dowloadLink.format(nexusVersion)
     }
 

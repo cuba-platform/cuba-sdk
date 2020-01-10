@@ -72,7 +72,7 @@ class RepositoryManagerImpl : RepositoryManager {
                 Repository(
                     name = "local",
                     type = RepositoryType.LOCAL,
-                    url = "file:///" + Paths.get(System.getProperty("user.home")).resolve(".m2").toString()
+                    url = "file:///" + Paths.get(System.getProperty("user.home")).resolve(".m2").resolve("repository").toString()
                 ),
                 Repository(
                     name = "cuba-bintray",
@@ -91,7 +91,7 @@ class RepositoryManagerImpl : RepositoryManager {
                 Repository(
                     name = "local",
                     type = RepositoryType.LOCAL,
-                    url = "file:///" + Paths.get(System.getProperty("user.home")).resolve(".m2").toString()
+                    url = "file:///" + Paths.get(System.getProperty("user.home")).resolve(".m2").resolve("repository").toString()
                 ),
                 Repository(
                     name = "cuba-bintray",
@@ -159,7 +159,7 @@ class RepositoryManagerImpl : RepositoryManager {
     override fun buildMavenSettingsFile() {
         val settings = xml("settings") {
             "localRepository" {
-                -sdkSettings.sdkHome.resolve(sdkSettings["mvn-local-repo"]).toString()
+                -sdkSettings["mvn.local.repo"]
             }
             "profiles" {
                 "profile" {
@@ -167,7 +167,8 @@ class RepositoryManagerImpl : RepositoryManager {
                     "activation" {
                         "activeByDefault" { -"true" }
                     }
-                    this.addNode(addRepositories(RepositoryTarget.SOURCE))
+                    this.addNode(addRepositories("repositories", "repository", RepositoryTarget.SOURCE))
+                    this.addNode(addRepositories("pluginRepositories", "pluginRepository", RepositoryTarget.SOURCE))
                 }
                 "profile" {
                     "id" { -RepositoryTarget.TARGET.getId() }
@@ -178,7 +179,7 @@ class RepositoryManagerImpl : RepositoryManager {
                         "downloadSources" { -"true" }
                         "downloadJavadocs" { -"true" }
                     }
-                    this.addNode(addRepositories(RepositoryTarget.TARGET))
+                    this.addNode(addRepositories("repositories", "repository", RepositoryTarget.TARGET))
                 }
             }
             "servers" {
@@ -207,18 +208,14 @@ class RepositoryManagerImpl : RepositoryManager {
         }
     }
 
-    private fun addRepositories(target: RepositoryTarget): Node = xml("repositories") {
-        getRepositories(target).forEach {
-            "repository"{
-                "id" { -getRepositoryId(target, it.name) }
-                "name" { -it.name }
-                "url" { -it.url }
-            }
-            "pluginRepository"{
-                "id" { -getRepositoryId(target, it.name) }
-                "name" { -it.name }
-                "url" { -it.url }
+    private fun addRepositories(rootEl: String, elementName: String, target: RepositoryTarget): Node =
+        xml(rootEl) {
+            getRepositories(target).forEach {
+                elementName {
+                    "id" { -getRepositoryId(target, it.name) }
+                    "name" { -it.name }
+                    "url" { -it.url }
+                }
             }
         }
-    }
 }

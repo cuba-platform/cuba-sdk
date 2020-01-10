@@ -19,7 +19,6 @@ package com.haulmont.cuba.cli.plugin.sdk.commands
 import com.beust.jcommander.Parameters
 import com.haulmont.cuba.cli.commands.AbstractCommand
 import org.kodein.di.generic.instance
-import java.io.File
 import java.io.PrintWriter
 
 @Parameters(commandDescription = "CUBA SDK")
@@ -28,6 +27,6 @@ class SdkCommand : AbstractCommand() {
     private val printWriter: PrintWriter by kodein.instance()
 
     override fun run() {
-        printWriter.println("hello")
+        printWriter.println("Please use SDK subcommands.")
     }
 }

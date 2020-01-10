@@ -19,12 +19,16 @@ package com.haulmont.cuba.cli.plugin.sdk.services
 import com.github.kittinunf.fuel.Fuel
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.generation.VelocityHelper
-import com.haulmont.cuba.cli.plugin.sdk.dto.*
+import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
+import com.haulmont.cuba.cli.plugin.sdk.dto.MvnArtifact
+import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
+import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
 import com.haulmont.cuba.cli.plugin.sdk.utils.authorizeIfRequired
 import org.apache.maven.model.Model
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
 import org.kodein.di.generic.instance
-import java.io.*
+import java.io.FileReader
+import java.io.PrintWriter
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
@@ -54,32 +58,16 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
         return "$groupUrl/$name/$version/$name-$version.${classifier.extension}"
     }
 
-    fun InputStream.read(handleResult: (m: String?) -> Unit) {
-        InputStreamReader(this).use {
-            BufferedReader(it).use {
-                var s: String?
-                while (it.readLine().also { s = it } != null) {
-                    handleResult(s)
-                }
-            }
-        }
-    }
-
     override fun readPom(artifact: MvnArtifact, classifier: Classifier): Model? {
         log.info("Read POM: ${artifact.mvnCoordinates(classifier)}")
         val pomFile = getArtifactPomFile(artifact, classifier)
 
         if (!Files.exists(pomFile)) {
-            val commandResult = mavenExecutor.mvn(
+            mavenExecutor.mvn(
                 RepositoryTarget.SOURCE.getId(),
                 "org.apache.maven.plugins:maven-dependency-plugin:3.1.1:get",
                 arrayListOf("-Dartifact=${artifact.mvnCoordinates(classifier)}")
             )
-            commandResult.result.read {
-                if (it != null) {
-                    printMvnResultToCommandLine(it)
-                }
-            }
         }
 
         if (Files.exists(pomFile)) {
@@ -92,14 +80,8 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
 
     }
 
-    private fun printMvnResultToCommandLine(it: String?): String? {
-        val s = if (it != null && it.startsWith("Progress ")) "\r" + it else it + "\n"
-        log.fine("mvn:$s")
-        return s
-    }
-
     private fun getArtifactFile(artifact: MvnArtifact, classifier: Classifier): Path {
-        var pomDirectory: Path = sdkSettings.sdkHome.resolve(sdkSettings["mvn-local-repo"])
+        var pomDirectory: Path = Path.of(sdkSettings["mvn.local.repo"])
         for (groupPart in artifact.groupId.split(".")) {
             pomDirectory = pomDirectory.resolve(groupPart)
         }
@@ -111,17 +93,8 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
         return pomDirectory.resolve("${artifact.artifactId}-${artifact.version}${classifierSuffix}.${classifier.extension}")
     }
 
-    override fun upload(artifact: MvnArtifact) {
-        for (repository in repositoryManager.getRepositories(RepositoryTarget.TARGET)
-            .filter {
-                it.type in listOf(
-                    RepositoryType.NEXUS3,
-                    RepositoryType.NEXUS2,
-                    RepositoryType.BINTRAY
-                )
-            }) {
+    override fun upload(repository: Repository,artifact: MvnArtifact) {
             uploadToRepository(repository, artifact)
-        }
     }
 
     private fun uploadToRepository(repository: Repository, artifact: MvnArtifact) {
@@ -194,7 +167,9 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
                     commands
                 )
 
-                handleMvnResult(commandResult, "${artifactFile} upload failed.")
+                if (commandResult.contains("BUILD FAILURE")) {
+                    throw IllegalStateException("${artifactFile} upload failed. \n$commandResult")
+                }
             } finally {
                 Files.delete(tempCopy)
                 log.fine("Deleted temp file for ${artifact.mvnCoordinates(mainClassifier)}: ${tempCopy}")
@@ -252,67 +227,39 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
         val artifacts = ArrayList<MvnArtifact>()
         var artifactList = false
 
-        val commandOutput = StringBuilder()
-        commandResult.result.read {
-            if (it != null) {
-                commandOutput.append(printMvnResultToCommandLine(it))
+        commandResult.split("\n").forEach {
+            if (it.trim() == "[INFO]") {
+                artifactList = false
+            }
 
-                if (it.trim() == "[INFO]") {
-                    artifactList = false
-                }
-
-                if (artifactList) {
-
-                    val dependency = readArtifactFromLine(it)
-                    if (dependency != null) {
-                        log.fine("Read artifact from line \"$it\": $dependency")
-                        artifacts.add(dependency)
-                    }
-                }
-
-                if (it.contains("The following files have been resolved:")) {
-                    artifactList = true
+            if (artifactList) {
+                val dependency = readArtifactFromLine(it)
+                if (dependency != null) {
+                    log.fine("Read artifact from line \"$it\": $dependency")
+                    artifacts.add(dependency)
                 }
             }
+
+            if (it.contains("The following files have been resolved:")) {
+                artifactList = true
+            }
         }
-        if (commandOutput.contains("BUILD FAILURE")) {
-            throw IllegalStateException("Resolve ${artifact.mvnCoordinates(classifier)} failed \n$commandOutput")
+        if (commandResult.contains("BUILD FAILURE")) {
+            throw IllegalStateException("Resolve ${artifact.mvnCoordinates(classifier)} failed \n$commandResult")
         }
 
-        commandResult.error.read { printMvnResultToCommandLine(it) }
         return artifacts
     }
 
     override fun getArtifact(artifact: MvnArtifact, classifier: Classifier) {
         log.info("Get with dependencies ${artifact.mvnCoordinates(classifier)}")
-        val commandResult = mavenExecutor.mvn(
+        mavenExecutor.mvn(
             RepositoryTarget.SOURCE.getId(),
             "org.apache.maven.plugins:maven-dependency-plugin:3.1.1:get",
             arrayListOf(
                 "-Dartifact=${artifact.mvnCoordinates(classifier)}"
             )
         )
-        commandResult.result.read {
-            if (it != null) {
-                printMvnResultToCommandLine(it)
-            }
-        }
-    }
-
-    private fun handleMvnResult(
-        commandResult: MavenExecutor.CommandResult,
-        message: String
-    ) {
-        val commandOutput = StringBuilder()
-        commandResult.result.read {
-            if (it != null) {
-                commandOutput.append(printMvnResultToCommandLine(it))
-            }
-        }
-
-        if (commandOutput.contains("BUILD FAILURE")) {
-            throw IllegalStateException("${message} \n$commandOutput")
-        }
     }
 
     override fun resolveClassifiers(artifact: MvnArtifact) {

@@ -17,6 +17,7 @@
 package com.haulmont.cuba.cli.plugin.sdk.services
 
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
+import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 
 interface ComponentManager {
 
@@ -28,7 +29,7 @@ interface ComponentManager {
 
     fun resolve(component: Component, progress: ResolveProgressCallback? = null)
 
-    fun upload(component: Component, progress: UploadProcessCallback? = null)
+    fun upload(component: Component, repository: Repository?, progress: UploadProcessCallback? = null)
 
     fun register(component: Component)
 }

@@ -36,7 +36,7 @@ class StartCommand : AbstractCommand() {
     private val messages by localMessages()
 
     override fun run() {
-        if (sdkSettings["repoType"] != "local") {
+        if (sdkSettings["repository.type"] != "local") {
             printWriter.println(messages["start.sdkConfiguredForRemote"])
             return
         }
@@ -60,7 +60,7 @@ class StartCommand : AbstractCommand() {
         if (!repositoryStarted()) {
             printWriter.println(messages["start.repositoryNotStarted"].red())
         } else {
-            printWriter.println(messages["start.repositoryStarted"].format(sdkSettings["local-repo-url"]).green())
+            printWriter.println(messages["start.repositoryStarted"].format(sdkSettings["repository.url"]).green())
         }
     }
 
@@ -86,7 +86,7 @@ class StartCommand : AbstractCommand() {
         Runtime.getRuntime().exec(
             arrayOf(
                 "cmd", "/c", "start", "\"cuba-sdk-nexus\"", "cmd", "/k",
-                Path.of(sdkSettings["repository-install-path"])
+                Path.of(sdkSettings["repository.path"])
                     .resolve("nexus3")
                     .resolve("bin")
                     .resolve("nexus").toString(),
@@ -96,7 +96,7 @@ class StartCommand : AbstractCommand() {
     }
 
     private fun repositoryStarted(): Boolean {
-        val (_, response, _) = sdkSettings["local-repo-url"]
+        val (_, response, _) = sdkSettings["repository.url"]
             .httpHead()
             .response()
         return response.statusCode == 200

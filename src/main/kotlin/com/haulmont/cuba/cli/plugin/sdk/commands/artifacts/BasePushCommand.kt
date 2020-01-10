@@ -16,21 +16,42 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
+import com.beust.jcommander.Parameter
+import com.haulmont.cuba.cli.green
+import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
+import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
+import com.haulmont.cuba.cli.red
+
 abstract class BasePushCommand : BaseComponentCommand() {
 
+    @Parameter(
+        names = ["--repo"],
+        description = "Repository",
+        hidden = true
+    )
+    private var repositoryName: String? = null
+
     override fun run() {
+        var repository: Repository? = null
+        if (repositoryName != null) {
+            repository = repositoryManager.getRepository(repositoryName!!, RepositoryTarget.TARGET)
+            if (repository == null) {
+                printWriter.println(messages["repository.unknown"].format(repositoryName).red())
+                return
+            }
+        }
         createSearchContext()?.let {
             if (force || !componentManager.isAlreadyInstalled(it)) {
                 val component = searchInMetadata(it)
                 if (component != null) {
-                    upload(component)
+                    upload(component,repository)
                     printWriter.println()
-                    printWriter.println(messages["installed"])
+                    printWriter.println(messages["installed"].green())
                 } else {
-                    printWriter.println(messages["notResolved"])
+                    printWriter.println(messages["notResolved"].red())
                 }
             } else {
-                printWriter.println(messages["alreadyInstalled"])
+                printWriter.println(messages["alreadyInstalled"].green())
             }
         }
     }

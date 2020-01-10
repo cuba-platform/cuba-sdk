@@ -18,13 +18,14 @@ package com.haulmont.cuba.cli.plugin.sdk.services
 
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
 import com.haulmont.cuba.cli.plugin.sdk.dto.MvnArtifact
+import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 import org.apache.maven.model.Model
 
 interface MvnArtifactManager {
 
     fun readPom(artifact: MvnArtifact, classifier: Classifier = Classifier.pom()): Model?
 
-    fun upload(artifact: MvnArtifact)
+    fun upload(repository: Repository, artifact: MvnArtifact)
 
     fun getArtifact(artifact: MvnArtifact, classifier: Classifier)
 

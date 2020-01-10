@@ -20,13 +20,12 @@ import com.github.kittinunf.fuel.Fuel
 import com.google.gson.Gson
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.generation.VelocityHelper
+import com.haulmont.cuba.cli.plugin.sdk.commands.CommonSdkParameters
 import com.haulmont.cuba.cli.plugin.sdk.dto.*
-import com.haulmont.cuba.cli.plugin.sdk.search.BintraySearch
-import com.haulmont.cuba.cli.plugin.sdk.search.Nexus2Search
-import com.haulmont.cuba.cli.plugin.sdk.search.Nexus3Search
-import com.haulmont.cuba.cli.plugin.sdk.search.RepositorySearch
+import com.haulmont.cuba.cli.plugin.sdk.search.*
 import org.kodein.di.generic.instance
 import java.nio.file.Files
+import java.nio.file.Path
 import java.util.logging.Logger
 import java.util.stream.Collectors
 
@@ -131,7 +130,7 @@ class ComponentManagerImpl : ComponentManager {
         RepositoryType.BINTRAY -> BintraySearch(repository)
         RepositoryType.NEXUS2 -> Nexus2Search(repository)
         RepositoryType.NEXUS3 -> Nexus3Search(repository)
-        else -> throw IllegalStateException("Unsupported search context")
+        RepositoryType.LOCAL -> LocalRepositorySearch(repository)
     }
 
 
@@ -144,7 +143,8 @@ class ComponentManagerImpl : ComponentManager {
             val resolvedComponents = ArrayList<Component>()
             val total = component.components.size
             var resolved = 0f
-            component.components.parallelStream().forEach { componentToResolve ->
+            //TODO use parallel?
+            componentResolveStream(component).forEach { componentToResolve ->
                 progress?.let { it(componentToResolve, resolved, total) }
                 val resolvedComponent = resolveDependencies(componentToResolve) { _, localProgress, _ ->
                     progress?.let { it(componentToResolve, resolved + localProgress, total) }
@@ -163,8 +163,7 @@ class ComponentManagerImpl : ComponentManager {
 
     private fun resolveRawComponent(component: Component): Component? {
         for (classifier in component.classifiers) {
-            val componentPath = sdkSettingsHolder.sdkHome
-                .resolve(sdkSettingsHolder["mvn-local-repo"])
+            val componentPath = Path.of(sdkSettingsHolder["mvn.local.repo"])
                 .resolve(component.packageName)
                 .resolve(component.name)
                 .resolve(component.version)
@@ -215,7 +214,7 @@ class ComponentManagerImpl : ComponentManager {
                     Component(
                         packageName = "gradle",
                         name = "gradle",
-                        url = sdkSettingsHolder.getApplicationProperty("gradleDownloadLink").format(gradleVersion),
+                        url = sdkSettingsHolder["gradle.downloadLink"].format(gradleVersion),
                         version = gradleVersion,
                         classifiers = mutableListOf(Classifier("", "zip")),
                         type = ComponentType.RAW
@@ -225,7 +224,7 @@ class ComponentManagerImpl : ComponentManager {
         }
     }
 
-    override fun upload(component: Component, progress: UploadProcessCallback?) {
+    override fun upload(component: Component, repository: Repository?, progress: UploadProcessCallback?) {
         val artifacts = component.components.stream()
             .flatMap { it.dependencies.stream() }
             .collect(Collectors.toSet())
@@ -235,8 +234,10 @@ class ComponentManagerImpl : ComponentManager {
         val total = artifacts.size
         var uploaded = 0f
 
-        artifacts.parallelStream().forEach { artifact ->
-            mvnArtifactManager.upload(artifact)
+        artifactsStream(artifacts).forEach { artifact ->
+            repositoriesToUpload(repository).forEach {
+                mvnArtifactManager.upload(it, artifact)
+            }
             uploaded++
             progress?.let { it(artifact, uploaded, total) }
         }
@@ -249,6 +250,25 @@ class ComponentManagerImpl : ComponentManager {
         )
         metadataHolder.flushMetadata()
     }
+
+    private fun repositoriesToUpload(repository: Repository?): List<Repository> =
+        if (repository != null)
+            listOf(repository)
+        else repositoryManager.getRepositories(RepositoryTarget.TARGET)
+            .filter {
+                it.type in listOf(
+                    RepositoryType.NEXUS3,
+                    RepositoryType.NEXUS2,
+                    RepositoryType.BINTRAY
+                )
+            }
+
+
+    private fun componentResolveStream(component: Component) =
+        if (CommonSdkParameters.singleThread) component.components.stream() else component.components.parallelStream()
+
+    private fun artifactsStream(artifacts: Set<MvnArtifact>) =
+        if (CommonSdkParameters.singleThread) artifacts.stream() else artifacts.parallelStream()
 
     override fun register(component: Component) {
         metadataHolder.getMetadata().components.add(component)
@@ -285,7 +305,7 @@ class ComponentManagerImpl : ComponentManager {
             component.dependencies.addAll(dependencies)
 
             progress?.let { it(component, localProgressCount(progressCount++, component), 1) }
-            val additionalDependencies = component.dependencies.parallelStream()
+            val additionalDependencies = artifactsStream(component.dependencies)
                 .flatMap { mvnArtifactManager.searchAdditionalDependencies(it).stream() }
                 .collect(Collectors.toSet())
 
@@ -304,7 +324,7 @@ class ComponentManagerImpl : ComponentManager {
 
             progress?.let { it(component, localProgressCount(progressCount++, component), 1) }
             log.fine("Resolve ${component.packageName} classifiers")
-            component.dependencies.parallelStream().forEach {
+            artifactsStream(component.dependencies).forEach {
                 mvnArtifactManager.resolveClassifiers(it)
             }
 

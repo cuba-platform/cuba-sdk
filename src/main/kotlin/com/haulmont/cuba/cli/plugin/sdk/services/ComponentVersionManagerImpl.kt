@@ -18,10 +18,13 @@ package com.haulmont.cuba.cli.plugin.sdk.services
 
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import com.haulmont.cuba.cli.commands.LaunchOptions
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.SdkPlugin
 import com.haulmont.cuba.cli.plugin.sdk.dto.MarketplaceAddon
 import org.kodein.di.generic.instance
+import java.nio.charset.StandardCharsets
+import java.nio.file.Path
 import java.util.logging.Logger
 import kotlin.concurrent.thread
 
@@ -36,7 +39,7 @@ class ComponentVersionManagerImpl : ComponentVersionManager {
 
     private fun loadSync(): List<MarketplaceAddon> {
         //TODO load addons from cuba-site
-//        val result = Fuel.get(sdkSettings.getApplicationProperty("addonsMarketplaceUrl"))
+//        val result = Fuel.get(sdkSettings.getApplicationProperty("addon.marketplaceUrl"))
 //            .responseString().third
 //
 //        result.fold(
@@ -47,11 +50,25 @@ class ComponentVersionManagerImpl : ComponentVersionManager {
 //                log.severe("error: ${error}")
 //            }
 //        )
+        if (LaunchOptions.skipVersionLoading) {
+            return readAddons(
+                readAddonsFile()
+            )
+        } else {
+            //TODO load from site
+            return readAddons(
+                readAddonsFile()
+            )
+        }
+    }
 
-        return readAddons(
-            SdkPlugin::class.java.getResourceAsStream("app-components.json")
-                .bufferedReader()
-                .use { it.readText() })
+    private fun readAddonsFile(): String {
+        if (sdkSettings.hasProperty("addons-file")) {
+            return Path.of(sdkSettings["addons-file"]).toFile().readText(StandardCharsets.UTF_8)
+        }
+        return SdkPlugin::class.java.getResourceAsStream("app-components.json")
+            .bufferedReader()
+            .use { it.readText() }
     }
 
     private fun readAddons(json: String): List<MarketplaceAddon> {

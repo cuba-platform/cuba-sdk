@@ -16,6 +16,8 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
+import com.haulmont.cuba.cli.green
+
 abstract class BaseResolveCommand : BaseComponentCommand() {
 
     override fun run() {
@@ -25,7 +27,7 @@ abstract class BaseResolveCommand : BaseComponentCommand() {
             if (force || component == null) {
                 component = search(it)
             } else {
-                printWriter.println(messages["alreadyResolved"])
+                printWriter.println(messages["alreadyResolved"].green())
                 return
             }
             component?.let {
@@ -33,7 +35,7 @@ abstract class BaseResolveCommand : BaseComponentCommand() {
                 register(component)
             }
             printWriter.println()
-            printWriter.println(messages["resolved"])
+            printWriter.println(messages["resolved"].green())
         }
     }
 }

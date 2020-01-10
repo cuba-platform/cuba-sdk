@@ -17,12 +17,10 @@
 package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
 import com.beust.jcommander.Parameters
-import com.haulmont.cuba.cli.commands.AbstractCommand
+import com.haulmont.cuba.cli.plugin.sdk.dto.ComponentType
 
 @Parameters(commandDescription = "List available frameworks in SDK")
-class ListFrameworkCommand : AbstractCommand() {
+class ListFrameworkCommand : AbstractListCommand() {
 
-    override fun run() {
-
-    }
+    override fun getComponentType(): ComponentType = ComponentType.FRAMEWORK
 }

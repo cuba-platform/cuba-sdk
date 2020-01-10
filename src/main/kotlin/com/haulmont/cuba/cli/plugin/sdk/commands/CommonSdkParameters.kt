@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Haulmont.
+ * Copyright (c) 2008-2018 Haulmont.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.services
+package com.haulmont.cuba.cli.plugin.sdk.commands
 
-interface MavenExecutor {
+object CommonSdkParameters {
+    var printMaven: Boolean = false
+    var singleThread: Boolean = false
 
-    fun mvn(profile: String, command: String, commands: List<String>): String
-
+    fun reset() {
+        printMaven = false
+        singleThread = false
+    }
 }

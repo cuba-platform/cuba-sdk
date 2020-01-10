@@ -22,9 +22,9 @@ interface SdkSettingsHolder {
 
     val sdkHome: Path
 
-    fun getApplicationProperty(property: String): String
-
     fun getProperty(property: String): String
+
+    fun hasProperty(property: String): Boolean
 
     fun setProperty(property: String, value: String)
 
