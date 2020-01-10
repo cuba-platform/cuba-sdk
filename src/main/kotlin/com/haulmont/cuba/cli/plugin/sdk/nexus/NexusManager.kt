@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Haulmont.
+ * Copyright (c) 2008-2020 Haulmont.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,14 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.services
+package com.haulmont.cuba.cli.plugin.sdk.nexus
 
-import java.nio.file.Path
 
-interface SdkSettingsHolder {
+interface NexusManager {
 
-    fun sdkHome(): Path
+    fun startRepository()
 
-    fun nexusRepositoryPath():Path
+    fun stopRepository()
 
-    fun getProperty(property: String): String
-
-    fun hasProperty(property: String): Boolean
-
-    fun setProperty(property: String, value: String)
-
-    fun flushAppProperties()
-
-    fun sdkConfigured(): Boolean
-
-    operator fun get(property: String): String = getProperty(property)
-    operator fun set(property: String, value: String) = setProperty(property, value)
+    fun isStarted():Boolean
 }

@@ -67,7 +67,7 @@ class SetupCommand : AbstractCommand() {
             askIf { isRemoteRepository(it) }
         }
         question("repository.path", messages["localRepositoryLocationCaption"]) {
-            default(sdkSettings.sdkHome.resolve("repository").toString())
+            default(sdkSettings.sdkHome().resolve("repository").toString())
             askIf { !isRemoteRepository(it) }
         }
         confirmation("rewrite-install-path", messages["localRepositoryRewriteInstallPathCaption"]) {
@@ -99,7 +99,7 @@ class SetupCommand : AbstractCommand() {
 
     private fun mavenPathIsEmpty(answers: Map<String, Answer>): Boolean {
         return !Files.exists(
-            sdkSettings.sdkHome.resolve(sdkSettings["mvn.path"])
+            sdkSettings.sdkHome().resolve(sdkSettings["mvn.path"])
         )
     }
 
@@ -120,7 +120,7 @@ class SetupCommand : AbstractCommand() {
         downloadMaven(answers).also {
             if (mavenPathIsEmpty(answers)) {
                 Files.createDirectory(
-                    sdkSettings.sdkHome.resolve(sdkSettings["mvn.path"])
+                    sdkSettings.sdkHome().resolve(sdkSettings["mvn.path"])
                 )
                 unzipMaven(
                     answers, it
@@ -155,13 +155,13 @@ class SetupCommand : AbstractCommand() {
         printWriter.println(messages["unzipMavenCaption"])
         FileUtils.unzip(
             it,
-            sdkSettings.sdkHome.resolve(sdkSettings["mvn.path"]),
+            sdkSettings.sdkHome().resolve(sdkSettings["mvn.path"]),
             true
         )
     }
 
     private fun downloadMaven(answers: Map<String, Answer>): Path {
-        val archive = sdkSettings.sdkHome.resolve("maven.zip")
+        val archive = sdkSettings.sdkHome().resolve("maven.zip")
         if (!Files.exists(archive)) {
             printWriter.println(messages["downloadMaven"])
             val file = Files.createFile(archive)
@@ -361,20 +361,23 @@ class SetupCommand : AbstractCommand() {
         }
         sdkSettings["repository.type"] = answers["repository.type"] as String
         sdkSettings["repository.path"] = answers["repository.path"] as String
-        sdkSettings["sdk.home"] = sdkSettings.sdkHome.toString()
-        sdkSettings["mvn.local.repo"] = sdkSettings.sdkHome.resolve(".m2").toString()
-        sdkSettings["mvn.path"] = sdkSettings.sdkHome.resolve("mvn").toString()
+        sdkSettings["sdk.home"] = sdkSettings.sdkHome().toString()
+        sdkSettings["sdk.metadata"] = sdkSettings.sdkHome().resolve("sdk.metadata").toString()
+        sdkSettings["sdk.repositories"] = sdkSettings.sdkHome().resolve("sdk.repositories").toString()
+        sdkSettings["mvn.settings"] = sdkSettings.sdkHome().resolve("sdk-settings.xml").toString()
+        sdkSettings["mvn.local.repo"] = sdkSettings.sdkHome().resolve(".m2").toString()
+        sdkSettings["mvn.path"] = sdkSettings.sdkHome().resolve("mvn").toString()
         sdkSettings.flushAppProperties()
     }
 
     private fun createSdkDir() {
-        if (!Files.exists(sdkSettings.sdkHome)) {
-            Files.createDirectories(sdkSettings.sdkHome)
+        if (!Files.exists(sdkSettings.sdkHome())) {
+            Files.createDirectories(sdkSettings.sdkHome())
         }
     }
 
     private fun downloadRepository(answers: Answers): Path {
-        val repositoryArchive = sdkSettings.sdkHome.resolve("nexus.zip")
+        val repositoryArchive = sdkSettings.sdkHome().resolve("nexus.zip")
         if (!Files.exists(repositoryArchive)) {
             printWriter.println(messages["downloadNexus"])
             val file = Files.createFile(repositoryArchive)

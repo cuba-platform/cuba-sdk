@@ -21,6 +21,7 @@ import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.localMessages
 import com.haulmont.cuba.cli.plugin.sdk.dto.ComponentType
 import com.haulmont.cuba.cli.plugin.sdk.services.MetadataHolder
+import com.haulmont.cuba.cli.plugin.sdk.utils.doubleUnderline
 import org.kodein.di.generic.instance
 import java.io.PrintWriter
 
@@ -31,14 +32,12 @@ abstract class AbstractListCommand : AbstractCommand() {
     internal val printWriter: PrintWriter by sdkKodein.instance()
 
     override fun run() {
-        printWriter.println(messages["list.resolved"])
-        printWriter.println("==============================")
+        printWriter.println(messages["list.resolved.${getComponentType()}"].doubleUnderline())
         for (component in metadataHolder.getMetadata().components.filter { it.type == getComponentType() }) {
             printWriter.println("$component")
         }
         printWriter.println()
-        printWriter.println(messages["list.installed"])
-        printWriter.println("==============================")
+        printWriter.println(messages["list.installed.${getComponentType()}"].doubleUnderline())
         for (component in metadataHolder.getMetadata().installedComponents.filter { it.type == getComponentType() }) {
             printWriter.println("$component")
         }

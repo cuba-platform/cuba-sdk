@@ -18,6 +18,8 @@ package com.haulmont.cuba.cli.plugin.sdk.services
 
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.commands.CommonSdkParameters
+import com.haulmont.cuba.cli.plugin.sdk.dto.OsType
+import com.haulmont.cuba.cli.plugin.sdk.utils.currentOsType
 import org.kodein.di.generic.instance
 import java.io.BufferedReader
 import java.io.InputStream
@@ -41,11 +43,10 @@ class MavenExecutorImpl : MavenExecutor {
                 Path.of(
                     sdkSettings["mvn.path"],
                     "bin",
-                    "mvn.cmd"
+                    mavenCmd()
                 ).toString(),
                 command,
-                "-s",
-                "\"$settingsFile\"",
+                "-s \"$settingsFile\"",
                 "-P $profile"
             ).asList()
         )
@@ -74,6 +75,11 @@ class MavenExecutorImpl : MavenExecutor {
             printWriter.println()
         }
         return commandOutput.toString()
+    }
+
+    private fun mavenCmd() = when (currentOsType()) {
+        OsType.WINDOWS -> "mvn.cmd"
+        else -> "mvn"
     }
 
     fun InputStream.readMvn(handleResult: (m: String?) -> Unit) {

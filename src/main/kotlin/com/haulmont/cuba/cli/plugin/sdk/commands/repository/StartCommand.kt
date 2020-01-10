@@ -22,11 +22,11 @@ import com.haulmont.cuba.cli.commands.AbstractCommand
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.green
 import com.haulmont.cuba.cli.localMessages
+import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusManager
 import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
 import com.haulmont.cuba.cli.red
 import org.kodein.di.generic.instance
 import java.io.PrintWriter
-import java.nio.file.Path
 
 @Parameters(commandDescription = "Start SDK")
 class StartCommand : AbstractCommand() {
@@ -34,6 +34,7 @@ class StartCommand : AbstractCommand() {
     internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
     private val printWriter: PrintWriter by kodein.instance()
     private val messages by localMessages()
+    private val nexusManager: NexusManager by sdkKodein.instance()
 
     override fun run() {
         if (sdkSettings["repository.type"] != "local") {
@@ -64,35 +65,10 @@ class StartCommand : AbstractCommand() {
         }
     }
 
-    private fun isRepositoryStarting(): Boolean {
-        return isRepositoryStartingWindows()
-    }
-
-    private fun isRepositoryStartingWindows(): Boolean {
-        val process = Runtime.getRuntime().exec(
-            arrayOf(
-                "cmd", "/c", "tasklist /FI \"IMAGENAME eq nexus.exe\""
-            )
-        )
-        val result = process.inputStream.bufferedReader().use { it.readText() }
-        return result.contains("nexus.exe")
-    }
+    private fun isRepositoryStarting(): Boolean = nexusManager.isStarted()
 
     private fun startRepository() {
-        startWindows()
-    }
-
-    private fun startWindows() {
-        Runtime.getRuntime().exec(
-            arrayOf(
-                "cmd", "/c", "start", "\"cuba-sdk-nexus\"", "cmd", "/k",
-                Path.of(sdkSettings["repository.path"])
-                    .resolve("nexus3")
-                    .resolve("bin")
-                    .resolve("nexus").toString(),
-                "/run"
-            )
-        )
+        nexusManager.startRepository()
     }
 
     private fun repositoryStarted(): Boolean {

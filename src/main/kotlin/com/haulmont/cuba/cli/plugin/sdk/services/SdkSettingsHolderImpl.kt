@@ -61,11 +61,16 @@ class SdkSettingsHolderImpl : SdkSettingsHolder {
         return properties
     }
 
-    override val sdkHome: Path = getSdkPath().also {
+    override fun sdkHome(): Path = getSdkPath().also {
         if (!Files.exists(it)) {
             Files.createDirectories(it)
         }
     }
+
+    override fun nexusRepositoryPath(): Path = Path.of(sdkSettings["repository.path"])
+        .resolve("nexus3")
+        .resolve("bin")
+        .resolve("nexus")
 
     private fun getSdkPath() =
         if (sdkProperties.contains("sdk_home"))

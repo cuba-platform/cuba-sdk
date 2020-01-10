@@ -23,6 +23,7 @@ import com.haulmont.cuba.cli.localMessages
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryType
 import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
+import com.haulmont.cuba.cli.plugin.sdk.utils.doubleUnderline
 import org.kodein.di.generic.instance
 import java.io.PrintWriter
 
@@ -35,8 +36,7 @@ open class ListRepositoryCommand : AbstractCommand() {
 
     override fun run() {
         for (target in getTargets()) {
-            printWriter.println(messages["repository.$target"])
-            printWriter.println("==============================")
+            printWriter.println(messages["repository.$target"].doubleUnderline())
             for (repository in repositoryManager.getRepositories(target)) {
                 printWriter.println("Name: ${repository.name}")
                 if (RepositoryType.LOCAL != repository.type) {

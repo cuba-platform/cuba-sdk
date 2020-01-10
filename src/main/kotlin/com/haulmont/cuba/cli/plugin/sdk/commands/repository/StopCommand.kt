@@ -21,6 +21,7 @@ import com.haulmont.cuba.cli.commands.AbstractCommand
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.green
 import com.haulmont.cuba.cli.localMessages
+import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusManager
 import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
 import org.kodein.di.generic.instance
 import java.io.PrintWriter
@@ -31,23 +32,10 @@ class StopCommand : AbstractCommand() {
     internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
     private val printWriter: PrintWriter by kodein.instance()
     private val messages by localMessages()
+    private val nexusManager: NexusManager by sdkKodein.instance()
 
     override fun run() {
-        stopRepository()
-        Thread.sleep(500)
-        stopRepository()
+        nexusManager.stopRepository()
         printWriter.println(messages["stop.repositoryStopped"].green())
-    }
-
-    private fun stopRepository() {
-        stopWindows()
-    }
-
-    private fun stopWindows() {
-        Runtime.getRuntime().exec(
-            arrayOf(
-                "cmd", "/c", "taskkill /F /FI \"WINDOWTITLE eq cuba-sdk-nexus*\""
-            )
-        )
     }
 }

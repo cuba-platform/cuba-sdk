@@ -143,7 +143,7 @@ class ComponentManagerImpl : ComponentManager {
             val resolvedComponents = ArrayList<Component>()
             val total = component.components.size
             var resolved = 0f
-            //TODO use parallel?
+
             componentResolveStream(component).forEach { componentToResolve ->
                 progress?.let { it(componentToResolve, resolved, total) }
                 val resolvedComponent = resolveDependencies(componentToResolve) { _, localProgress, _ ->

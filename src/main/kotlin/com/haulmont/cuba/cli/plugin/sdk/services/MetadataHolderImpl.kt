@@ -23,19 +23,16 @@ import org.kodein.di.generic.instance
 import java.io.FileInputStream
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 
 class MetadataHolderImpl : MetadataHolder {
 
     private val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
 
-    val SDK_METADATA_PATH by lazy {
-        sdkSettings.sdkHome.resolve("sdk.metadata")
-    }
-
     private val sdkMetadata by lazy {
-        if (Files.exists(SDK_METADATA_PATH)) {
-            FileInputStream(SDK_METADATA_PATH.toString())
+        if (Files.exists(metadataPath())) {
+            FileInputStream(metadataPath().toString())
                 .bufferedReader(StandardCharsets.UTF_8)
                 .use {
                     return@lazy Gson().fromJson(it.readText(), SdkMetadata::class.java)
@@ -64,7 +61,7 @@ class MetadataHolderImpl : MetadataHolder {
     override fun flushMetadata() {
         createFileIfNotExists()
         Files.writeString(
-            SDK_METADATA_PATH,
+            metadataPath(),
             Gson().toJson(sdkMetadata),
             StandardOpenOption.WRITE,
             StandardOpenOption.TRUNCATE_EXISTING
@@ -72,9 +69,11 @@ class MetadataHolderImpl : MetadataHolder {
     }
 
     private fun createFileIfNotExists() {
-        if (!Files.exists(SDK_METADATA_PATH)) {
-            Files.createFile(SDK_METADATA_PATH)
+        if (!Files.exists(metadataPath())) {
+            Files.createFile(metadataPath())
         }
     }
+
+    private fun metadataPath() = Path.of(sdkSettings["sdk.metadata"])
 
 }

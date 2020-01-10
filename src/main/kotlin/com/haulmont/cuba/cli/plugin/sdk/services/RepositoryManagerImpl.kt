@@ -38,25 +38,20 @@ class RepositoryManagerImpl : RepositoryManager {
 
     internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
 
-    val SDK_REPOSITORIES_PATH by lazy {
-        sdkSettings.sdkHome.resolve("sdk.repositories")
-    }
-
-    val MVN_SETTINGS_PATH by lazy {
-        sdkSettings.sdkHome.resolve("sdk-settings.xml")
-    }
-
     inline fun <reified T> fromJson(json: String): T {
         return Gson().fromJson(json, object : TypeToken<T>() {}.type)
     }
+
+    private fun sdkRepositoriesPath() = Path.of(sdkSettings["sdk.repositories"])
+    private fun mvnSettingsPath() = Path.of(sdkSettings["mvn.settings"])
 
     override fun getRepositoryId(target: RepositoryTarget, name: String): String {
         return target.getId() + "." + name.replace("\\s{2,}", " ").toLowerCase()
     }
 
     private val sdkRepositories by lazy {
-        if (Files.exists(SDK_REPOSITORIES_PATH)) {
-            FileInputStream(SDK_REPOSITORIES_PATH.toString())
+        if (Files.exists(sdkRepositoriesPath())) {
+            FileInputStream(sdkRepositoriesPath().toString())
                 .bufferedReader(StandardCharsets.UTF_8)
                 .use {
                     return@lazy fromJson(it.readText()) as LinkedTreeMap<RepositoryTarget, MutableList<Repository>>
@@ -141,7 +136,7 @@ class RepositoryManagerImpl : RepositoryManager {
         (sdkRepositories.get(target) ?: throw IllegalStateException("Unknown repository target $target"))
 
     fun flushMetadata() {
-        writeToFile(SDK_REPOSITORIES_PATH, Gson().toJson(sdkRepositories))
+        writeToFile(sdkRepositoriesPath(), Gson().toJson(sdkRepositories))
     }
 
     fun writeToFile(file: Path, text: String) {
@@ -197,11 +192,11 @@ class RepositoryManagerImpl : RepositoryManager {
             }
         }
 
-        writeToFile(MVN_SETTINGS_PATH, settings.toString(true))
+        writeToFile(mvnSettingsPath(), settings.toString(true))
     }
 
     override fun mvnSettingFile(): Path {
-        return MVN_SETTINGS_PATH.also {
+        return mvnSettingsPath().also {
             if (!Files.exists(it)) {
                 buildMavenSettingsFile()
             }
