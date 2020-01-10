@@ -24,22 +24,23 @@ import com.haulmont.cuba.cli.red
 class StopCommand : NexusCommand() {
 
     override fun run() {
-        if (nexusManager.isStarted()) {
-            nexusManager.stopRepository()
-            var i = 0
-            val msg = messages["stop.stoppingRepository"]
-            printProgressMessage(msg)
-            while (repositoryStarted() && nexusManager.isStarted()) {
-                printProgressMessage(msg, i++)
-            }
-            printWriter.println()
-            if (!repositoryStarted()) {
-                printWriter.println(messages["stop.repositoryStopped"].green())
-            } else {
-                printWriter.println(messages["stop.repositoryNotStopped"].red())
-            }
-        } else {
+        if (!nexusManager.isStarted()) {
             printWriter.println(messages["start.repositoryNotStarted"])
+            return
         }
+        nexusManager.stopRepository()
+        var i = 0
+        val msg = messages["stop.stoppingRepository"]
+        printProgressMessage(msg)
+        while (repositoryStarted() && nexusManager.isStarted()) {
+            printProgressMessage(msg, i++)
+        }
+        printWriter.println()
+        if (!repositoryStarted()) {
+            printWriter.println(messages["stop.repositoryStopped"].green())
+        } else {
+            printWriter.println(messages["stop.repositoryNotStopped"].red())
+        }
+
     }
 }
