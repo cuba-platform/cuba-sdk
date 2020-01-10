@@ -51,7 +51,6 @@ class NexusManagerImpl : NexusManager {
         val currentProcess = process
         if (currentProcess != null) {
             currentProcess.destroy()
-            process = null
         }
     }
 

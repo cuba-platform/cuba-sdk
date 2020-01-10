@@ -17,24 +17,11 @@
 package com.haulmont.cuba.cli.plugin.sdk.commands.repository
 
 import com.beust.jcommander.Parameters
-import com.github.kittinunf.fuel.httpHead
-import com.haulmont.cuba.cli.commands.AbstractCommand
-import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.green
-import com.haulmont.cuba.cli.localMessages
-import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusManager
-import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
 import com.haulmont.cuba.cli.red
-import org.kodein.di.generic.instance
-import java.io.PrintWriter
 
 @Parameters(commandDescription = "Start SDK")
-class StartCommand : AbstractCommand() {
-
-    internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
-    private val printWriter: PrintWriter by kodein.instance()
-    private val messages by localMessages()
-    private val nexusManager: NexusManager by sdkKodein.instance()
+class StartCommand : NexusCommand() {
 
     override fun run() {
         if (sdkSettings["repository.type"] != "local") {
@@ -47,15 +34,10 @@ class StartCommand : AbstractCommand() {
         }
         startRepository()
         var i = 0
-        val padLength = 10
         val msg = messages["start.startingRepository"]
-        waitAndPrintProgress(100, msg.padEnd(msg.length + i % padLength, '.'))
+        printProgressMessage(msg)
         while (!repositoryStarted() && isRepositoryStarting()) {
-            if (i % padLength == 0) {
-                printWriter.print(msg.padEnd(msg.length + padLength))
-            }
-            waitAndPrintProgress(100, msg.padEnd(msg.length + i % padLength, '.'))
-            i++
+            printProgressMessage(msg, i++)
         }
         printWriter.println()
         if (!repositoryStarted()) {
@@ -69,17 +51,5 @@ class StartCommand : AbstractCommand() {
 
     private fun startRepository() {
         nexusManager.startRepository()
-    }
-
-    private fun repositoryStarted(): Boolean {
-        val (_, response, _) = sdkSettings["repository.url"]
-            .httpHead()
-            .response()
-        return response.statusCode == 200
-    }
-
-    private fun waitAndPrintProgress(period: Long, msg: String) {
-        Thread.sleep(period)
-        printWriter.print(msg)
     }
 }

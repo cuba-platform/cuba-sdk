@@ -17,25 +17,29 @@
 package com.haulmont.cuba.cli.plugin.sdk.commands.repository
 
 import com.beust.jcommander.Parameters
-import com.haulmont.cuba.cli.commands.AbstractCommand
-import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.green
-import com.haulmont.cuba.cli.localMessages
-import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusManager
-import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
-import org.kodein.di.generic.instance
-import java.io.PrintWriter
+import com.haulmont.cuba.cli.red
 
 @Parameters(commandDescription = "Stop SDK")
-class StopCommand : AbstractCommand() {
-
-    internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
-    private val printWriter: PrintWriter by kodein.instance()
-    private val messages by localMessages()
-    private val nexusManager: NexusManager by sdkKodein.instance()
+class StopCommand : NexusCommand() {
 
     override fun run() {
-        nexusManager.stopRepository()
-        printWriter.println(messages["stop.repositoryStopped"].green())
+        if (nexusManager.isStarted()) {
+            nexusManager.stopRepository()
+            var i = 0
+            val msg = messages["stop.stoppingRepository"]
+            printProgressMessage(msg)
+            while (repositoryStarted() && nexusManager.isStarted()) {
+                printProgressMessage(msg, i++)
+            }
+            printWriter.println()
+            if (!repositoryStarted()) {
+                printWriter.println(messages["stop.repositoryStopped"].green())
+            } else {
+                printWriter.println(messages["stop.repositoryNotStopped"].red())
+            }
+        } else {
+            printWriter.println(messages["start.repositoryNotStarted"])
+        }
     }
 }
