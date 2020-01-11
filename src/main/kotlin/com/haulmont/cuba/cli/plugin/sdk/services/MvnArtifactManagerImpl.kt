@@ -81,7 +81,7 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
     }
 
     private fun getArtifactFile(artifact: MvnArtifact, classifier: Classifier): Path {
-        var pomDirectory: Path = Path.of(sdkSettings["mvn.local.repo"])
+        var pomDirectory: Path = Path.of(sdkSettings["maven.local.repo"])
         for (groupPart in artifact.groupId.split(".")) {
             pomDirectory = pomDirectory.resolve(groupPart)
         }

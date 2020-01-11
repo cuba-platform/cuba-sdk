@@ -17,10 +17,10 @@
 package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
 import com.beust.jcommander.Parameters
-import com.haulmont.cuba.cli.commands.AbstractCommand
+import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
 
 @Parameters(commandDescription = "Remove framework from SDK")
-class RemoveFrameworkCommand : AbstractCommand() {
+class RemoveFrameworkCommand : AbstractSdkCommand() {
 
     override fun run() {
 

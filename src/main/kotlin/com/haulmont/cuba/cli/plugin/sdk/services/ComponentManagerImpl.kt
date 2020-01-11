@@ -163,7 +163,7 @@ class ComponentManagerImpl : ComponentManager {
 
     private fun resolveRawComponent(component: Component): Component? {
         for (classifier in component.classifiers) {
-            val componentPath = Path.of(sdkSettingsHolder["mvn.local.repo"])
+            val componentPath = Path.of(sdkSettingsHolder["maven.local.repo"])
                 .resolve(component.packageName)
                 .resolve(component.name)
                 .resolve(component.version)

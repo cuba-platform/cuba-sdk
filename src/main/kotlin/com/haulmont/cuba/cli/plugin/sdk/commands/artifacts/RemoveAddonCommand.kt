@@ -17,10 +17,10 @@
 package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
 import com.beust.jcommander.Parameters
-import com.haulmont.cuba.cli.commands.AbstractCommand
+import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
 
 @Parameters(commandDescription = "Remove add-on from SDK")
-class RemoveAddonCommand : AbstractCommand() {
+class RemoveAddonCommand : AbstractSdkCommand() {
 
     override fun run() {
 

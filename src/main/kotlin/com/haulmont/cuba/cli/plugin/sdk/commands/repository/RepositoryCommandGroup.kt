@@ -17,13 +17,13 @@
 package com.haulmont.cuba.cli.plugin.sdk.commands.repository
 
 import com.beust.jcommander.Parameters
-import com.haulmont.cuba.cli.commands.AbstractCommand
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
+import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
 import org.kodein.di.generic.instance
 import java.io.PrintWriter
 
 @Parameters(commandDescription = "Repository command group")
-class RepositoryCommandGroup : AbstractCommand() {
+class RepositoryCommandGroup : AbstractSdkCommand() {
 
     private val printWriter: PrintWriter by sdkKodein.instance()
 

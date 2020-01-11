@@ -17,21 +17,18 @@
 package com.haulmont.cuba.cli.plugin.sdk.commands
 
 import com.beust.jcommander.Parameters
-import com.haulmont.cuba.cli.commands.AbstractCommand
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.green
 import com.haulmont.cuba.cli.localMessages
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusManager
-import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
 import com.haulmont.cuba.cli.plugin.sdk.utils.doubleUnderline
 import com.haulmont.cuba.cli.red
 import org.kodein.di.generic.instance
 import java.io.PrintWriter
 
 @Parameters(commandDescription = "CUBA SDK")
-class SdkCommand : AbstractCommand() {
+class SdkCommand : AbstractSdkCommand() {
 
-    internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
     private val printWriter: PrintWriter by kodein.instance()
     private val messages by localMessages()
     private val nexusManager: NexusManager by sdkKodein.instance()
@@ -48,8 +45,8 @@ class SdkCommand : AbstractCommand() {
         } else {
             printWriter.println()
         }
-        printWriter.println("Maven install path: ${sdkSettings["mvn.path"].green()}")
-        printWriter.println("Maven local repository: ${sdkSettings["mvn.local.repo"].green()}")
+        printWriter.println("Maven install path: ${sdkSettings["maven.path"].green()}")
+        printWriter.println("Maven local repository: ${sdkSettings["maven.local.repo"].green()}")
 
     }
 

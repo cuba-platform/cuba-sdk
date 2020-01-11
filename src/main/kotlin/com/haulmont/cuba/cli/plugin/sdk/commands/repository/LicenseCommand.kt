@@ -17,10 +17,10 @@
 package com.haulmont.cuba.cli.plugin.sdk.commands.repository
 
 import com.beust.jcommander.Parameters
-import com.haulmont.cuba.cli.commands.AbstractCommand
+import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
 
 @Parameters(commandDescription = "Set license key for SDK")
-class LicenseCommand : AbstractCommand() {
+class LicenseCommand : AbstractSdkCommand() {
 
     override fun run() {
 

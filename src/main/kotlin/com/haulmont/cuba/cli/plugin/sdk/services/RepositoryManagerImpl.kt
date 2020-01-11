@@ -43,7 +43,7 @@ class RepositoryManagerImpl : RepositoryManager {
     }
 
     private fun sdkRepositoriesPath() = Path.of(sdkSettings["sdk.repositories"])
-    private fun mvnSettingsPath() = Path.of(sdkSettings["mvn.settings"])
+    private fun mvnSettingsPath() = Path.of(sdkSettings["maven.settings"])
 
     override fun getRepositoryId(target: RepositoryTarget, name: String): String {
         return target.getId() + "." + name.replace("\\s{2,}", " ").toLowerCase()
@@ -154,7 +154,7 @@ class RepositoryManagerImpl : RepositoryManager {
     override fun buildMavenSettingsFile() {
         val settings = xml("settings") {
             "localRepository" {
-                -sdkSettings["mvn.local.repo"]
+                -sdkSettings["maven.local.repo"]
             }
             "profiles" {
                 "profile" {

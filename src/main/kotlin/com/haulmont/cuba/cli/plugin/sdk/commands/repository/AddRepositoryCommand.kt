@@ -17,10 +17,10 @@
 package com.haulmont.cuba.cli.plugin.sdk.commands.repository
 
 import com.beust.jcommander.Parameters
-import com.haulmont.cuba.cli.commands.AbstractCommand
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.green
 import com.haulmont.cuba.cli.localMessages
+import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
 import com.haulmont.cuba.cli.plugin.sdk.dto.Authentication
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
@@ -34,7 +34,7 @@ import java.io.PrintWriter
 import java.nio.file.Paths
 
 @Parameters(commandDescription = "Add repository for SDK")
-open class AddRepositoryCommand : AbstractCommand() {
+open class AddRepositoryCommand : AbstractSdkCommand() {
 
     internal val messages by localMessages()
     internal val printWriter: PrintWriter by sdkKodein.instance()

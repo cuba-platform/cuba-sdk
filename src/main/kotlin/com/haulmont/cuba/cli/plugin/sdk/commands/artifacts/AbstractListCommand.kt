@@ -16,16 +16,16 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
-import com.haulmont.cuba.cli.commands.AbstractCommand
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.localMessages
+import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
 import com.haulmont.cuba.cli.plugin.sdk.dto.ComponentType
 import com.haulmont.cuba.cli.plugin.sdk.services.MetadataHolder
 import com.haulmont.cuba.cli.plugin.sdk.utils.doubleUnderline
 import org.kodein.di.generic.instance
 import java.io.PrintWriter
 
-abstract class AbstractListCommand : AbstractCommand() {
+abstract class AbstractListCommand : AbstractSdkCommand() {
 
     internal val messages by localMessages()
     internal val metadataHolder: MetadataHolder by sdkKodein.instance()

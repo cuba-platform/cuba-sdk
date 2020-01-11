@@ -41,7 +41,7 @@ class MavenExecutorImpl : MavenExecutor {
         val cliCommandsList = ArrayList(
             arrayOf(
                 Path.of(
-                    sdkSettings["mvn.path"],
+                    sdkSettings["maven.path"],
                     "bin",
                     mavenCmd()
                 ).toString(),

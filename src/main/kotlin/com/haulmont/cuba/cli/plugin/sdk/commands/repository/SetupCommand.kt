@@ -5,18 +5,17 @@ import com.github.kittinunf.fuel.core.Headers
 import com.github.kittinunf.fuel.core.extensions.authentication
 import com.github.kittinunf.fuel.httpDelete
 import com.github.kittinunf.fuel.httpPost
-import com.haulmont.cuba.cli.commands.AbstractCommand
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.green
 import com.haulmont.cuba.cli.localMessages
 import com.haulmont.cuba.cli.plugin.sdk.SdkPlugin
+import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
 import com.haulmont.cuba.cli.plugin.sdk.dto.Authentication
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryType
 import com.haulmont.cuba.cli.plugin.sdk.services.FileDownloadService
 import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
-import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
 import com.haulmont.cuba.cli.plugin.sdk.utils.FileUtils
 import com.haulmont.cuba.cli.prompting.Answer
 import com.haulmont.cuba.cli.prompting.Answers
@@ -36,18 +35,12 @@ import java.util.*
 
 
 @Parameters(commandDescription = "Setup SDK")
-class SetupCommand : AbstractCommand() {
+class SetupCommand : AbstractSdkCommand() {
 
-    internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
     internal val fileDownloadService: FileDownloadService by sdkKodein.instance()
     internal val repositoryManager: RepositoryManager by sdkKodein.instance()
     private val printWriter: PrintWriter by kodein.instance()
     private val messages by localMessages()
-
-    val SDK_LOCAL_REPOSITORY_URL: String by lazy {
-        sdkSettings["template.repositoryUrl"]
-    }
-
 
     override fun run() {
         Prompts.create(kodein) { askRepositorySettings() }
@@ -99,7 +92,7 @@ class SetupCommand : AbstractCommand() {
 
     private fun mavenPathIsEmpty(answers: Map<String, Answer>): Boolean {
         return !Files.exists(
-            sdkSettings.sdkHome().resolve(sdkSettings["mvn.path"])
+            sdkSettings.sdkHome().resolve(sdkSettings["maven.path"])
         )
     }
 
@@ -120,7 +113,7 @@ class SetupCommand : AbstractCommand() {
         downloadMaven(answers).also {
             if (mavenPathIsEmpty(answers)) {
                 Files.createDirectory(
-                    sdkSettings.sdkHome().resolve(sdkSettings["mvn.path"])
+                    sdkSettings.sdkHome().resolve(sdkSettings["maven.path"])
                 )
                 unzipMaven(
                     answers, it
@@ -155,7 +148,7 @@ class SetupCommand : AbstractCommand() {
         printWriter.println(messages["unzipMavenCaption"])
         FileUtils.unzip(
             it,
-            sdkSettings.sdkHome().resolve(sdkSettings["mvn.path"]),
+            sdkSettings.sdkHome().resolve(sdkSettings["maven.path"]),
             true
         )
     }
@@ -357,16 +350,16 @@ class SetupCommand : AbstractCommand() {
 
     private fun createSdkRepoSettingsFile(answers: Answers) {
         if (!isRemoteRepository(answers)) {
-            sdkSettings["repository.url"] = SDK_LOCAL_REPOSITORY_URL.format(answers["port"])
+            sdkSettings["repository.url"] = sdkSettings["template.repositoryUrl"].format(answers["port"])
         }
         sdkSettings["repository.type"] = answers["repository.type"] as String
         sdkSettings["repository.path"] = answers["repository.path"] as String
         sdkSettings["sdk.home"] = sdkSettings.sdkHome().toString()
         sdkSettings["sdk.metadata"] = sdkSettings.sdkHome().resolve("sdk.metadata").toString()
         sdkSettings["sdk.repositories"] = sdkSettings.sdkHome().resolve("sdk.repositories").toString()
-        sdkSettings["mvn.settings"] = sdkSettings.sdkHome().resolve("sdk-settings.xml").toString()
-        sdkSettings["mvn.local.repo"] = sdkSettings.sdkHome().resolve(".m2").toString()
-        sdkSettings["mvn.path"] = sdkSettings.sdkHome().resolve("mvn").toString()
+        sdkSettings["maven.settings"] = sdkSettings.sdkHome().resolve("sdk-settings.xml").toString()
+        sdkSettings["maven.local.repo"] = sdkSettings.sdkHome().resolve(".m2").toString()
+        sdkSettings["maven.path"] = sdkSettings.sdkHome().resolve("mvn").toString()
         sdkSettings.flushAppProperties()
     }
 

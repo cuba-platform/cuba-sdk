@@ -21,6 +21,7 @@ import com.haulmont.cuba.cli.CliPlugin
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.event.DestroyPluginEvent
 import com.haulmont.cuba.cli.event.InitPluginEvent
+import com.haulmont.cuba.cli.plugin.sdk.commands.PrintPropertiesCommand
 import com.haulmont.cuba.cli.plugin.sdk.commands.SdkCommand
 import com.haulmont.cuba.cli.plugin.sdk.commands.artifacts.*
 import com.haulmont.cuba.cli.plugin.sdk.commands.repository.*
@@ -41,6 +42,9 @@ class SdkPlugin : CliPlugin {
         componentVersionsManager.load {}
         event.commandsRegistry {
             command("sdk", SdkCommand()) {
+                command("properties",
+                    PrintPropertiesCommand()
+                )
                 command("setup", SetupCommand())
                 command("start", StartCommand())
                 command("stop", StopCommand())

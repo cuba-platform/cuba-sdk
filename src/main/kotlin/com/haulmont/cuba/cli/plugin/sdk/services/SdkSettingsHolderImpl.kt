@@ -41,13 +41,22 @@ class SdkSettingsHolderImpl : SdkSettingsHolder {
         ).resolve("sdk.properties")
     }
 
-    private val sdkProperties by lazy {
+    private var sdkProperties: Properties
+
+    init {
+        sdkProperties = readDefaultProperties()
+    }
+
+    private fun readDefaultProperties(): Properties {
         createSdkPropertiesFileIfNotExists()
-        readProperties(
+        return readProperties(
             FileInputStream(SDK_PROPERTIES_PATH.toString()),
-            readProperties(SdkPlugin::class.java.getResourceAsStream("application.properties"))
+            readApplicationProperties()
         )
     }
+
+    private fun readApplicationProperties() =
+        readProperties(SdkPlugin::class.java.getResourceAsStream("application.properties"))
 
     private fun readProperties(
         propertiesInputStream: InputStream,
@@ -73,8 +82,8 @@ class SdkSettingsHolderImpl : SdkSettingsHolder {
         .resolve("nexus")
 
     private fun getSdkPath() =
-        if (sdkProperties.contains("sdk_home"))
-            Path.of(getProperty("sdk_home"))
+        if (sdkProperties.contains("sdk.home"))
+            Path.of(getProperty("sdk.home"))
         else Paths.get(
             System.getProperty(
                 "user.home"
@@ -87,7 +96,7 @@ class SdkSettingsHolderImpl : SdkSettingsHolder {
     }
 
     override fun hasProperty(property: String): Boolean {
-        return sdkProperties[property]!=null
+        return sdkProperties[property] != null
     }
 
     override fun setProperty(property: String, value: String) {
@@ -104,6 +113,21 @@ class SdkSettingsHolderImpl : SdkSettingsHolder {
 
     override fun sdkConfigured(): Boolean {
         return Files.exists(SDK_PROPERTIES_PATH) && sdkProperties.getProperty("repository.type") != null
+    }
+
+    override fun setExternalProperties(file: Path) {
+        sdkProperties = readProperties(
+            FileInputStream(file.toString()),
+            sdkProperties
+        )
+    }
+
+    override fun resetProperties() {
+        sdkProperties = readDefaultProperties()
+    }
+
+    override fun propertyNames(): Set<String> {
+        return sdkProperties.stringPropertyNames()
     }
 
     private fun createSdkPropertiesFileIfNotExists() {

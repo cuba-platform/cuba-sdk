@@ -34,6 +34,12 @@ interface SdkSettingsHolder {
 
     fun sdkConfigured(): Boolean
 
+    fun setExternalProperties(file: Path)
+
+    fun resetProperties()
+
+    fun propertyNames(): Set<String>
+
     operator fun get(property: String): String = getProperty(property)
     operator fun set(property: String, value: String) = setProperty(property, value)
 }

@@ -17,10 +17,10 @@
 package com.haulmont.cuba.cli.plugin.sdk.commands.repository
 
 import com.beust.jcommander.Parameters
-import com.haulmont.cuba.cli.commands.AbstractCommand
+import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
 
 @Parameters(commandDescription = "Export SDK")
-class ExportCommand : AbstractCommand() {
+class ExportCommand : AbstractSdkCommand() {
 
     override fun run() {
 

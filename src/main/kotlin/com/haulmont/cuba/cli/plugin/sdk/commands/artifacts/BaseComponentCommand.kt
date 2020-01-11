@@ -17,10 +17,10 @@
 package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
 import com.beust.jcommander.Parameter
-import com.haulmont.cuba.cli.commands.AbstractCommand
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.green
 import com.haulmont.cuba.cli.localMessages
+import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
 import com.haulmont.cuba.cli.plugin.sdk.commands.CommonSdkParameters
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
@@ -32,7 +32,7 @@ import com.haulmont.cuba.cli.prompting.ValidationException
 import org.kodein.di.generic.instance
 import java.io.PrintWriter
 
-abstract class BaseComponentCommand : AbstractCommand() {
+abstract class BaseComponentCommand : AbstractSdkCommand() {
 
     @Parameter(names = ["--print-maven"], description = "Print maven output", hidden = true)
     var printMaven: Boolean = false
@@ -61,10 +61,12 @@ abstract class BaseComponentCommand : AbstractCommand() {
     internal val messages by localMessages()
 
     override fun postExecute() {
+        super.postExecute()
         CommonSdkParameters.reset()
     }
 
     override fun preExecute() {
+        super.preExecute()
         CommonSdkParameters.printMaven = printMaven
         CommonSdkParameters.singleThread = printMaven || !parallel
     }

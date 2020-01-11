@@ -17,12 +17,12 @@
 package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
 import com.beust.jcommander.Parameters
-import com.haulmont.cuba.cli.commands.AbstractCommand
+import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
 import org.kodein.di.generic.instance
 import java.io.PrintWriter
 
 @Parameters(commandDescription = "Install artifact in SDK")
-class ResolveCommand : AbstractCommand() {
+class ResolveCommand : AbstractSdkCommand() {
 
     private val printWriter: PrintWriter by kodein.instance()
 
