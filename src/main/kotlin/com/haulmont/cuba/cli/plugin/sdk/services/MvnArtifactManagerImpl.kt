@@ -77,24 +77,14 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
         }
         log.info("POM does not exist: ${artifact.mvnCoordinates(classifier)}")
         return null
-
     }
 
     private fun getArtifactFile(artifact: MvnArtifact, classifier: Classifier): Path {
-        var pomDirectory: Path = Path.of(sdkSettings["maven.local.repo"])
-        for (groupPart in artifact.groupId.split(".")) {
-            pomDirectory = pomDirectory.resolve(groupPart)
-        }
-        pomDirectory = pomDirectory.resolve(artifact.artifactId).resolve(artifact.version)
-        if (!Files.exists(pomDirectory)) {
-            Files.createDirectories(pomDirectory)
-        }
-        val classifierSuffix = if (classifier.type.isEmpty()) "" else "-${classifier.type}"
-        return pomDirectory.resolve("${artifact.artifactId}-${artifact.version}${classifierSuffix}.${classifier.extension}")
+        return artifact.localPath(Path.of(sdkSettings["maven.local.repo"]), classifier)
     }
 
-    override fun upload(repository: Repository,artifact: MvnArtifact) {
-            uploadToRepository(repository, artifact)
+    override fun upload(repository: Repository, artifact: MvnArtifact) {
+        uploadToRepository(repository, artifact)
     }
 
     private fun uploadToRepository(repository: Repository, artifact: MvnArtifact) {

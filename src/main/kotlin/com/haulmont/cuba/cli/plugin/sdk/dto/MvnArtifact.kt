@@ -16,6 +16,9 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.dto
 
+import java.nio.file.Files
+import java.nio.file.Path
+
 
 data class MvnArtifact(
     val groupId: String,
@@ -48,4 +51,17 @@ data class MvnArtifact(
 
     fun pomClassifiers(): List<Classifier> =
         classifiers.filter { it.extension == "pom" || it.extension == "sdk" }.ifEmpty { listOf(Classifier.pom()) }
+
+    fun localPath(repoPath: Path, classifier: Classifier = Classifier.default()): Path {
+        var path: Path = repoPath
+        for (groupPart in groupId.split(".")) {
+            path = path.resolve(groupPart)
+        }
+        path = path.resolve(artifactId).resolve(version)
+        if (!Files.exists(path)) {
+            Files.createDirectories(path)
+        }
+        val classifierSuffix = if (classifier.type.isEmpty()) "" else "-${classifier.type}"
+        return path.resolve("${artifactId}-${version}${classifierSuffix}.${classifier.extension}")
+    }
 }

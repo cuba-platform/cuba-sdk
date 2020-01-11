@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.commands.repository
+package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
 import com.beust.jcommander.Parameters
 import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
 
-@Parameters(commandDescription = "Export SDK")
-class ExportCommand : AbstractSdkCommand() {
+@Parameters(commandDescription = "Clean SDK")
+class CleanCommand : AbstractSdkCommand() {
 
     override fun run() {
 

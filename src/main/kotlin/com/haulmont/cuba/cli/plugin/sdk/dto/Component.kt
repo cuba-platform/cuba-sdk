@@ -33,6 +33,6 @@ data class Component(
     val dependencies: MutableSet<MvnArtifact> = HashSet()
 ) {
     override fun toString(): String {
-        return name ?: "${packageName}:${name ?: ""}:${version}"
+        return (name ?: "${packageName}:${name ?: ""}") + ":$version"
     }
 }

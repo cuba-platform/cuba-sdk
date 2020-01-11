@@ -42,7 +42,8 @@ class SdkPlugin : CliPlugin {
         componentVersionsManager.load {}
         event.commandsRegistry {
             command("sdk", SdkCommand()) {
-                command("properties",
+                command(
+                    "properties",
                     PrintPropertiesCommand()
                 )
                 command("setup", SetupCommand())
@@ -72,7 +73,12 @@ class SdkPlugin : CliPlugin {
                 command("docker", DockerCommand())
 
                 command("import", ImportCommand())
-                command("export", ExportCommand())
+
+                command("export", ExportCommand()) {
+                    command("framework", ExportFrameworkCommand())
+                    command("addon", ExportAddonCommand())
+                    command("lib", ExportLibCommand())
+                }
 
                 command("resolve", ResolveCommand()) {
                     command("framework", ResolveFrameworkCommand())

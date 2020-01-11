@@ -16,10 +16,12 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.utils
 
+import java.io.*
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
+import java.util.zip.ZipOutputStream
 
 class FileUtils {
     companion object {
@@ -52,6 +54,27 @@ class FileUtils {
                 }
             }
             return targetDir
+        }
+
+        fun zip(zipFileName: Path, files: Collection<File>) {
+            ZipOutputStream(BufferedOutputStream(FileOutputStream(zipFileName.toFile()))).use { out ->
+                val data = ByteArray(1024)
+                for (file in files) {
+                    FileInputStream(file).use { fi ->
+                        BufferedInputStream(fi).use { origin ->
+                            val entry = ZipEntry(file.name)
+                            out.putNextEntry(entry)
+                            while (true) {
+                                val readBytes = origin.read(data)
+                                if (readBytes == -1) {
+                                    break
+                                }
+                                out.write(data, 0, readBytes)
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

@@ -14,15 +14,20 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.commands.repository
+package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
 import com.beust.jcommander.Parameters
+import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
+import org.kodein.di.generic.instance
+import java.io.PrintWriter
 
-@Parameters(commandDescription = "Import SDK")
-class ImportCommand : AbstractSdkCommand() {
+@Parameters(commandDescription = "Export SDK")
+class ExportCommandGroup : AbstractSdkCommand() {
+
+    internal val printWriter: PrintWriter by sdkKodein.instance()
 
     override fun run() {
-
+        printWriter.println("Use 'framework', 'addon', 'lib' or 'all' subcommands.")
     }
 }
