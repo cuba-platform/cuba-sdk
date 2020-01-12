@@ -65,6 +65,10 @@ private val sdkModule = Kodein.Module {
     bind<NexusManager>() with singleton {
         NexusManagerImpl()
     }
+
+    bind<ImportExportService>() with singleton {
+        ImportExportServiceImpl()
+    }
 }
 
 internal val sdkKodein = Kodein {

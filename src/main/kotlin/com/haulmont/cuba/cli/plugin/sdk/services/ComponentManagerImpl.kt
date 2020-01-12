@@ -29,9 +29,6 @@ import java.nio.file.Path
 import java.util.logging.Logger
 import java.util.stream.Collectors
 
-typealias ResolveProgressCallback = (component: Component, resolved: Float, total: Int) -> Unit
-typealias UploadProcessCallback = (artifact: MvnArtifact, uploaded: Float, total: Int) -> Unit
-
 class ComponentManagerImpl : ComponentManager {
 
     private val log: Logger = Logger.getLogger(ComponentManagerImpl::class.java.name)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Haulmont.
+ * Copyright (c) 2008-2020 Haulmont.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,22 +18,11 @@ package com.haulmont.cuba.cli.plugin.sdk.services
 
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.MvnArtifact
-import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
+import java.nio.file.Path
 
-typealias ResolveProgressCallback = (component: Component, resolved: Float, total: Int) -> Unit
-typealias UploadProcessCallback = (artifact: MvnArtifact, uploaded: Float, total: Int) -> Unit
+typealias ExportProcessCallback = (artifact: MvnArtifact, exported: Float, total: Int) -> Unit
 
-interface ComponentManager {
+interface ImportExportService {
 
-    fun isAlreadyInstalled(component: Component): Boolean
-
-    fun searchInMetadata(component: Component): Component?
-
-    fun search(component: Component): Component?
-
-    fun resolve(component: Component, progress: ResolveProgressCallback? = null)
-
-    fun upload(component: Component, repository: Repository?, progress: UploadProcessCallback? = null)
-
-    fun register(component: Component)
+    fun export(fileName: String, components: Collection<Component>, progress: ExportProcessCallback? = null): Path
 }

@@ -38,22 +38,6 @@ typealias NameVersion = Pair<String, String>
 
 abstract class BaseComponentCommand : AbstractSdkCommand() {
 
-    @Parameter(names = ["--print-maven"], description = "Print maven output", hidden = true)
-    var printMaven: Boolean = false
-        private set
-
-    @Parameter(names = ["--force"], description = "Force resolve and upload component with dependencies", hidden = true)
-    var force: Boolean = false
-        private set
-
-    @Parameter(
-        names = ["--parallel"],
-        description = "Resolve component dependencies in parallel",
-        hidden = true
-    )
-    var parallel: Boolean = true
-        private set
-
     internal val PROGRESS_LINE_LENGHT = 110
 
     internal val componentManager: ComponentManager by sdkKodein.instance()
@@ -69,6 +53,22 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
     internal val platformVersionsManager: PlatformVersionsManager by sdkKodein.instance()
 
     internal val messages by localMessages()
+
+    @Parameter(names = ["--print-maven"], description = "Print maven output", hidden = true)
+    var printMaven: Boolean = false
+        private set
+
+    @Parameter(names = ["--force"], description = "Force resolve and upload component with dependencies", hidden = true)
+    var force: Boolean = false
+        private set
+
+    @Parameter(
+        names = ["--parallel"],
+        description = "Resolve component dependencies in parallel",
+        hidden = true
+    )
+    var parallel: Boolean = true
+        private set
 
     override fun postExecute() {
         super.postExecute()
