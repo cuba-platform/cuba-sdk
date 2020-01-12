@@ -18,6 +18,7 @@ package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
 import com.beust.jcommander.Parameter
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
+import com.haulmont.cuba.cli.cubaplugin.model.PlatformVersionsManager
 import com.haulmont.cuba.cli.green
 import com.haulmont.cuba.cli.localMessages
 import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
@@ -27,10 +28,15 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.ComponentType
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 import com.haulmont.cuba.cli.plugin.sdk.services.ComponentManager
+import com.haulmont.cuba.cli.plugin.sdk.services.ComponentVersionManager
+import com.haulmont.cuba.cli.plugin.sdk.services.MetadataHolder
 import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
+import com.haulmont.cuba.cli.prompting.Prompts
 import com.haulmont.cuba.cli.prompting.ValidationException
 import org.kodein.di.generic.instance
 import java.io.PrintWriter
+
+typealias NameVersion = Pair<String, String>
 
 abstract class BaseComponentCommand : AbstractSdkCommand() {
 
@@ -57,6 +63,12 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
     internal val repositoryManager: RepositoryManager by sdkKodein.instance()
 
     internal val printWriter: PrintWriter by sdkKodein.instance()
+
+    internal val metadataHolder: MetadataHolder by sdkKodein.instance()
+
+    internal val componentVersionsManager: ComponentVersionManager by sdkKodein.instance()
+
+    internal val platformVersionsManager: PlatformVersionsManager by sdkKodein.instance()
 
     internal val messages by localMessages()
 
@@ -123,36 +135,26 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
 
     fun fail(cause: String): Nothing = throw ValidationException(cause)
 
-    fun String.resolveAddonCoordinates(): Component? {
-        this.split(":").let {
-            when (it.size) {
-                3 -> return Component(
-                    packageName = it[0],
-                    name = it[1].substringBefore("-global"),
-                    version = it[2],
-                    type = ComponentType.ADDON
-                )
-                2 -> return Component(
-                    packageName = it[0],
-                    version = it[1],
-                    type = ComponentType.ADDON
-                )
-                else -> return null
-            }
-        }
-    }
+    fun askNameVersion(
+        msgPrefix: String,
+        addons: List<String>,
+        versions: (name: String) -> List<String>
+    ): NameVersion {
+        val addonAnswers = Prompts.create {
+            textOptions("name", messages["$msgPrefix.name"], addons)
+        }.ask()
 
-    fun String.resolveFrameworkCoordinates(): Component? {
-        this.split(":").let {
-            when (it.size) {
-                2 -> return Component(
-                    packageName = it[0],
-                    version = it[1],
-                    type = ComponentType.FRAMEWORK
-                )
-                else -> return null
-            }
-        }
+        val name = addonAnswers["name"] as String
+
+        val versionAnswers = Prompts.create {
+            textOptions(
+                "version",
+                messages["$msgPrefix.version"],
+                versions(name)
+            )
+        }.ask()
+
+        return NameVersion(addonAnswers["name"] as String, versionAnswers["version"] as String)
     }
 
     fun String.resolveLibraryCoordinates(): Component? {

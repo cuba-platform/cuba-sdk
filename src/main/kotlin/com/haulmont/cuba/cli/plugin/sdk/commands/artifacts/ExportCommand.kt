@@ -17,23 +17,18 @@
 package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
 import com.beust.jcommander.Parameters
-import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
-import com.haulmont.cuba.cli.plugin.sdk.services.MetadataHolder
-import org.kodein.di.generic.instance
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @Parameters(commandDescription = "Export all dependencies")
 class ExportCommand : AbstractExportCommand() {
-
-    private val metadataHolder: MetadataHolder by sdkKodein.instance()
 
     override fun componentsToExport(): Collection<Component> {
         return metadataHolder.getMetadata().components
     }
 
-    override fun exportName(): String {
-        return "sdk"
-    }
+    override fun exportName() = "sdk-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH:mm"))
 
     override fun createSearchContext(): Component? {
         return null

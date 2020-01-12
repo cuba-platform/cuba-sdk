@@ -18,6 +18,6 @@ package com.haulmont.cuba.cli.plugin.sdk.services
 
 interface MavenExecutor {
 
-    fun mvn(profile: String, command: String, commands: List<String>): String
+    fun mvn(profile: String, command: String, commands: List<String>, ignoreErrors: Boolean = false): String
 
 }

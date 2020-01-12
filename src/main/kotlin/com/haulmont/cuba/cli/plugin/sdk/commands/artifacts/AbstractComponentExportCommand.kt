@@ -16,30 +16,57 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
+import com.haulmont.cuba.cli.green
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
-import com.haulmont.cuba.cli.red
+import com.haulmont.cuba.cli.prompting.Prompts
 
 abstract class AbstractComponentExportCommand : AbstractExportCommand() {
 
-    override fun componentsToExport(): Collection<Component> {
+    var componetToExport: Component? = null
+
+    override fun componentsToExport(): List<Component>? = componentToExport()?.let { listOf(it) }
+
+    fun componentToExport(): Component? {
+        componetToExport?.let { return it }
         createSearchContext()?.let {
-            val component = searchInMetadata(it)
-            if (component == null) {
-                printWriter.println(messages["notResolved"].red())
-                return emptyList()
-            }
-            return listOf(component)
+            return searchInMetadata(it)
         }
-        return emptyList()
+        return null
     }
 
     override fun exportName(): String {
         createSearchContext()?.let {
             val component = searchInMetadata(it)
             component?.let {
-                return "sdk-${it.type.toString().toLowerCase()}_${it.toString().replace(":", "-")}"
+                return "${it.toString().replace(":", "-")}_${it.type.toString().toLowerCase()}_sdk"
             }
         }
         return "export"
+    }
+
+    override fun run() {
+        if (componentsToExport() == null) {
+            val searchContext = createSearchContext()
+            val answers = Prompts.create {
+                confirmation("need-to-resolve", messages["export.needToResolve"].format(searchContext)) {
+                    default(true)
+                }
+            }.ask()
+            if (answers["need-to-resolve"] as Boolean) {
+                searchContext?.let {
+                    val component = search(it)
+                    component?.let {
+                        resolve(component)
+                        register(component)
+                    }
+                    printWriter.println()
+                    printWriter.println(messages["resolved"].green())
+                    componentToExport()
+                    super.run()
+                }
+            }
+        } else {
+            super.run()
+        }
     }
 }

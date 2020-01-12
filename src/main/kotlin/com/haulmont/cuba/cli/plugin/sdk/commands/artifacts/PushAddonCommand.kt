@@ -18,58 +18,27 @@ package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
 import com.beust.jcommander.Parameter
 import com.beust.jcommander.Parameters
-import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
-import com.haulmont.cuba.cli.plugin.sdk.dto.ComponentType
-import com.haulmont.cuba.cli.plugin.sdk.services.MetadataHolder
-import com.haulmont.cuba.cli.prompting.Prompts
-import org.kodein.di.generic.instance
 
 @Parameters(commandDescription = "Upload add-on with dependencies to SDK target repository")
 class PushAddonCommand : BasePushCommand() {
 
-    private val metadataHolder: MetadataHolder by sdkKodein.instance()
-
-    @Parameter(description = "Addon name and version <name>:<version> or in full coordinates format <group>:<name>:<version>", hidden = true)
-    private var addonNameVersion: String? = null
+    @Parameter(
+        description = "Addon name and version <name>:<version> or in full coordinates format <group>:<name>:<version>",
+        hidden = true
+    )
+    private var nameVersion: String? = null
 
     override fun run() {
-        if (addonNameVersion == null) {
-            val addonAnswers = Prompts.create {
-                textOptions("name", messages["addon.name"], metadataHolder.getMetadata().components
-                    .filter { ComponentType.ADDON == it.type }
-                    .filter { it.name != null }
-                    .map { it.name }
-                    .distinct()
-                    .toList() as List<String>
-                )
-            }.ask()
-
-            val name = addonAnswers["name"] as String
-
-            val versionAnswers = Prompts.create {
-                textOptions(
-                    "version",
-                    messages["addon.version"],
-                    metadataHolder.getMetadata().components
-                        .filter { ComponentType.ADDON == it.type }
-                        .filter { it.name == name }
-                        .map { it.version }
-                        .distinct()
-                        .toList())
-            }.ask()
-            installAddonCommand(name, versionAnswers["version"] as String)
-        } else {
-            super.run()
+        if (nameVersion == null) {
+            askResolvedAddonNameVersion().let {
+                nameVersion = "${it.first}:${it.second}"
+            }
         }
-    }
-
-    private fun installAddonCommand(name: String, version: String) {
-        addonNameVersion = "$name:$version"
         super.run()
     }
 
     override fun createSearchContext(): Component? {
-        return addonNameVersion?.resolveAddonCoordinates() ?: fail(messages["unknownAddon"].format(addonNameVersion))
+        return nameVersion?.resolveAddonCoordinates() ?: fail(messages["unknownAddon"].format(nameVersion))
     }
 }

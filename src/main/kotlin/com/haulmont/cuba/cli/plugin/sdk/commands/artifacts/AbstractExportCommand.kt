@@ -39,14 +39,14 @@ abstract class AbstractExportCommand : BaseComponentCommand() {
             if (!Files.exists(it)) Files.createDirectories(it)
         }
         val components = componentsToExport()
-        if (components.isEmpty()) {
+        if (components==null) {
             printWriter.println(messages["export.nothingToExport"].red())
             return
         }
         val metadata = SdkMetadata()
         val allDependencies = mutableListOf<MvnArtifact>()
         val paths = mutableSetOf<Path>()
-        for (component in componentsToExport()) {
+        for (component in components) {
             metadata.components.add(component)
             allDependencies.addAll(collectAllDependencies(component))
         }
@@ -91,7 +91,7 @@ abstract class AbstractExportCommand : BaseComponentCommand() {
         printWriter.println()
     }
 
-    abstract fun componentsToExport(): Collection<Component>
+    abstract fun componentsToExport(): Collection<Component>?
 
     abstract fun exportName(): String
 

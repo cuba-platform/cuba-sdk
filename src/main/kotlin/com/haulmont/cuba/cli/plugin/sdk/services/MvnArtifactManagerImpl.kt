@@ -66,7 +66,8 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
             mavenExecutor.mvn(
                 RepositoryTarget.SOURCE.getId(),
                 "org.apache.maven.plugins:maven-dependency-plugin:3.1.1:get",
-                arrayListOf("-Dartifact=${artifact.mvnCoordinates(classifier)}")
+                arrayListOf("-Dartifact=${artifact.mvnCoordinates(classifier)}"),
+                ignoreErrors = true
             )
         }
 
@@ -157,9 +158,6 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
                     commands
                 )
 
-                if (commandResult.contains("BUILD FAILURE")) {
-                    throw IllegalStateException("${artifactFile} upload failed. \n$commandResult")
-                }
             } finally {
                 Files.delete(tempCopy)
                 log.fine("Deleted temp file for ${artifact.mvnCoordinates(mainClassifier)}: ${tempCopy}")
@@ -234,9 +232,6 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
                 artifactList = true
             }
         }
-        if (commandResult.contains("BUILD FAILURE")) {
-            throw IllegalStateException("Resolve ${artifact.mvnCoordinates(classifier)} failed \n$commandResult")
-        }
 
         return artifacts
     }
@@ -248,7 +243,8 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
             "org.apache.maven.plugins:maven-dependency-plugin:3.1.1:get",
             arrayListOf(
                 "-Dartifact=${artifact.mvnCoordinates(classifier)}"
-            )
+            ),
+            ignoreErrors = true
         )
     }
 

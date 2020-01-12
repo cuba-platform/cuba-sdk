@@ -35,7 +35,7 @@ class MavenExecutorImpl : MavenExecutor {
     private val repositoryManager: RepositoryManager by sdkKodein.instance()
     private val printWriter: PrintWriter by sdkKodein.instance()
 
-    override fun mvn(profile: String, command: String, commands: List<String>): String {
+    override fun mvn(profile: String, command: String, commands: List<String>, ignoreErrors: Boolean): String {
         val rt = Runtime.getRuntime()
         val settingsFile = repositoryManager.mvnSettingFile()
         val cliCommandsList = ArrayList(
@@ -46,8 +46,8 @@ class MavenExecutorImpl : MavenExecutor {
                     mavenCmd()
                 ).toString(),
                 command,
-                "-s \"$settingsFile\"",
-                "-P $profile"
+                "-s", "\"$settingsFile\"",
+                "-P", profile
             ).asList()
         )
         cliCommandsList.addAll(commands)
@@ -74,7 +74,14 @@ class MavenExecutorImpl : MavenExecutor {
         if (CommonSdkParameters.printMaven) {
             printWriter.println()
         }
-        return commandOutput.toString()
+
+        val commandResult = commandOutput.toString()
+        if (!ignoreErrors) {
+            if (commandResult.contains("[BUILD FAILURE]") || commandResult.contains("[ERROR]")) {
+                throw IllegalStateException("Maven execution failed. \n$commandResult")
+            }
+        }
+        return commandResult
     }
 
     private fun mavenCmd() = when (currentOsType()) {
