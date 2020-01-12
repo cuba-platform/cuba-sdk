@@ -65,9 +65,10 @@ class ImportCommand : AbstractSdkCommand() {
                 )
             }
         )
+        printWriter.println()
         printWriter.println(messages["import.components"].doubleUnderline())
-        for (component in components) {
-            printWriter.println("$component")
+        for (component in components.sortedBy { "${it.type}_${it}" }) {
+            printWriter.println("${messages[component.type.toString().toLowerCase()]} $component")
         }
     }
 }
