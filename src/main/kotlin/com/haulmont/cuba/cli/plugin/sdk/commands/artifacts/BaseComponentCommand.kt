@@ -23,9 +23,7 @@ import com.haulmont.cuba.cli.green
 import com.haulmont.cuba.cli.localMessages
 import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
 import com.haulmont.cuba.cli.plugin.sdk.commands.CommonSdkParameters
-import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
-import com.haulmont.cuba.cli.plugin.sdk.dto.ComponentType
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 import com.haulmont.cuba.cli.plugin.sdk.services.ComponentManager
 import com.haulmont.cuba.cli.plugin.sdk.services.ComponentVersionManager
@@ -155,28 +153,5 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
         }.ask()
 
         return NameVersion(addonAnswers["name"] as String, versionAnswers["version"] as String)
-    }
-
-    fun String.resolveLibraryCoordinates(): Component? {
-        this.split(":").let {
-            when (it.size) {
-                3 -> return Component(it[0], it[1], it[2], ComponentType.LIB)
-                4 -> return Component(
-                    it[0],
-                    it[1],
-                    it[2],
-                    ComponentType.LIB,
-                    classifiers = arrayListOf(Classifier.pom(), Classifier(it[3]))
-                )
-                5 -> return Component(
-                    it[0],
-                    it[1],
-                    it[2],
-                    ComponentType.LIB,
-                    classifiers = arrayListOf(Classifier.pom(), Classifier(it[3], it[4]))
-                )
-                else -> return null
-            }
-        }
     }
 }
