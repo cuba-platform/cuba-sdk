@@ -19,7 +19,6 @@ package com.haulmont.cuba.cli.plugin.sdk.commands.repository
 import com.beust.jcommander.Parameters
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.green
-import com.haulmont.cuba.cli.localMessages
 import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
 import com.haulmont.cuba.cli.plugin.sdk.dto.Authentication
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
@@ -30,14 +29,11 @@ import com.haulmont.cuba.cli.prompting.Answers
 import com.haulmont.cuba.cli.prompting.Prompts
 import com.haulmont.cuba.cli.prompting.QuestionsList
 import org.kodein.di.generic.instance
-import java.io.PrintWriter
 import java.nio.file.Paths
 
 @Parameters(commandDescription = "Add repository for SDK")
 open class AddRepositoryCommand : AbstractSdkCommand() {
 
-    internal val messages by localMessages()
-    internal val printWriter: PrintWriter by sdkKodein.instance()
     internal val repositoryManager: RepositoryManager by sdkKodein.instance()
     internal var target: RepositoryTarget? = null
 

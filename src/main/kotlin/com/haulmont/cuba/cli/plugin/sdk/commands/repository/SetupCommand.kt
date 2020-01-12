@@ -7,7 +7,6 @@ import com.github.kittinunf.fuel.httpDelete
 import com.github.kittinunf.fuel.httpPost
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.green
-import com.haulmont.cuba.cli.localMessages
 import com.haulmont.cuba.cli.plugin.sdk.SdkPlugin
 import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
 import com.haulmont.cuba.cli.plugin.sdk.dto.Authentication
@@ -27,7 +26,6 @@ import org.kodein.di.generic.instance
 import java.io.FileInputStream
 import java.io.FileWriter
 import java.io.InputStreamReader
-import java.io.PrintWriter
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
@@ -39,8 +37,6 @@ class SetupCommand : AbstractSdkCommand() {
 
     internal val fileDownloadService: FileDownloadService by sdkKodein.instance()
     internal val repositoryManager: RepositoryManager by sdkKodein.instance()
-    private val printWriter: PrintWriter by kodein.instance()
-    private val messages by localMessages()
 
     override fun run() {
         Prompts.create(kodein) { askRepositorySettings() }
@@ -145,25 +141,30 @@ class SetupCommand : AbstractSdkCommand() {
     }
 
     private fun unzipMaven(answers: Map<String, Answer>, it: Path) {
-        printWriter.println(messages["unzipMavenCaption"])
         FileUtils.unzip(
             it,
             sdkSettings.sdkHome().resolve(sdkSettings["maven.path"]),
             true
-        )
+        ) { count, total ->
+            printProgress(
+                messages["unzipMavenCaption"],
+                100 * count.toFloat() / total.toFloat()
+            )
+        }
     }
 
     private fun downloadMaven(answers: Map<String, Answer>): Path {
         val archive = sdkSettings.sdkHome().resolve("maven.zip")
         if (!Files.exists(archive)) {
-            printWriter.println(messages["downloadMaven"])
             val file = Files.createFile(archive)
             fileDownloadService.downloadFile(
                 mavenDownloadLink(),
                 file
             ) { bytesRead: Long, contentLength: Long, isDone: Boolean ->
-                val progress = 100 * bytesRead.toFloat() / contentLength.toFloat()
-                printWriter.print(messages["downloadProgress"].format(progress))
+                printProgress(
+                    messages["downloadMaven"],
+                    100 * 100 * bytesRead.toFloat() / contentLength.toFloat()
+                )
             }
 
         }
@@ -336,7 +337,12 @@ class SetupCommand : AbstractSdkCommand() {
 
     private fun unzipRepository(answers: Answers, it: Path) {
         printWriter.println(messages["unzipRepositoryCaption"].format(answers["repository.path"]))
-        FileUtils.unzip(it, Path.of((answers["repository.path"]) as String))
+        FileUtils.unzip(it, Path.of((answers["repository.path"]) as String)) { count, total ->
+            printProgress(
+                messages["unzipProgress"],
+                100 * count.toFloat() / total.toFloat()
+            )
+        }
     }
 
     private fun needToInstallRepository(answers: Map<String, Answer>): Boolean {
@@ -373,14 +379,15 @@ class SetupCommand : AbstractSdkCommand() {
     private fun downloadRepository(answers: Answers): Path {
         val repositoryArchive = sdkSettings.sdkHome().resolve("nexus.zip")
         if (!Files.exists(repositoryArchive)) {
-            printWriter.println(messages["downloadNexus"])
             val file = Files.createFile(repositoryArchive)
             fileDownloadService.downloadFile(
                 nexusDownloadLink(),
                 file
             ) { bytesRead: Long, contentLength: Long, isDone: Boolean ->
-                val progress = 100 * bytesRead.toFloat() / contentLength.toFloat()
-                printWriter.print(messages["downloadProgress"].format(progress))
+                printProgress(
+                    messages["downloadNexus"],
+                    100 * 100 * bytesRead.toFloat() / contentLength.toFloat()
+                )
             }
         }
         printWriter.println()

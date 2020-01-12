@@ -19,11 +19,20 @@ package com.haulmont.cuba.cli.plugin.sdk.commands
 import com.beust.jcommander.Parameter
 import com.haulmont.cuba.cli.commands.AbstractCommand
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
+import com.haulmont.cuba.cli.green
+import com.haulmont.cuba.cli.localMessages
 import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
 import org.kodein.di.generic.instance
+import java.io.PrintWriter
 import java.nio.file.Path
 
 abstract class AbstractSdkCommand : AbstractCommand() {
+
+    internal val PROGRESS_LINE_LENGHT = 110
+
+    internal val messages by localMessages()
+    internal val printWriter: PrintWriter by sdkKodein.instance()
+    internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
 
     @Parameter(
         names = ["-s", "--settings"],
@@ -39,8 +48,6 @@ abstract class AbstractSdkCommand : AbstractCommand() {
         variableArity = true
     )
     internal var parameters: List<String>? = null
-
-    internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
 
     override fun preExecute() {
         super.preExecute()
@@ -61,5 +68,14 @@ abstract class AbstractSdkCommand : AbstractCommand() {
         if (settingsFile != null || parameters != null) {
             sdkSettings.resetProperties()
         }
+    }
+
+    internal fun printProgress(message: String, progress: Float): String {
+        var progressStr = messages["progress"].format(progress).green()
+        if (progress == 100f) {
+            progressStr += "\n"
+        }
+        val maxLength = PROGRESS_LINE_LENGHT - progressStr.length
+        return "\r" + message.substring(IntRange(0, maxLength - 1)).padEnd(maxLength) + progressStr;
     }
 }

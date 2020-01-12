@@ -19,10 +19,11 @@ package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.ComponentType
 
-fun BaseComponentCommand.askResolvedAddonNameVersion(): NameVersion {
+fun BaseComponentCommand.askResolvedAddonNameVersion(nameVersion: NameVersion?): NameVersion {
     val addons = metadataHolder.getMetadata().components
         .filter { ComponentType.ADDON == it.type }
     return askNameVersion(
+        nameVersion,
         "addon",
         addons.map { it.name }
             .requireNoNulls()
@@ -35,9 +36,10 @@ fun BaseComponentCommand.askResolvedAddonNameVersion(): NameVersion {
     }
 }
 
-fun BaseComponentCommand.askAllAddonsNameVersion(): NameVersion {
+fun BaseComponentCommand.askAllAddonsNameVersion(nameVersion: NameVersion?): NameVersion {
     val addons = componentVersionsManager.addons()
     return askNameVersion(
+        nameVersion,
         "addon",
         addons.map { it.id }.toList()
     ) { addonName ->

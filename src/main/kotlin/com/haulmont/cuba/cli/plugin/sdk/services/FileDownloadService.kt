@@ -22,5 +22,5 @@ interface FileDownloadService {
 
     fun  downloadFile(url: String,
                       downloadFile: Path,
-                      downloadProgressFun: (bytesRead: Long, contentLength: Long, isDone: Boolean) -> Unit)
+                      progressFun: (bytesRead: Long, contentLength: Long, isDone: Boolean) -> Unit)
 }

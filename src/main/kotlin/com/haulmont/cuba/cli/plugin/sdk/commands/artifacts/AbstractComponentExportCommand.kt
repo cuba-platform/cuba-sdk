@@ -57,7 +57,6 @@ abstract class AbstractComponentExportCommand : AbstractExportCommand() {
                     val component = search(it)
                     component?.let {
                         resolve(component)
-                        register(component)
                     }
                     printWriter.println()
                     printWriter.println(messages["resolved"].green())

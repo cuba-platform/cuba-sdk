@@ -23,11 +23,18 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
 
+typealias UnzipProcessCallback = (count: Int, total: Int) -> Unit
+
 class FileUtils {
     companion object {
-        fun unzip(zipFileName: Path, targetDir: Path, skipFirstEntry: Boolean = false): Path {
+        fun unzip(
+            zipFileName: Path, targetDir: Path, skipFirstEntry: Boolean = false,
+            progressFun: UnzipProcessCallback? = null
+        ): Path {
             var firstZipEntry: ZipEntry? = null;
             ZipFile(zipFileName.toFile()).use { zip ->
+                val total = zip.entries().asSequence().count()
+                var count = 0
                 zip.entries().asSequence().forEach { entry ->
                     if (firstZipEntry == null) {
                         firstZipEntry = entry
@@ -51,6 +58,8 @@ class FileUtils {
                             }
                         }
                     }
+
+                    progressFun?.let { it(++count, total) }
                 }
             }
             return targetDir

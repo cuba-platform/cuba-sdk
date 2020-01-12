@@ -24,17 +24,17 @@ class FileDownloadServiceImpl : FileDownloadService {
     override fun downloadFile(
         url: String,
         downloadFile: Path,
-        downloadProgressFun: (bytesRead: Long, contentLength: Long, isDone: Boolean) -> Unit
+        progressFun: (bytesRead: Long, contentLength: Long, isDone: Boolean) -> Unit
     ) {
         val (_, response, _) = Fuel.download(url).fileDestination { response, Url ->
             downloadFile.toFile()
         }.progress { readBytes, totalBytes ->
             val done = readBytes >= totalBytes
-            downloadProgressFun(readBytes, totalBytes, done)
+            progressFun(readBytes, totalBytes, done)
         }.response()
 
         if (response.statusCode == 200) {
-            downloadProgressFun(100, 100, true)
+            progressFun(100, 100, true)
         }
     }
 

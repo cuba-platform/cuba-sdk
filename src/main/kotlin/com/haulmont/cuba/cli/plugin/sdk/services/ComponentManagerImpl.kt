@@ -156,6 +156,7 @@ class ComponentManagerImpl : ComponentManager {
             log.info("Resolve component: ${component}")
             resolveDependencies(component, progress)
         }
+        register(component)
     }
 
     private fun resolveRawComponent(component: Component): Component? {
@@ -235,8 +236,7 @@ class ComponentManagerImpl : ComponentManager {
             repositoriesToUpload(repository).forEach {
                 mvnArtifactManager.upload(it, artifact)
             }
-            uploaded++
-            progress?.let { it(artifact, uploaded, total) }
+            progress?.let { it(artifact, ++uploaded, total) }
         }
 
         metadataHolder.getMetadata().installedComponents.add(
@@ -268,8 +268,24 @@ class ComponentManagerImpl : ComponentManager {
         if (CommonSdkParameters.singleThread) artifacts.stream() else artifacts.parallelStream()
 
     override fun register(component: Component) {
-        metadataHolder.getMetadata().components.add(component)
+        removeFromMetadata(component)
+        addToMetadata(component)
         metadataHolder.flushMetadata()
+    }
+
+    private fun addToMetadata(component: Component) {
+        metadataHolder.getMetadata().components.add(component)
+    }
+
+    private fun removeFromMetadata(component: Component) {
+        val existComponent = metadataHolder.getMetadata().components
+            .filter {
+                it.packageName == component.packageName
+                        && it.type == component.type
+                        && it.name == component.name
+                        && it.version == component.version
+            }.firstOrNull()
+        existComponent?.let { metadataHolder.getMetadata().components.remove(existComponent) }
     }
 
     private fun resolveDependencies(component: Component, progress: ResolveProgressCallback? = null): Component? {

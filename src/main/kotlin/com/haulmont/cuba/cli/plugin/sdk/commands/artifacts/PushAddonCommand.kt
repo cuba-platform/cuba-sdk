@@ -30,11 +30,7 @@ class PushAddonCommand : BasePushCommand() {
     private var nameVersion: String? = null
 
     override fun run() {
-        if (nameVersion == null) {
-            askResolvedAddonNameVersion().let {
-                nameVersion = "${it.first}:${it.second}"
-            }
-        }
+        nameVersion = askResolvedAddonNameVersion(nameVersion)
         super.run()
     }
 

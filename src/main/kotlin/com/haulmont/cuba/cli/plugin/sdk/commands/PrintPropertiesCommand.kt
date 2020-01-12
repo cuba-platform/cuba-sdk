@@ -18,18 +18,11 @@ package com.haulmont.cuba.cli.plugin.sdk.commands
 
 import com.beust.jcommander.Parameter
 import com.beust.jcommander.Parameters
-import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.green
-import com.haulmont.cuba.cli.localMessages
 import com.haulmont.cuba.cli.plugin.sdk.utils.doubleUnderline
-import org.kodein.di.generic.instance
-import java.io.PrintWriter
 
 @Parameters(commandDescription = "Print SDK properties")
 class PrintPropertiesCommand : AbstractSdkCommand() {
-
-    internal val messages by localMessages()
-    internal val printWriter: PrintWriter by sdkKodein.instance()
 
     @Parameter(
         names = ["--name"],

@@ -30,11 +30,7 @@ class InstallAddonCommand : BaseInstallCommand() {
     private var nameVersion: String? = null
 
     override fun run() {
-        if (nameVersion == null) {
-            askAllAddonsNameVersion().let {
-                nameVersion = "${it.first}:${it.second}"
-            }
-        }
+        nameVersion = askAllAddonsNameVersion(nameVersion)
         super.run()
     }
 

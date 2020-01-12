@@ -33,7 +33,7 @@ interface ComponentManager {
 
     fun resolve(component: Component, progress: ResolveProgressCallback? = null)
 
-    fun upload(component: Component, repository: Repository?, progress: UploadProcessCallback? = null)
+    fun upload(component: Component, repository: Repository?=null, progress: UploadProcessCallback? = null)
 
     fun register(component: Component)
 }

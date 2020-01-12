@@ -18,13 +18,9 @@ package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
 import com.beust.jcommander.Parameters
 import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
-import org.kodein.di.generic.instance
-import java.io.PrintWriter
 
 @Parameters(commandDescription = "Remove artifacts from SDK")
 class RemoveCommandGroup : AbstractSdkCommand() {
-
-    private val printWriter: PrintWriter by kodein.instance()
 
     override fun run() {
         printWriter.println("Use 'framework', 'addon' or 'lib' subcommands.")

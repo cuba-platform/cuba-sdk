@@ -21,21 +21,22 @@ import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.MvnArtifact
 import com.haulmont.cuba.cli.plugin.sdk.dto.SdkMetadata
+import com.haulmont.cuba.cli.plugin.sdk.utils.UnzipProcessCallback
 import org.kodein.di.generic.instance
-import java.io.BufferedInputStream
-import java.io.BufferedOutputStream
-import java.io.FileInputStream
-import java.io.FileOutputStream
+import java.io.*
+import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.logging.Logger
 import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
 
 class ImportExportServiceImpl : ImportExportService {
 
     private val log: Logger = Logger.getLogger(MavenExecutorImpl::class.java.name)
     private val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
+    private val componentManager: ComponentManager by sdkKodein.instance()
 
     override fun export(fileName: String, components: Collection<Component>, progress: ExportProcessCallback?): Path {
         val exportDir = Path.of(sdkSettings["sdk.export"]).also {
@@ -53,7 +54,7 @@ class ImportExportServiceImpl : ImportExportService {
         val sdkFileName = exportDir.resolve(fileName)
         ZipOutputStream(BufferedOutputStream(FileOutputStream(sdkFileName.toFile()))).use { out ->
             val data = ByteArray(1024)
-            val entry = ZipEntry("export.metadata")
+            val entry = ZipEntry("sdk.metadata")
             out.putNextEntry(entry)
             out.write(Gson().toJson(metadata).toByteArray())
             for (artifact in allDependencies) {
@@ -78,14 +79,84 @@ class ImportExportServiceImpl : ImportExportService {
                         }
                     }
                 }
-                exported++
                 progress?.let {
-                    progress(artifact, exported, total)
+                    it(artifact, ++exported, total)
                 }
             }
         }
         return sdkFileName
     }
+
+    override fun import(
+        importFilePath: Path,
+        uploadRequired: Boolean,
+        unzipProgressFun: UnzipProcessCallback?,
+        uploadProgressFun: UploadProcessCallback?
+    ): Collection<Component> {
+        val targetDir = Path.of(sdkSettings["maven.local.repo"]).also {
+            if (!Files.exists(it)) {
+                Files.createDirectories(it)
+            }
+        }
+        var sdkMetadata: SdkMetadata? = null
+        ZipFile(importFilePath.toFile()).use { zip ->
+            val total = zip.entries().asSequence().count()
+            var count = 0
+            zip.entries().asSequence().forEach { entry ->
+                zip.getInputStream(entry).use { input ->
+                    var entryName = entry.name
+                    if (entryName.startsWith("m2")){
+                        entryName = entryName.replaceFirst("m2\\","")
+                    }
+                    targetDir.resolve(entryName).also {
+                        Files.createDirectories(it.parent)
+                        if (Files.exists(it)) {
+                            Files.delete(it)
+                        }
+                    }.also { zipPath ->
+                        if (!entry.isDirectory) {
+                            if (entryName == "sdk.metadata") {
+                                sdkMetadata = readMetadata(input)
+                            } else {
+                                Files.createFile(zipPath)
+                                    .toFile().outputStream().use { output ->
+                                        input.copyTo(output)
+                                    }
+                            }
+                        }
+                    }
+                }
+
+                unzipProgressFun?.let { it(++count, total) }
+            }
+        }
+        val components: Collection<Component> = sdkMetadata?.components ?: emptySet()
+        for (component in components) {
+            componentManager.register(component)
+        }
+        if (uploadRequired) {
+            if (sdkMetadata != null) {
+                val allDependencies = mutableListOf<MvnArtifact>()
+
+                for (component in components) {
+                    allDependencies.addAll(collectAllDependencies(component))
+                }
+                var totalUploaded = 0f
+                val total = allDependencies.size
+                for (component in components) {
+                    componentManager.upload(component) { artifact: MvnArtifact, uploaded: Float, totalForComponent: Int ->
+                        uploadProgressFun?.let { it(artifact, ++totalUploaded, total) }
+                    }
+                }
+            }
+        }
+        return components
+    }
+
+    private fun readMetadata(input: InputStream): SdkMetadata =
+        input.bufferedReader(StandardCharsets.UTF_8).use {
+            return Gson().fromJson(it.readText(), SdkMetadata::class.java)
+        }
 
     internal fun collectAllDependencies(component: Component): List<MvnArtifact> {
         val list = mutableListOf<MvnArtifact>()

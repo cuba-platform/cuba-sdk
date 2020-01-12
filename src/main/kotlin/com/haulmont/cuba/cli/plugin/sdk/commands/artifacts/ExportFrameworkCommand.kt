@@ -27,11 +27,7 @@ class ExportFrameworkCommand : AbstractComponentExportCommand() {
     private var nameVersion: String? = null
 
     override fun run() {
-        if (nameVersion == null) {
-            askResolvedFrameworkNameVersion().let {
-                nameVersion = "${it.first}:${it.second}"
-            }
-        }
+        nameVersion = askResolvedFrameworkNameVersion(nameVersion)
         super.run()
     }
 

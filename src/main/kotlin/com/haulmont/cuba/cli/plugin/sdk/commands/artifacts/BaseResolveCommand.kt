@@ -32,7 +32,6 @@ abstract class BaseResolveCommand : BaseComponentCommand() {
             }
             component?.let {
                 resolve(component)
-                register(component)
             }
             printWriter.println()
             printWriter.println(messages["resolved"].green())

@@ -20,7 +20,6 @@ import com.beust.jcommander.Parameter
 import com.beust.jcommander.Parameters
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.green
-import com.haulmont.cuba.cli.localMessages
 import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
 import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
@@ -28,14 +27,11 @@ import com.haulmont.cuba.cli.prompting.Answers
 import com.haulmont.cuba.cli.prompting.Prompts
 import com.haulmont.cuba.cli.prompting.QuestionsList
 import org.kodein.di.generic.instance
-import java.io.PrintWriter
 
 @Parameters(commandDescription = "Remove repository from SDK")
 open class RemoveRepositoryCommand : AbstractSdkCommand() {
 
-    internal val messages by localMessages()
     internal val repositoryManager: RepositoryManager by sdkKodein.instance()
-    internal val printWriter: PrintWriter by sdkKodein.instance()
     internal var target: RepositoryTarget? = null
 
     @Parameter(description = "Repository name")

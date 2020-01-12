@@ -18,16 +18,12 @@ package com.haulmont.cuba.cli.plugin.sdk.commands.repository
 
 import com.github.kittinunf.fuel.httpHead
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
-import com.haulmont.cuba.cli.localMessages
 import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusManager
 import org.kodein.di.generic.instance
-import java.io.PrintWriter
 
 abstract class NexusCommand : AbstractSdkCommand() {
 
-    internal val printWriter: PrintWriter by kodein.instance()
-    internal val messages by localMessages()
     internal val nexusManager: NexusManager by sdkKodein.instance()
 
     internal fun repositoryStarted(): Boolean {

@@ -27,11 +27,7 @@ class InstallFrameworkCommand : BaseInstallCommand() {
     private var nameVersion: String? = null
 
     override fun run() {
-        if (nameVersion == null) {
-            askAllFrameworkNameVersion().let {
-                nameVersion = "${it.first}:${it.second}"
-            }
-        }
+        nameVersion = askAllFrameworkNameVersion(nameVersion)
         super.run()
     }
 

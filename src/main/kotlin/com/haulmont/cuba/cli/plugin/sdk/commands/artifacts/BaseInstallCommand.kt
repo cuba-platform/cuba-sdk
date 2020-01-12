@@ -46,7 +46,6 @@ abstract class BaseInstallCommand : BaseComponentCommand() {
                 if (force || component == null) {
                     component = search(it)?.also {
                         resolve(it)
-                        register(it)
                     }
                 }
                 component?.let { upload(it, repository) }

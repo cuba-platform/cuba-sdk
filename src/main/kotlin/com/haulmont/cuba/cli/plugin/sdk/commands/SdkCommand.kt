@@ -19,18 +19,14 @@ package com.haulmont.cuba.cli.plugin.sdk.commands
 import com.beust.jcommander.Parameters
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.green
-import com.haulmont.cuba.cli.localMessages
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusManager
 import com.haulmont.cuba.cli.plugin.sdk.utils.doubleUnderline
 import com.haulmont.cuba.cli.red
 import org.kodein.di.generic.instance
-import java.io.PrintWriter
 
 @Parameters(commandDescription = "CUBA SDK")
 class SdkCommand : AbstractSdkCommand() {
 
-    private val printWriter: PrintWriter by kodein.instance()
-    private val messages by localMessages()
     private val nexusManager: NexusManager by sdkKodein.instance()
 
     override fun run() {
