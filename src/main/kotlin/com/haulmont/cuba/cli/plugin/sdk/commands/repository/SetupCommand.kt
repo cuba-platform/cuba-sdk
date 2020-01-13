@@ -35,12 +35,13 @@ class SetupCommand : AbstractSdkCommand() {
     internal val repositoryManager: RepositoryManager by sdkKodein.instance()
     internal val nexusScriptManager: NexusScriptManager by sdkKodein.instance()
 
+    override fun onlyForConfiguredSdk(): Boolean  = false
+
     override fun run() {
         Prompts.create(kodein) { askRepositorySettings() }
             .let(Prompts::ask)
             .let(this::setupRepository)
     }
-
 
     private fun QuestionsList.askRepositorySettings() {
         question("repository.type", messages["setup.remoteOrLocalQuestionCaption"]) {

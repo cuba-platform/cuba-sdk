@@ -40,4 +40,6 @@ class PrintPropertiesCommand : AbstractSdkCommand() {
     }
 
     private fun propertyNames(): Collection<String> = names ?: sdkSettings.propertyNames()
+
+    override fun onlyForConfiguredSdk(): Boolean  = false
 }

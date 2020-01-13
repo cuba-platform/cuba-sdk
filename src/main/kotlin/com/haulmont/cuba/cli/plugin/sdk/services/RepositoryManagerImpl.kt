@@ -138,6 +138,50 @@ class RepositoryManagerImpl : RepositoryManager {
             .filter { it.active }.toMutableList()
     }
 
+    override fun addPremiumRepository(licenseKey: String) {
+        licenseKey.split("-").also {
+            val login = it[0]
+            val password = it[1]
+
+            getInternalRepositories(RepositoryTarget.SEARCH).addAll(
+                listOf(
+                    Repository(
+                        name = "cuba-bintray-premium",
+                        type = RepositoryType.BINTRAY,
+                        url = "https://api.bintray.com/search/packages/maven?",
+                        authentication = Authentication("$login-@cuba-platform", password),
+                        repositoryName = "cuba-platform"
+                    ),
+                    Repository(
+                        name = "cuba-nexus-premium",
+                        type = RepositoryType.NEXUS2,
+                        url = "https://repo.cuba-platform.com/service/local/lucene/search",
+                        authentication = Authentication(login, password)
+                    )
+                )
+            )
+
+            getInternalRepositories(RepositoryTarget.SOURCE).addAll(
+                listOf(
+                    Repository(
+                        name = "cuba-bintray-premium",
+                        type = RepositoryType.BINTRAY,
+                        url = "https://cuba-platform.bintray.com/premium",
+                        authentication = Authentication("$login-@cuba-platform", password)
+                    ),
+                    Repository(
+                        name = "cuba-nexus-premium",
+                        type = RepositoryType.NEXUS2,
+                        url = "https://repo.cuba-platform.com/content/groups/premium",
+                        authentication = Authentication(login, password)
+                    )
+                )
+            )
+
+            flush()
+        }
+    }
+
     override fun isOnline(repository: Repository): Boolean {
         var url = repository.url
         if (RepositoryType.LOCAL == repository.type) {
@@ -200,7 +244,7 @@ class RepositoryManagerImpl : RepositoryManager {
                 }
             }
             "servers" {
-                RepositoryTarget.values().forEach { target ->
+                listOf(RepositoryTarget.SOURCE, RepositoryTarget.TARGET).forEach { target ->
                     getRepositories(target)
                         .filter { it.authentication != null }
                         .forEach {

@@ -17,12 +17,30 @@
 package com.haulmont.cuba.cli.plugin.sdk.commands.repository
 
 import com.beust.jcommander.Parameters
+import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
+import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
+import com.haulmont.cuba.cli.prompting.Prompts
+import org.kodein.di.generic.instance
 
 @Parameters(commandDescription = "Set license key for SDK")
 class LicenseCommand : AbstractSdkCommand() {
 
-    override fun run() {
+    internal val repositoryManager: RepositoryManager by sdkKodein.instance()
 
+    override fun run() {
+        val licenseKey = Prompts.create {
+            question("licenseKey", messages["license.askLicenseCaption"]) {
+                validate {
+                    checkRegex("[0-9a-zA-Z]+-[0-9a-zA-Z]+", "License key should be form of ************-************")
+                }
+            }
+        }.ask()["licenseKey"] as String
+
+        activate(licenseKey)
+    }
+
+    private fun activate(licenseKey: String) {
+        repositoryManager.addPremiumRepository(licenseKey)
     }
 }

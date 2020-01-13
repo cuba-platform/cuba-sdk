@@ -22,6 +22,7 @@ import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.green
 import com.haulmont.cuba.cli.localMessages
 import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
+import com.haulmont.cuba.cli.prompting.ValidationException
 import org.kodein.di.generic.instance
 import java.io.PrintWriter
 import java.nio.file.Path
@@ -42,7 +43,7 @@ abstract class AbstractSdkCommand : AbstractCommand() {
     internal var settingsFile: String? = null
 
     @Parameter(
-        names = ["--p", "--parameter"],
+        names = ["--sp", "--parameter"],
         description = "Settings parameter",
         hidden = true,
         variableArity = true
@@ -60,6 +61,9 @@ abstract class AbstractSdkCommand : AbstractCommand() {
                     sdkSettings[it[0]] = it[1]
                 }
             }
+        }
+        if (onlyForConfiguredSdk() && !sdkSettings.sdkConfigured()) {
+            throw ValidationException(messages["sdk.notConfigured"])
         }
     }
 
@@ -88,4 +92,6 @@ abstract class AbstractSdkCommand : AbstractCommand() {
             printWriter.println()
         }
     }
+
+    open fun onlyForConfiguredSdk(): Boolean = true
 }
