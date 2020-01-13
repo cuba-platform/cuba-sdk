@@ -21,7 +21,12 @@ import com.beust.jcommander.Parameters
 import com.haulmont.cuba.cli.WorkingDirectoryManager
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
+import com.haulmont.cuba.cli.plugin.sdk.dto.Component
+import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
+import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
+import com.haulmont.cuba.cli.plugin.sdk.services.ComponentManager
 import com.haulmont.cuba.cli.plugin.sdk.services.ImportExportService
+import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
 import com.haulmont.cuba.cli.plugin.sdk.utils.doubleUnderline
 import com.haulmont.cuba.cli.red
 import org.kodein.di.generic.instance
@@ -32,10 +37,19 @@ import java.nio.file.Path
 class ImportCommand : AbstractSdkCommand() {
 
     internal val exportService: ImportExportService by sdkKodein.instance()
+    internal val componentManager: ComponentManager by sdkKodein.instance()
+    internal val repositoryManager: RepositoryManager by sdkKodein.instance()
     internal val workingDirectoryManager: WorkingDirectoryManager by kodein.instance()
 
     @Parameter(description = "SDK archive to import")
     private var importFile: String? = null
+
+    @Parameter(
+        names = ["--repo"],
+        description = "Repository",
+        hidden = true
+    )
+    private var repositoryName: String? = null
 
     @Parameter(names = ["--no-upload"], description = "Do not upload components to repositories", hidden = true)
     var noUpload: Boolean = false
@@ -47,28 +61,53 @@ class ImportCommand : AbstractSdkCommand() {
             printWriter.println(messages["import.fileNotFound"].format(importFile).red())
             return
         }
-        val components = exportService.import(importFilePath, !noUpload,
-            { count, total ->
-                printWriter.print(
-                    printProgress(
-                        messages["unzipProgress"],
-                        100 * count.toFloat() / total.toFloat()
-                    )
-                )
-            },
-            { artifact, uploaded, total ->
-                printWriter.print(
-                    printProgress(
-                        messages["dependencyUploadProgress"].format(artifact.mvnCoordinates()),
-                        uploaded / total * 100
-                    )
-                )
+
+        var repository: Repository? = null
+        if (repositoryName != null) {
+            repository = repositoryManager.getRepository(repositoryName!!, RepositoryTarget.TARGET)
+            if (repository == null) {
+                printWriter.println(messages["repository.unknown"].format(repositoryName).red())
+                return
             }
-        )
-        printWriter.println()
-        printWriter.println(messages["import.components"].doubleUnderline())
-        for (component in components.sortedBy { "${it.type}_${it}" }) {
-            printWriter.println("${messages[component.type.toString().toLowerCase()]} $component")
+        }
+
+        import(importFilePath)
+            .also { upload(it, repository) }
+            .also { components ->
+                printWriter.println(messages["import.components"].doubleUnderline())
+                components.sortedBy { "${it.type}_${it}" }.forEach {
+                    printWriter.println("${messages[it.type.toString().toLowerCase()]} $it")
+                }
+            }
+    }
+
+    private fun import(importFilePath: Path): Collection<Component> {
+        val components = exportService.import(importFilePath, !noUpload) { count, total ->
+            printProgress(
+                messages["unzipProgress"],
+                calculateProgress(count, total)
+            )
+        }
+        return components
+    }
+
+    private fun upload(components: Collection<Component>, repository: Repository?) {
+        if (!noUpload && components.isNotEmpty()) {
+            printProgress(messages["upload.progress"].format(""), 0f)
+            var totalUploaded = 0
+            val total = components.flatMap { it.collectAllDependencies() }.count()
+            components.forEach { component ->
+                componentManager.upload(
+                    component,
+                    repository
+                ) { artifact, _, _ ->
+                    printProgress(
+                        messages["upload.progress"].format(artifact.mvnCoordinates()),
+                        calculateProgress(++totalUploaded, total)
+                    )
+                }
+            }
+            printWriter.println()
         }
     }
 }

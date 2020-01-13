@@ -31,19 +31,16 @@ abstract class AbstractExportCommand : BaseComponentCommand() {
 
     override fun run() {
         val components = componentsToExport()
-        if (components==null) {
+        if (components == null) {
             printWriter.println(messages["export.nothingToExport"].red())
             return
         }
-        val sdkArchive = exportService.export("${exportName()}.zip",components){artifact, exported, total ->
-            printWriter.print(
-                printProgress(
-                    messages["dependencyExportProgress"].format(artifact.mvnCoordinates()),
-                    exported / total * 100
-                )
+        val sdkArchive = exportService.export("${exportName()}.zip", components) { artifact, exported, total ->
+            printProgress(
+                messages["export.progress"].format(artifact.mvnCoordinates()),
+                calculateProgress(exported, total)
             )
         }
-        printWriter.println()
         printWriter.println(messages["export.exportedTo"].format(sdkArchive).green())
     }
 

@@ -28,6 +28,8 @@ class NexusManagerImpl : NexusManager {
     internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
     internal var process: Process? = null
 
+    override fun isLocal(): Boolean = sdkSettings["repository.type"] == "local"
+
     override fun startRepository() {
         thread {
             val newProcess = Runtime.getRuntime().exec(
@@ -61,4 +63,5 @@ class NexusManagerImpl : NexusManager {
         }
         return false
     }
+
 }

@@ -29,12 +29,11 @@ class InstallAddonCommand : BaseInstallCommand() {
     )
     private var nameVersion: String? = null
 
-    override fun run() {
-        nameVersion = askAllAddonsNameVersion(nameVersion)
-        super.run()
-    }
-
     override fun createSearchContext(): Component? {
-        return nameVersion?.resolveAddonCoordinates() ?: fail(messages["unknownAddon"].format(nameVersion))
+        return askAllAddonsNameVersion(nameVersion).resolveAddonCoordinates() ?: fail(
+            messages["addon.unknown"].format(
+                nameVersion
+            )
+        )
     }
 }

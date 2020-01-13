@@ -46,12 +46,12 @@ abstract class BasePushCommand : BaseComponentCommand() {
                 if (component != null) {
                     upload(component,repository)
                     printWriter.println()
-                    printWriter.println(messages["installed"].green())
+                    printWriter.println(messages["install.finished"].green())
                 } else {
-                    printWriter.println(messages["notResolved"].red())
+                    printWriter.println(messages["resolve.failed"].red())
                 }
             } else {
-                printWriter.println(messages["alreadyInstalled"].green())
+                printWriter.println(messages["install.alreadyInstalled"].green())
             }
         }
     }

@@ -33,6 +33,8 @@ interface MvnArtifactManager {
 
     fun resolveClassifiers(artifact: MvnArtifact)
 
+    fun remove(artifact: MvnArtifact)
+
     fun searchAdditionalDependencies(artifact: MvnArtifact): List<MvnArtifact>
 
 }

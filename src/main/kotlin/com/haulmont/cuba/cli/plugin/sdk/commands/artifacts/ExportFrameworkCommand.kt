@@ -26,14 +26,9 @@ class ExportFrameworkCommand : AbstractComponentExportCommand() {
     @Parameter(description = "Framework name and version <name>:<version>", hidden = true)
     private var nameVersion: String? = null
 
-    override fun run() {
-        nameVersion = askResolvedFrameworkNameVersion(nameVersion)
-        super.run()
-    }
-
     override fun createSearchContext(): Component? {
-        return nameVersion?.resolveFrameworkCoordinates() ?: fail(
-            messages["unknownFramework"].format(
+        return askResolvedFrameworkNameVersion(nameVersion).resolveFrameworkCoordinates() ?: fail(
+            messages["framework.unknown"].format(
                 nameVersion
             )
         )

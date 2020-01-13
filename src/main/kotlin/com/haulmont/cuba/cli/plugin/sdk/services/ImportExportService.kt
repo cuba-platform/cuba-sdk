@@ -21,7 +21,7 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.MvnArtifact
 import com.haulmont.cuba.cli.plugin.sdk.utils.UnzipProcessCallback
 import java.nio.file.Path
 
-typealias ExportProcessCallback = (artifact: MvnArtifact, exported: Float, total: Int) -> Unit
+typealias ExportProcessCallback = (artifact: MvnArtifact, exported: Int, total: Int) -> Unit
 
 interface ImportExportService {
 
@@ -30,7 +30,6 @@ interface ImportExportService {
     fun import(
         importFilePath: Path,
         uploadRequired: Boolean = false,
-        unzipProgressFun: UnzipProcessCallback? = null,
-        uploadProgressFun: UploadProcessCallback? = null
+        unzipProgressFun: UnzipProcessCallback? = null
     ): Collection<Component>
 }

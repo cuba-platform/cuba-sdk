@@ -70,12 +70,22 @@ abstract class AbstractSdkCommand : AbstractCommand() {
         }
     }
 
-    internal fun printProgress(message: String, progress: Float): String {
-        var progressStr = messages["progress"].format(progress).green()
-        if (progress == 100f) {
-            progressStr += "\n"
-        }
+    internal fun calculateProgress(count: Int, total: Int) = calculateProgress(count.toFloat(), total)
+
+    internal fun calculateProgress(count: Long, total: Long) = calculateProgress(count.toFloat(), total.toFloat())
+
+    internal fun calculateProgress(count: Float, total: Int) = calculateProgress(count, total.toFloat())
+
+    internal fun calculateProgress(count: Float, total: Float) = count / total * 100
+
+    internal fun printProgress(message: String, progress: Float) {
+        val progressStr = messages["progress"].format(progress).green()
         val maxLength = PROGRESS_LINE_LENGHT - progressStr.length
-        return "\r" + message.substring(IntRange(0, maxLength - 1)).padEnd(maxLength) + progressStr;
+
+        val trim = if (message.length > maxLength - 1) message.substring(IntRange(0, maxLength - 1)) else message
+        printWriter.print("\r" + trim.padEnd(maxLength) + progressStr)
+        if (progress == 100f) {
+            printWriter.println()
+        }
     }
 }

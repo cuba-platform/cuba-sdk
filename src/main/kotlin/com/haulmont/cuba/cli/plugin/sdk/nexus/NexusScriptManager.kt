@@ -16,15 +16,16 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.nexus
 
+import com.github.kittinunf.fuel.core.Response
+import org.json.JSONObject
 
-interface NexusManager {
+interface NexusScriptManager {
 
-    fun isLocal(): Boolean
+    fun loadScript(name:String):String
 
-    fun startRepository()
+    fun create(login: String, password: String, name: String, script: String, type: String = "groovy"): Response
 
-    fun stopRepository()
+    fun run(login: String, password: String, name: String, jsonObject: JSONObject? = null): Response
 
-    fun isStarted(): Boolean
-
+    fun drop(login: String, password: String, name: String): Response
 }

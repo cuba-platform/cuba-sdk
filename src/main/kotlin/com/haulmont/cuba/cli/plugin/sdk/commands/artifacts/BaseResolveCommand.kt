@@ -27,7 +27,7 @@ abstract class BaseResolveCommand : BaseComponentCommand() {
             if (force || component == null) {
                 component = search(it)
             } else {
-                printWriter.println(messages["alreadyResolved"].green())
+                printWriter.println(messages["resolve.alreadyResolved"].green())
                 return
             }
             component?.let {

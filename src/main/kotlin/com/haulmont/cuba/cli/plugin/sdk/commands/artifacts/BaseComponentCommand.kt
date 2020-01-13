@@ -19,6 +19,7 @@ package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 import com.beust.jcommander.Parameter
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.cubaplugin.model.PlatformVersionsManager
+import com.haulmont.cuba.cli.green
 import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
 import com.haulmont.cuba.cli.plugin.sdk.commands.CommonSdkParameters
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
@@ -78,31 +79,23 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
         printWriter.println()
         printWriter.println("Uploading dependencies...")
         componentManager.upload(component, repository) { artifact, uploaded, total ->
-            printWriter.print(
-                printProgress(
-                    messages["dependencyUploadProgress"].format(artifact.mvnCoordinates()),
-                    uploaded / total * 100
-                )
+            printProgress(
+                messages["upload.progress"].format(artifact.mvnCoordinates()),
+                calculateProgress(uploaded, total)
             )
         }
-        printWriter.print(
-            printProgress(messages["uploaded"], 100f)
-        )
+        printWriter.println(messages["upload.finished"].green())
     }
 
     internal fun resolve(component: Component) {
         printWriter.println("Resolving dependencies...")
         componentManager.resolve(component) { resolvedComponent, resolved, total ->
-            printWriter.print(
-                printProgress(
-                    messages["dependencyResolvingProgress"].format(resolvedComponent),
-                    resolved / total * 100
-                )
+            printProgress(
+                messages["resolve.progress"].format(resolvedComponent),
+                calculateProgress(resolved, total)
             )
         }
-        printWriter.print(
-            printProgress(messages["resolved"], 100f)
-        )
+        printWriter.println(messages["resolve.finished"].green())
     }
 
     internal fun register(component: Component) {
@@ -128,14 +121,14 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
         if (nameVersion == null) {
             val name = askName(msgPrefix, names)
             val version = askVersion(msgPrefix, versions, name)
-            return "${name}:$version"
+            return "${name}:$version".toLowerCase()
         }
-        val split = nameVersion.split(nameVersion)
+        val split = nameVersion.split(":")
         if (split.size == 1) {
             val version = askVersion(msgPrefix, versions, nameVersion)
-            return "${nameVersion}:$version"
+            return "${nameVersion}:$version".toLowerCase()
         }
-        return nameVersion
+        return nameVersion.toLowerCase()
     }
 
     private fun askVersion(

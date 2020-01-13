@@ -35,4 +35,13 @@ data class Component(
     override fun toString(): String {
         return (name ?: "${packageName}:${name ?: ""}") + ":$version"
     }
+
+    fun collectAllDependencies(): Set<MvnArtifact> {
+        val list = mutableSetOf<MvnArtifact>()
+        list.addAll(dependencies)
+        for (child in components) {
+            list.addAll(child.dependencies)
+        }
+        return list
+    }
 }

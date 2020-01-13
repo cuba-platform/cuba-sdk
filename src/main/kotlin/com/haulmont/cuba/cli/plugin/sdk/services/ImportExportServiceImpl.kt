@@ -19,7 +19,6 @@ package com.haulmont.cuba.cli.plugin.sdk.services
 import com.google.gson.Gson
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
-import com.haulmont.cuba.cli.plugin.sdk.dto.MvnArtifact
 import com.haulmont.cuba.cli.plugin.sdk.dto.SdkMetadata
 import com.haulmont.cuba.cli.plugin.sdk.utils.UnzipProcessCallback
 import org.kodein.di.generic.instance
@@ -42,20 +41,18 @@ class ImportExportServiceImpl : ImportExportService {
         val exportDir = Path.of(sdkSettings["sdk.export"]).also {
             if (!Files.exists(it)) Files.createDirectories(it)
         }
-        val metadata = SdkMetadata()
-        val allDependencies = mutableListOf<MvnArtifact>()
-        val paths = mutableSetOf<Path>()
-        for (component in components) {
-            metadata.components.add(component)
-            allDependencies.addAll(collectAllDependencies(component))
+        val metadata = SdkMetadata().apply {
+            this.components.addAll(components)
         }
+        val allDependencies = components.flatMap { it.collectAllDependencies() }.toList()
+        val paths = mutableSetOf<Path>()
         val total = allDependencies.size
-        var exported = 0f
+        var exported = 0
         val sdkFileName = exportDir.resolve(fileName)
         ZipOutputStream(BufferedOutputStream(FileOutputStream(sdkFileName.toFile()))).use { out ->
             val data = ByteArray(1024)
-            val entry = ZipEntry("sdk.metadata")
-            out.putNextEntry(entry)
+            val metadataEntry = ZipEntry("sdk.metadata")
+            out.putNextEntry(metadataEntry)
             out.write(Gson().toJson(metadata).toByteArray())
             for (artifact in allDependencies) {
                 val zipPath = artifact.localPath(Path.of("m2")).parent
@@ -90,8 +87,7 @@ class ImportExportServiceImpl : ImportExportService {
     override fun import(
         importFilePath: Path,
         uploadRequired: Boolean,
-        unzipProgressFun: UnzipProcessCallback?,
-        uploadProgressFun: UploadProcessCallback?
+        unzipProgressFun: UnzipProcessCallback?
     ): Collection<Component> {
         val targetDir = Path.of(sdkSettings["maven.local.repo"]).also {
             if (!Files.exists(it)) {
@@ -105,8 +101,8 @@ class ImportExportServiceImpl : ImportExportService {
             zip.entries().asSequence().forEach { entry ->
                 zip.getInputStream(entry).use { input ->
                     var entryName = entry.name
-                    if (entryName.startsWith("m2")){
-                        entryName = entryName.replaceFirst("m2\\","")
+                    if (entryName.startsWith("m2")) {
+                        entryName = entryName.replaceFirst("m2\\", "")
                     }
                     targetDir.resolve(entryName).also {
                         Files.createDirectories(it.parent)
@@ -131,25 +127,7 @@ class ImportExportServiceImpl : ImportExportService {
             }
         }
         val components: Collection<Component> = sdkMetadata?.components ?: emptySet()
-        for (component in components) {
-            componentManager.register(component)
-        }
-        if (uploadRequired) {
-            if (sdkMetadata != null) {
-                val allDependencies = mutableListOf<MvnArtifact>()
-
-                for (component in components) {
-                    allDependencies.addAll(collectAllDependencies(component))
-                }
-                var totalUploaded = 0f
-                val total = allDependencies.size
-                for (component in components) {
-                    componentManager.upload(component) { artifact: MvnArtifact, uploaded: Float, totalForComponent: Int ->
-                        uploadProgressFun?.let { it(artifact, ++totalUploaded, total) }
-                    }
-                }
-            }
-        }
+        components.forEach { componentManager.register(it) }
         return components
     }
 
@@ -158,12 +136,5 @@ class ImportExportServiceImpl : ImportExportService {
             return Gson().fromJson(it.readText(), SdkMetadata::class.java)
         }
 
-    internal fun collectAllDependencies(component: Component): List<MvnArtifact> {
-        val list = mutableListOf<MvnArtifact>()
-        list.addAll(component.dependencies)
-        for (child in component.components) {
-            list.addAll(child.dependencies)
-        }
-        return list
-    }
+
 }

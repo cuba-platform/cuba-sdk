@@ -69,7 +69,7 @@ class SdkPlugin : CliPlugin {
                 }
 
                 command("set-license", LicenseCommand())
-                command("clean", CleanCommand())
+                command("cleanup", CleanCommand())
                 command("docker", DockerCommand())
 
                 command("import", ImportCommand())
@@ -115,7 +115,7 @@ class SdkPlugin : CliPlugin {
 
     @Subscribe
     fun onDestroy(event: DestroyPluginEvent) {
-        nexusManager.stopRepository()
+        StopCommand().execute()
     }
 
 }

@@ -24,7 +24,7 @@ import com.haulmont.cuba.cli.red
 class StartCommand : NexusCommand() {
 
     override fun run() {
-        if (sdkSettings["repository.type"] != "local") {
+        if (!nexusManager.isLocal()) {
             printWriter.println(messages["start.sdkConfiguredForRemote"])
             return
         }

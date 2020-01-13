@@ -1,18 +1,14 @@
 package com.haulmont.cuba.cli.plugin.sdk.commands.repository
 
 import com.beust.jcommander.Parameters
-import com.github.kittinunf.fuel.core.Headers
-import com.github.kittinunf.fuel.core.extensions.authentication
-import com.github.kittinunf.fuel.httpDelete
-import com.github.kittinunf.fuel.httpPost
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.green
-import com.haulmont.cuba.cli.plugin.sdk.SdkPlugin
 import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
 import com.haulmont.cuba.cli.plugin.sdk.dto.Authentication
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryType
+import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusScriptManager
 import com.haulmont.cuba.cli.plugin.sdk.services.FileDownloadService
 import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
 import com.haulmont.cuba.cli.plugin.sdk.utils.FileUtils
@@ -37,6 +33,7 @@ class SetupCommand : AbstractSdkCommand() {
 
     internal val fileDownloadService: FileDownloadService by sdkKodein.instance()
     internal val repositoryManager: RepositoryManager by sdkKodein.instance()
+    internal val nexusScriptManager: NexusScriptManager by sdkKodein.instance()
 
     override fun run() {
         Prompts.create(kodein) { askRepositorySettings() }
@@ -46,34 +43,34 @@ class SetupCommand : AbstractSdkCommand() {
 
 
     private fun QuestionsList.askRepositorySettings() {
-        question("repository.type", messages["remoteOrLocalQuestionCaption"]) {
+        question("repository.type", messages["setup.remoteOrLocalQuestionCaption"]) {
             validate {
                 value.toLowerCase() == "remote" || value.toLowerCase() == "local"
             }
             default("local")
         }
-        question("url", messages["remoteRepositoryURLCaption"]) {
+        question("url", messages["remotesetup.repositoryURLCaption"]) {
             askIf { isRemoteRepository(it) }
         }
-        question("repository.path", messages["localRepositoryLocationCaption"]) {
+        question("repository.path", messages["setup.localRepositoryLocationCaption"]) {
             default(sdkSettings.sdkHome().resolve("repository").toString())
             askIf { !isRemoteRepository(it) }
         }
-        confirmation("rewrite-install-path", messages["localRepositoryRewriteInstallPathCaption"]) {
+        confirmation("rewrite-install-path", messages["setup.localRepositoryRewriteInstallPathCaption"]) {
             default(false)
             askIf { !repositoryPathIsEmpty(it) }
         }
-        question("port", messages["localRepositoryPortCaption"]) {
+        question("port", messages["setup.localRepositoryPortCaption"]) {
             default("8081")
             askIf { !isRemoteRepository(it) }
         }
-        question("login", messages["repositoryLoginCaption"]) {
+        question("login", messages["setup.repositoryLoginCaption"]) {
             default("admin")
         }
-        question("password", messages["repositoryPasswordCaption"]) {
+        question("password", messages["setup.repositoryPasswordCaption"]) {
             default("admin")
         }
-        question("repository-name", messages["repositoryName"]) {
+        question("repository-name", messages["setup.repositoryName"]) {
             default("cuba-sdk")
         }
     }
@@ -147,8 +144,8 @@ class SetupCommand : AbstractSdkCommand() {
             true
         ) { count, total ->
             printProgress(
-                messages["unzipMavenCaption"],
-                100 * count.toFloat() / total.toFloat()
+                messages["setup.unzipMavenCaption"],
+                calculateProgress(count, total)
             )
         }
     }
@@ -162,13 +159,12 @@ class SetupCommand : AbstractSdkCommand() {
                 file
             ) { bytesRead: Long, contentLength: Long, isDone: Boolean ->
                 printProgress(
-                    messages["downloadMaven"],
-                    100 * 100 * bytesRead.toFloat() / contentLength.toFloat()
+                    messages["setup.downloadMaven"],
+                    calculateProgress(bytesRead, contentLength)
                 )
             }
 
         }
-        printWriter.println()
         return archive
     }
 
@@ -227,6 +223,7 @@ class SetupCommand : AbstractSdkCommand() {
             Path.of(answers["repository.path"] as String, "sonatype-work", "nexus3", "admin.password")
         if (Files.exists(adminPassword)) {
             runNexusConfigurationScript(answers, "admin", adminPassword.toFile().readText(StandardCharsets.UTF_8))
+            Files.delete(adminPassword)
         } else {
             runNexusConfigurationScript(answers, sdkSettings["repository.login"], sdkSettings["repository.password"])
         }
@@ -237,72 +234,70 @@ class SetupCommand : AbstractSdkCommand() {
     }
 
     private fun runNexusConfigurationScript(answers: Answers, login: String, password: String) {
-        val script = SdkPlugin::class.java
-            .getResourceAsStream("scripts/createRepository.groovy")
-            .bufferedReader()
-            .use { it.readText() }
-        if (createNexusScript(login, password, script)) {
+        if (createNexusScript(login, password, nexusScriptManager.loadScript("createRepository.groovy"))) {
             runNexusScript(answers, login, password)
             dropNexusScript(answers)
+            addAdditionalScripts(answers)
         }
+    }
+
+    private fun addAdditionalScripts(answers: Map<String, Answer>) {
+        val login = answers["login"] as String
+        val password = answers["password"] as String
+        nexusScriptManager.drop(login, password, "sdk.cleanup")
+        nexusScriptManager.create(
+            login,
+            password,
+            "sdk.cleanup",
+            nexusScriptManager.loadScript("cleanupRepository.groovy")
+        )
+            .also {
+                if (it.statusCode != 204) {
+                    printWriter.println(messages["setup.repositoryCanNotBeConfiguredAutomatically"].format(it.responseMessage).red())
+                }
+            }
+        nexusScriptManager.drop(login, password, "sdk.drop-component")
+        nexusScriptManager.create(
+            login,
+            password,
+            "sdk.drop-component",
+            nexusScriptManager.loadScript("dropComponent.groovy")
+        )
+            .also {
+                if (it.statusCode != 204) {
+                    printWriter.println(messages["setup.repositoryCanNotBeConfiguredAutomatically"].format(it.responseMessage).red())
+                }
+            }
     }
 
     private fun dropNexusScript(answers: Map<String, Answer>) {
-        "${sdkSettings["repository.url"]}service/rest/v1/script/sdk-init"
-            .httpDelete()
-            .authentication()
-            .basic(answers["login"] as String, answers["password"] as String)
-            .header(Headers.ACCEPT, "application/json")
-            .response()
+        nexusScriptManager.drop(answers["login"] as String, answers["password"] as String, "sdk.init")
     }
 
     private fun createNexusScript(login: String, password: String, script: String): Boolean {
-        val jsonObject = JSONObject()
-            .put("name", "sdk-init")
-            .put("type", "groovy")
-            .put("content", script)
-        val payload = jsonObject.toString()
-        val (_, response, _) =
-            "${sdkSettings["repository.url"]}service/rest/v1/script"
-                .httpPost()
-                .authentication()
-                .basic(login, password)
-                .header(Headers.CONTENT_TYPE, "application/json")
-                .header(Headers.ACCEPT, "application/json")
-                .header(Headers.CACHE_CONTROL, "no-cache")
-                .body(jsonObject.toString())
-                .response()
-        if (response.statusCode != 204) {
-            printWriter.println(messages["setup.repositoryCanNotBeConfiguredAutomatically"].format(response.responseMessage).red())
-            return false
-        }
-        return true
+        nexusScriptManager.create(login, password, "sdk.init", script)
+            .also {
+                if (it.statusCode != 204) {
+                    printWriter.println(messages["setup.repositoryCanNotBeConfiguredAutomatically"].format(it.responseMessage).red())
+                    return false
+                }
+                return true
+            }
     }
 
     private fun runNexusScript(answers: Answers, login: String, password: String): Boolean {
-        val (_, response, _) =
-            "${sdkSettings["repository.url"]}service/rest/v1/script/sdk-init/run"
-                .httpPost()
-                .authentication()
-                .basic(login, password)
-                .header(Headers.CONTENT_TYPE, "application/json")
-                .header(Headers.ACCEPT, "application/json")
-                .header(Headers.CACHE_CONTROL, "no-cache")
-                .body(
-                    """
-                    {
-                        "login": "${answers["login"]}",
-                        "password": "${answers["password"]}",
-                        "repoName": "${answers["repository-name"]}"
-                    }
-                    """
-                )
-                .response()
-        if (response.statusCode != 200) {
-            printWriter.println(messages["setup.repositoryCanNotBeConfiguredAutomatically"].format(response.responseMessage).red())
-            return false
+        nexusScriptManager.run(
+            login, password, "sdk.init", JSONObject()
+                .put("login", "${answers["login"]}")
+                .put("password", "${answers["password"]}")
+                .put("repoName", "${answers["repository-name"]}")
+        ).also {
+            if (it.statusCode != 200) {
+                printWriter.println(messages["setup.repositoryCanNotBeConfiguredAutomatically"].format(it.responseMessage).red())
+                return false
+            }
+            return true
         }
-        return true
     }
 
     private fun persistSdkCredentials(answers: Answers) {
@@ -336,11 +331,11 @@ class SetupCommand : AbstractSdkCommand() {
     }
 
     private fun unzipRepository(answers: Answers, it: Path) {
-        printWriter.println(messages["unzipRepositoryCaption"].format(answers["repository.path"]))
+        printWriter.println(messages["setup.unzipRepositoryCaption"].format(answers["repository.path"]))
         FileUtils.unzip(it, Path.of((answers["repository.path"]) as String)) { count, total ->
             printProgress(
                 messages["unzipProgress"],
-                100 * count.toFloat() / total.toFloat()
+                calculateProgress(count, total)
             )
         }
     }
@@ -357,6 +352,7 @@ class SetupCommand : AbstractSdkCommand() {
     private fun createSdkRepoSettingsFile(answers: Answers) {
         if (!isRemoteRepository(answers)) {
             sdkSettings["repository.url"] = sdkSettings["template.repositoryUrl"].format(answers["port"])
+            sdkSettings["repository.name"] = answers["repository-name"] as String
         }
         sdkSettings["repository.type"] = answers["repository.type"] as String
         sdkSettings["repository.path"] = answers["repository.path"] as String
@@ -385,12 +381,11 @@ class SetupCommand : AbstractSdkCommand() {
                 file
             ) { bytesRead: Long, contentLength: Long, isDone: Boolean ->
                 printProgress(
-                    messages["downloadNexus"],
-                    100 * 100 * bytesRead.toFloat() / contentLength.toFloat()
+                    messages["setup.downloadNexus"],
+                    calculateProgress(bytesRead, contentLength)
                 )
             }
         }
-        printWriter.println()
         return repositoryArchive
     }
 

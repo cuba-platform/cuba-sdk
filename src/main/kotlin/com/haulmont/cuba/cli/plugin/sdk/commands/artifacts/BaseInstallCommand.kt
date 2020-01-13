@@ -50,9 +50,9 @@ abstract class BaseInstallCommand : BaseComponentCommand() {
                 }
                 component?.let { upload(it, repository) }
                 printWriter.println()
-                printWriter.println(messages["installed"].green())
+                printWriter.println(messages["install.finished"].green())
             } else {
-                printWriter.println(messages["alreadyInstalled"].green())
+                printWriter.println(messages["install.alreadyInstalled"].green())
             }
         }
     }

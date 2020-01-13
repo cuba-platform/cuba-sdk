@@ -33,7 +33,7 @@ class SdkCommand : AbstractSdkCommand() {
         printWriter.println(messages["sdk.title"].doubleUnderline())
         printWriter.println("SDK home: ${sdkSettings["sdk.home"].green()}")
         printWriter.print("Repository type: ${sdkSettings["repository.type"].green()} ")
-        if (isLocalRepository()) {
+        if (nexusManager.isLocal()) {
             printWriter.print(if (nexusManager.isStarted()) "running".green() else "stopped".red())
             printWriter.println()
             printWriter.println("Repository URL: ${sdkSettings["repository.url"].green()}")
@@ -45,6 +45,4 @@ class SdkCommand : AbstractSdkCommand() {
         printWriter.println("Maven local repository: ${sdkSettings["maven.local.repo"].green()}")
 
     }
-
-    private fun isLocalRepository() = sdkSettings["repository.type"] == "local"
 }

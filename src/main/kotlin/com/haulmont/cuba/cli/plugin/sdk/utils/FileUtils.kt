@@ -19,14 +19,25 @@ package com.haulmont.cuba.cli.plugin.sdk.utils
 import java.io.*
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.*
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
+
 
 typealias UnzipProcessCallback = (count: Int, total: Int) -> Unit
 
 class FileUtils {
     companion object {
+
+        @Throws(IOException::class)
+        fun deleteDirectory(path: Path?) {
+            Files.walk(path)
+                .sorted(Comparator.reverseOrder())
+                .map { obj: Path -> obj.toFile() }
+                .forEach { obj: File -> obj.delete() }
+        }
+
         fun unzip(
             zipFileName: Path, targetDir: Path, skipFirstEntry: Boolean = false,
             progressFun: UnzipProcessCallback? = null

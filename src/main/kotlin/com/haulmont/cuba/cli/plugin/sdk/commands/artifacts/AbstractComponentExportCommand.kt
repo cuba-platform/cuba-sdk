@@ -29,9 +29,9 @@ abstract class AbstractComponentExportCommand : AbstractExportCommand() {
     fun componentToExport(): Component? {
         componetToExport?.let { return it }
         createSearchContext()?.let {
-            return searchInMetadata(it)
+            componetToExport = searchInMetadata(it)
         }
-        return null
+        return componetToExport
     }
 
     override fun exportName(): String {

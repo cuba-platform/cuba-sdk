@@ -23,6 +23,7 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
 import com.haulmont.cuba.cli.plugin.sdk.dto.MvnArtifact
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
+import com.haulmont.cuba.cli.plugin.sdk.utils.FileUtils
 import com.haulmont.cuba.cli.plugin.sdk.utils.authorizeIfRequired
 import org.apache.maven.model.Model
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
@@ -80,7 +81,7 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
         return null
     }
 
-    private fun getArtifactFile(artifact: MvnArtifact, classifier: Classifier): Path {
+    private fun getArtifactFile(artifact: MvnArtifact, classifier: Classifier = Classifier.default()): Path {
         return artifact.localPath(Path.of(sdkSettings["maven.local.repo"]), classifier)
     }
 
@@ -135,6 +136,7 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
                     "-Dpackaging=${mainClassifier.extension}",
                     "-Durl=${repository.url}"
                 ).also {
+
                     val artifactPomFile = getArtifactPomFile(artifact)
                     if (mainClassifier.type.isNotEmpty()) {
                         it.add("-Dclassifier=${mainClassifier.type}")
@@ -145,10 +147,11 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
                     } else {
                         it.add("-DgeneratePom=true")
                     }
+
                     if (files.isNotEmpty()) {
-                        it.add("-Dfiles=\"${files.joinToString(separator = ",")}\"")
-                        it.add("-Dclassifiers=\"${classifiers.joinToString(separator = ",")}\"")
-                        it.add("-Dtypes=\"${types.joinToString(separator = ",")}\"")
+                        it.add("-Dfiles=\"${files.joinToString(",")}\"")
+                        it.add("-Dclassifiers=\"${classifiers.joinToString(",")}\"")
+                        it.add("-Dtypes=\"${types.joinToString(",")}\"")
                     }
                 }
 
@@ -250,6 +253,13 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
 
     override fun resolveClassifiers(artifact: MvnArtifact) {
         artifact.classifiers.removeAll { !artifactDownloaded(artifact, it) }
+    }
+
+    override fun remove(artifact: MvnArtifact) {
+        val artifactPath = getArtifactFile(artifact).parent
+        if (Files.exists(artifactPath)) {
+            FileUtils.deleteDirectory(artifactPath)
+        }
     }
 
     override fun searchAdditionalDependencies(artifact: MvnArtifact): List<MvnArtifact> {

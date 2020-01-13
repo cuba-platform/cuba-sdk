@@ -16,13 +16,21 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
+import com.beust.jcommander.Parameter
 import com.beust.jcommander.Parameters
-import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
+import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 
 @Parameters(commandDescription = "Remove add-on from SDK")
-class RemoveAddonCommand : AbstractSdkCommand() {
+class RemoveAddonCommand : BaseRemoveCommand() {
 
-    override fun run() {
+    @Parameter(
+        description = "Addon name and version <name>:<version> or in full coordinates format <group>:<name>:<version>",
+        hidden = true
+    )
+    private var nameVersion: String? = null
 
+    override fun createSearchContext(): Component? {
+        return askResolvedAddonNameVersion(nameVersion).resolveAddonCoordinates()
+            ?: fail(messages["addon.unknown"].format(nameVersion))
     }
 }

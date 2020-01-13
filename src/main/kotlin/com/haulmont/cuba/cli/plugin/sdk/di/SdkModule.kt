@@ -19,6 +19,8 @@ package com.haulmont.cuba.cli.cubaplugin.di
 import com.haulmont.cuba.cli.kodein
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusManager
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusManagerImpl
+import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusScriptManager
+import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusScriptManagerImpl
 import com.haulmont.cuba.cli.plugin.sdk.services.*
 import org.kodein.di.Kodein
 import org.kodein.di.generic.bind
@@ -64,6 +66,10 @@ private val sdkModule = Kodein.Module {
 
     bind<NexusManager>() with singleton {
         NexusManagerImpl()
+    }
+
+    bind<NexusScriptManager>() with singleton {
+        NexusScriptManagerImpl()
     }
 
     bind<ImportExportService>() with singleton {

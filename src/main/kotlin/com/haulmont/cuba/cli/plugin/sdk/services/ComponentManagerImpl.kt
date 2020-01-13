@@ -22,7 +22,10 @@ import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.generation.VelocityHelper
 import com.haulmont.cuba.cli.plugin.sdk.commands.CommonSdkParameters
 import com.haulmont.cuba.cli.plugin.sdk.dto.*
+import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusManager
+import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusScriptManager
 import com.haulmont.cuba.cli.plugin.sdk.search.*
+import org.json.JSONObject
 import org.kodein.di.generic.instance
 import java.nio.file.Files
 import java.nio.file.Path
@@ -37,7 +40,9 @@ class ComponentManagerImpl : ComponentManager {
     private val metadataHolder: MetadataHolder by sdkKodein.instance()
     private val repositoryManager: RepositoryManager by sdkKodein.instance()
     private val mvnArtifactManager: MvnArtifactManager by sdkKodein.instance()
-    private val sdkSettingsHolder: SdkSettingsHolder by sdkKodein.instance()
+    private val nexusManager: NexusManager by sdkKodein.instance()
+    private val nexusScriptManager: NexusScriptManager by sdkKodein.instance()
+    private val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
     private val velocityHelper: VelocityHelper = VelocityHelper()
 
     private fun localProgress(component: Component) =
@@ -77,18 +82,19 @@ class ComponentManagerImpl : ComponentManager {
             .isPresent
     }
 
-    override fun searchInMetadata(component: Component): Component? {
-        val componentTemplate = findTemplate(component) ?: component
-        return metadataHolder.getMetadata().components.stream()
+    override fun searchInMetadata(component: Component): Component? =
+        searchComponent(findTemplate(component) ?: component, metadataHolder.getMetadata().components)
+
+    private fun searchComponent(component: Component, components: Collection<Component>): Component? =
+        components.stream()
             .filter {
-                it.type == componentTemplate.type &&
-                        it.name == componentTemplate.name &&
-                        it.packageName == componentTemplate.packageName &&
-                        it.version == componentTemplate.version
+                it.type == component.type &&
+                        it.name == component.name &&
+                        it.packageName == component.packageName &&
+                        it.version == component.version
             }
             .findAny()
             .orElse(null)
-    }
 
     private fun findTemplate(component: Component): Component? =
         componentTemplates.getTemplates().searchTemplate(component)?.let {
@@ -161,7 +167,7 @@ class ComponentManagerImpl : ComponentManager {
 
     private fun resolveRawComponent(component: Component): Component? {
         for (classifier in component.classifiers) {
-            val componentPath = Path.of(sdkSettingsHolder["maven.local.repo"])
+            val componentPath = Path.of(sdkSettings["maven.local.repo"])
                 .resolve(component.packageName)
                 .resolve(component.name)
                 .resolve(component.version)
@@ -212,7 +218,7 @@ class ComponentManagerImpl : ComponentManager {
                     Component(
                         packageName = "gradle",
                         name = "gradle",
-                        url = sdkSettingsHolder["gradle.downloadLink"].format(gradleVersion),
+                        url = sdkSettings["gradle.downloadLink"].format(gradleVersion),
                         version = gradleVersion,
                         classifiers = mutableListOf(Classifier("", "zip")),
                         type = ComponentType.RAW
@@ -223,14 +229,10 @@ class ComponentManagerImpl : ComponentManager {
     }
 
     override fun upload(component: Component, repository: Repository?, progress: UploadProcessCallback?) {
-        val artifacts = component.components.stream()
-            .flatMap { it.dependencies.stream() }
-            .collect(Collectors.toSet())
-
-        artifacts.addAll(component.dependencies)
+        val artifacts = component.collectAllDependencies()
 
         val total = artifacts.size
-        var uploaded = 0f
+        var uploaded = 0
 
         artifactsStream(artifacts).forEach { artifact ->
             repositoriesToUpload(repository).forEach {
@@ -246,6 +248,36 @@ class ComponentManagerImpl : ComponentManager {
             )
         )
         metadataHolder.flushMetadata()
+    }
+
+    override fun remove(componentToRemove: Component, removeFromRepo: Boolean, progress: RemoveProcessCallback?) {
+        searchComponent(componentToRemove, metadataHolder.getMetadata().components)?.let { component ->
+            val allOtherDependencies = metadataHolder.getMetadata().components
+                .filter { it != component }
+                .flatMap { it.collectAllDependencies() }
+            val dependencies = component.collectAllDependencies()
+            val total = dependencies.size
+            var removed = 0
+            dependencies.forEach { artifact ->
+                if (!allOtherDependencies.contains(artifact)) {
+                    removeArtifact(artifact, removeFromRepo)
+                }
+                progress?.let { it(artifact, ++removed, total) }
+            }
+            removeFromMetadata(component)
+            metadataHolder.flushMetadata()
+        }
+    }
+
+    private fun removeArtifact(artifact: MvnArtifact, removeFromRepo: Boolean) {
+        mvnArtifactManager.remove(artifact)
+        if (removeFromRepo && nexusManager.isLocal()) {
+            nexusScriptManager.run(
+                sdkSettings["repository.login"], sdkSettings["repository.password"], "sdk.drop-component", JSONObject()
+                    .put("repoName", sdkSettings["repository.name"])
+                    .put("artifact", artifact.mvnCoordinates())
+            )
+        }
     }
 
     private fun repositoriesToUpload(repository: Repository?): List<Repository> =
@@ -278,14 +310,12 @@ class ComponentManagerImpl : ComponentManager {
     }
 
     private fun removeFromMetadata(component: Component) {
-        val existComponent = metadataHolder.getMetadata().components
-            .filter {
-                it.packageName == component.packageName
-                        && it.type == component.type
-                        && it.name == component.name
-                        && it.version == component.version
-            }.firstOrNull()
-        existComponent?.let { metadataHolder.getMetadata().components.remove(existComponent) }
+        searchComponent(component, metadataHolder.getMetadata().components)?.let {
+            metadataHolder.getMetadata().components.remove(it)
+        }
+        searchComponent(component, metadataHolder.getMetadata().installedComponents)?.let {
+            metadataHolder.getMetadata().installedComponents.remove(it)
+        }
     }
 
     private fun resolveDependencies(component: Component, progress: ResolveProgressCallback? = null): Component? {

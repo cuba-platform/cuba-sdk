@@ -16,13 +16,21 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
+import com.beust.jcommander.Parameter
 import com.beust.jcommander.Parameters
-import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
+import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 
 @Parameters(commandDescription = "Remove framework from SDK")
-class RemoveFrameworkCommand : AbstractSdkCommand() {
+class RemoveFrameworkCommand : BaseRemoveCommand() {
 
-    override fun run() {
+    @Parameter(description = "Framework name and version <name>:<version>", hidden = true)
+    private var nameVersion: String? = null
 
+    override fun createSearchContext(): Component? {
+        return askResolvedFrameworkNameVersion(nameVersion).resolveFrameworkCoordinates() ?: fail(
+            messages["framework.unknown"].format(
+                nameVersion
+            )
+        )
     }
 }

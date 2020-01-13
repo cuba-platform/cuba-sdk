@@ -29,12 +29,8 @@ class ExportAddonCommand : AbstractComponentExportCommand() {
     )
     private var nameVersion: String? = null
 
-    override fun run() {
-        nameVersion = askResolvedAddonNameVersion(nameVersion)
-        super.run()
-    }
-
     override fun createSearchContext(): Component? {
-        return nameVersion?.resolveAddonCoordinates() ?: fail(messages["unknownAddon"].format(nameVersion))
+        return askResolvedAddonNameVersion(nameVersion).resolveAddonCoordinates()
+            ?: fail(messages["addon.unknown"].format(nameVersion))
     }
 }

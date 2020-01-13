@@ -29,13 +29,8 @@ class FileDownloadServiceImpl : FileDownloadService {
         val (_, response, _) = Fuel.download(url).fileDestination { response, Url ->
             downloadFile.toFile()
         }.progress { readBytes, totalBytes ->
-            val done = readBytes >= totalBytes
-            progressFun(readBytes, totalBytes, done)
+            progressFun(readBytes, totalBytes, readBytes >= totalBytes)
         }.response()
-
-        if (response.statusCode == 200) {
-            progressFun(100, 100, true)
-        }
     }
 
 

@@ -16,6 +16,7 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.services
 
+import com.haulmont.cuba.cli.commands.CommonParameters
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.commands.CommonSdkParameters
 import com.haulmont.cuba.cli.plugin.sdk.dto.OsType
@@ -51,6 +52,9 @@ class MavenExecutorImpl : MavenExecutor {
             ).asList()
         )
         cliCommandsList.addAll(commands)
+        if (CommonParameters.stacktrace) {
+            cliCommandsList.add("-e")
+        }
 
         val cliCommands = arrayOfNulls<String>(cliCommandsList.size)
         cliCommandsList.toArray(cliCommands)

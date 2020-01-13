@@ -16,6 +16,7 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.services
 
+import com.github.kittinunf.fuel.Fuel
 import com.google.gson.Gson
 import com.google.gson.internal.LinkedTreeMap
 import com.google.gson.reflect.TypeToken
@@ -24,6 +25,7 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.Authentication
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryType
+import com.haulmont.cuba.cli.plugin.sdk.utils.authorizeIfRequired
 import org.kodein.di.generic.instance
 import org.redundent.kotlin.xml.Node
 import org.redundent.kotlin.xml.xml
@@ -130,6 +132,18 @@ class RepositoryManagerImpl : RepositoryManager {
     override fun getRepositories(target: RepositoryTarget): MutableList<Repository> {
         return getInternalRepositories(target)
             .filter { it.active }.toMutableList()
+    }
+
+    override fun isOnline(repository: Repository): Boolean {
+        if (RepositoryType.LOCAL == repository.type) {
+            return Files.exists(Path.of(repository.url.substringAfter("file:///")))
+        } else {
+            val (_, response, _) =
+                Fuel.head(repository.url)
+                    .authorizeIfRequired(repository)
+                    .response()
+            return response.statusCode == 200
+        }
     }
 
     private fun getInternalRepositories(target: RepositoryTarget) =

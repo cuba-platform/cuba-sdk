@@ -21,7 +21,8 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.MvnArtifact
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 
 typealias ResolveProgressCallback = (component: Component, resolved: Float, total: Int) -> Unit
-typealias UploadProcessCallback = (artifact: MvnArtifact, uploaded: Float, total: Int) -> Unit
+typealias UploadProcessCallback = (artifact: MvnArtifact, uploaded: Int, total: Int) -> Unit
+typealias RemoveProcessCallback = (artifact: MvnArtifact, removed: Int, total: Int) -> Unit
 
 interface ComponentManager {
 
@@ -33,7 +34,9 @@ interface ComponentManager {
 
     fun resolve(component: Component, progress: ResolveProgressCallback? = null)
 
-    fun upload(component: Component, repository: Repository?=null, progress: UploadProcessCallback? = null)
+    fun upload(component: Component, repository: Repository? = null, progress: UploadProcessCallback? = null)
+
+    fun remove(componentToRemove: Component, removeFromRepo:Boolean, progress: RemoveProcessCallback? = null)
 
     fun register(component: Component)
 }

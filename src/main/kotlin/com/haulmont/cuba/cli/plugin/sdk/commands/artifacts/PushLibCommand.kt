@@ -33,7 +33,7 @@ class PushLibCommand : BasePushCommand() {
     private var nameVersion: String? = null
 
     override fun createSearchContext(): Component? {
-        return nameVersion?.resolveLibraryCoordinates() ?: fail(messages["unknownLib"].format(nameVersion))
+        return nameVersion?.resolveLibraryCoordinates() ?: fail(messages["lib.unknown"].format(nameVersion))
     }
 
     override fun search(component: Component): Component? {

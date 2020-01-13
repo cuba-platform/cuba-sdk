@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Haulmont.
+ * Copyright (c) 2008-2020 Haulmont.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,64 @@
 package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
 import com.beust.jcommander.Parameters
+import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
+import com.haulmont.cuba.cli.green
 import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
+import com.haulmont.cuba.cli.plugin.sdk.commands.repository.StartCommand
+import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusManager
+import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusScriptManager
+import com.haulmont.cuba.cli.plugin.sdk.utils.FileUtils
+import com.haulmont.cuba.cli.prompting.Answers
+import com.haulmont.cuba.cli.prompting.Prompts
+import com.haulmont.cuba.cli.prompting.QuestionsList
+import org.json.JSONObject
+import org.kodein.di.generic.instance
+import java.nio.file.Files
+import java.nio.file.Path
 
 @Parameters(commandDescription = "Clean SDK")
 class CleanCommand : AbstractSdkCommand() {
 
-    override fun run() {
+    internal val nexusManager: NexusManager by sdkKodein.instance()
+    internal val nexusScriptManager: NexusScriptManager by sdkKodein.instance()
 
+    override fun run() {
+        Prompts.create(kodein) { askConfirmation() }
+            .let(Prompts::ask)
+            .let(this::cleanup)
+    }
+
+    private fun cleanup(answers: Answers) {
+        if (answers["needToStartRepo"] != null && answers["needToStartRepo"] as Boolean) {
+            StartCommand().execute()
+        }
+        if (answers["confirmed"] as Boolean) {
+            Path.of(sdkSettings["maven.local.repo"]).also {
+                FileUtils.deleteDirectory(it)
+                Files.createDirectories(it)
+            }
+
+            if (nexusManager.isLocal() && nexusManager.isStarted()) {
+                nexusScriptManager.run(
+                    sdkSettings["repository.login"],
+                    sdkSettings["repository.password"],
+                    "sdk.cleanup",
+                    JSONObject().put("repoName", sdkSettings["repository.name"])
+                )
+            }
+        }
+        printWriter.println(messages["cleanup.finished"].green())
+    }
+
+    private fun QuestionsList.askConfirmation() {
+        confirmation("confirmed", messages["cleanup.confirmation"]) {
+            default(false)
+        }
+        confirmation("needToStartRepo", messages["remove.needToStartRepo"]) {
+            default(true)
+            askIf {
+                it["confirmed"] as Boolean && nexusManager.isLocal() && !nexusManager.isStarted()
+            }
+        }
     }
 }

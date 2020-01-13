@@ -26,14 +26,9 @@ class ResolveFrameworkCommand : BaseResolveCommand() {
     @Parameter(description = "Framework name and version <name>:<version>", hidden = false)
     private var nameVersion: String? = null
 
-    override fun run() {
-        nameVersion = askAllFrameworkNameVersion(nameVersion)
-        super.run()
-    }
-
     override fun createSearchContext(): Component? {
-        return nameVersion?.resolveFrameworkCoordinates() ?: fail(
-            messages["unknownFramework"].format(
+        return askAllFrameworkNameVersion(nameVersion).resolveFrameworkCoordinates() ?: fail(
+            messages["framework.unknown"].format(
                 nameVersion
             )
         )

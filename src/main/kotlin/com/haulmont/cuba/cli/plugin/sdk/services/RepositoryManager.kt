@@ -32,6 +32,8 @@ interface RepositoryManager {
 
     fun getRepositories(target: RepositoryTarget): Collection<Repository>
 
+    fun isOnline(repository: Repository):Boolean
+
     fun buildMavenSettingsFile()
 
     fun mvnSettingFile(): Path
