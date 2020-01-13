@@ -47,7 +47,7 @@ open class ListRepositoryCommand : AbstractSdkCommand() {
                         if (repositoryManager.isOnline(repository)) messages["repository.online"].green() else messages["repository.offline"].red()
                     printWriter.println("Status: $repositoryStatus")
                 }
-                printWriter.println("Type: ${repository.type}")
+                printWriter.println("Type: ${messages["repository.${repository.type}"]}")
                 if (repository.authentication != null) {
                     printWriter.println("Login: ${repository.authentication.login}")
                     printWriter.println("Password: ${repository.authentication.password}")
