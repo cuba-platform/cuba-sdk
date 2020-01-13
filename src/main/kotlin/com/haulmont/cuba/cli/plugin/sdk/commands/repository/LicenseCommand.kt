@@ -18,6 +18,7 @@ package com.haulmont.cuba.cli.plugin.sdk.commands.repository
 
 import com.beust.jcommander.Parameters
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
+import com.haulmont.cuba.cli.green
 import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
 import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
 import com.haulmont.cuba.cli.prompting.Prompts
@@ -38,6 +39,8 @@ class LicenseCommand : AbstractSdkCommand() {
         }.ask()["licenseKey"] as String
 
         activate(licenseKey)
+
+        printWriter.println(messages["license.licenseKeyconfigured"].green())
     }
 
     private fun activate(licenseKey: String) {
