@@ -16,6 +16,7 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
+import com.beust.jcommander.Parameter
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.green
 import com.haulmont.cuba.cli.plugin.sdk.commands.repository.StartCommand
@@ -29,8 +30,12 @@ abstract class BaseRemoveCommand : BaseComponentCommand() {
 
     internal val nexusManager: NexusManager by sdkKodein.instance()
 
+    @Parameter(names = ["--not-form-repository"], description = "Do not remove from local repository", hidden = true)
+    var notFromRepository: Boolean = false
+        private set
+
     override fun run() {
-        var removeFromRepository = true
+        var removeFromRepository = !notFromRepository
         if (!nexusManager.isStarted() && nexusManager.isLocal()) {
             val answers = Prompts.create {
                 confirmation("remove.needToStartRepo", messages["remove.needToStartRepo"]) {
