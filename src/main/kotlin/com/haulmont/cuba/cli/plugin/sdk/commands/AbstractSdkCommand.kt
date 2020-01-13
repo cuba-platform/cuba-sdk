@@ -35,14 +35,14 @@ abstract class AbstractSdkCommand : AbstractCommand() {
     internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
 
     @Parameter(
-        names = ["-s", "--settings"],
+        names = ["--s", "--settings"],
         description = "Settings file",
         hidden = true
     )
     internal var settingsFile: String? = null
 
     @Parameter(
-        names = ["-p", "--parameter"],
+        names = ["--p", "--parameter"],
         description = "Settings parameter",
         hidden = true,
         variableArity = true

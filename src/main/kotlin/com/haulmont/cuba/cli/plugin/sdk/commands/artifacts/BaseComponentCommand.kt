@@ -52,7 +52,7 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
     var printMaven: Boolean = false
         private set
 
-    @Parameter(names = ["--force"], description = "Force resolve and upload component with dependencies", hidden = true)
+    @Parameter(names = ["--f", "--force"], description = "Force resolve and upload component with dependencies", hidden = true)
     var force: Boolean = false
         private set
 

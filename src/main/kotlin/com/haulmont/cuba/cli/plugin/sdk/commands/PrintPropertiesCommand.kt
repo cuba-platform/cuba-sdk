@@ -25,7 +25,7 @@ import com.haulmont.cuba.cli.plugin.sdk.utils.doubleUnderline
 class PrintPropertiesCommand : AbstractSdkCommand() {
 
     @Parameter(
-        names = ["--name"],
+        names = ["--n", "--name"],
         description = "Parameter name",
         hidden = true,
         variableArity = true

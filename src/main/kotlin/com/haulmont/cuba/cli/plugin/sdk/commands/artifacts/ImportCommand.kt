@@ -38,7 +38,7 @@ class ImportCommand : BaseComponentCommand() {
     private var importFile: String? = null
 
     @Parameter(
-        names = ["--r"],
+        names = ["--r", "--repository"],
         description = "Repository",
         hidden = true,
         variableArity = true

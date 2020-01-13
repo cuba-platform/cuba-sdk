@@ -25,7 +25,7 @@ import com.haulmont.cuba.cli.red
 abstract class BaseInstallCommand : BaseComponentCommand() {
 
     @Parameter(
-        names = ["--r"],
+        names = ["--r", "--repository"],
         description = "Repository",
         hidden = true,
         variableArity = true
