@@ -47,20 +47,20 @@ open class AddRepositoryCommand : AbstractSdkCommand() {
         val target = target ?: RepositoryTarget.getTarget(answers["target"] as String)
         val name = answers["name"] as String
         val isLocal = answers["isLocal"] as Boolean
-        val url = answers["url"] as String
+        val url = if (isLocal) "file:///${answers["path"]}" else answers["url"] as String
         val authRequired = answers["auth"] as Boolean?
         val authentication = if (authRequired == true)
             Authentication(
                 answers["login"] as String, answers["password"] as String
             ) else null
-        val type = (answers["type"] as String?)?.let {
-            if (isLocal) RepositoryType.LOCAL else getRepositoryType(it)
+        val type = if (isLocal) RepositoryType.LOCAL else (answers["type"] as String?)?.let {
+             getRepositoryType(it)
         }
         val repositoryName = answers["searchName"] as String?
         val repository = Repository(
             name = name,
             type = type ?: RepositoryType.NEXUS2,
-            url = if (isLocal) "file:///$url" else url,
+            url = url,
             authentication = authentication,
             repositoryName = repositoryName ?: ""
         )
@@ -81,7 +81,7 @@ open class AddRepositoryCommand : AbstractSdkCommand() {
         question("url", messages["repository.url"]) {
             askIf { !isLocal(it) }
         }
-        question("url", messages["repository.path"]) {
+        question("path", messages["repository.path"]) {
             default(Paths.get(System.getProperty("user.home")).resolve(".m2").toString())
             askIf { isLocal(it) }
         }
@@ -90,10 +90,10 @@ open class AddRepositoryCommand : AbstractSdkCommand() {
             askIf { !isLocal(it) }
         }
         question("login", messages["repository.login"]) {
-            askIf { it["auth"] as Boolean }
+            askIf { it["auth"] != null && it["auth"] as Boolean }
         }
         question("password", messages["repository.password"]) {
-            askIf { it["auth"] as Boolean }
+            askIf { it["auth"] != null && it["auth"] as Boolean }
         }
         question("type", messages["repository.type"]) {
             validate {

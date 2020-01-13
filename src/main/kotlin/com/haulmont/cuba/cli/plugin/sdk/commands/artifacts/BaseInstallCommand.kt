@@ -25,20 +25,20 @@ import com.haulmont.cuba.cli.red
 abstract class BaseInstallCommand : BaseComponentCommand() {
 
     @Parameter(
-        names = ["--repo"],
+        names = ["--r"],
         description = "Repository",
-        hidden = true
+        hidden = true,
+        variableArity = true
     )
-    private var repositoryName: String? = null
+    private var repositoryNames: List<String>? = null
 
     override fun run() {
-        var repository: Repository? = null
-        if (repositoryName != null) {
-            repository = repositoryManager.getRepository(repositoryName!!, RepositoryTarget.TARGET)
-            if (repository == null) {
-                printWriter.println(messages["repository.unknown"].format(repositoryName).red())
-                return
-            }
+        val repositories: List<Repository>? =
+            repositories(repositoryNames ?: repositoryManager.getRepositories(RepositoryTarget.TARGET).map { it.name })
+
+        if (repositories == null) {
+            printWriter.println(messages["repository.noTargetRepositories"].red())
+            return
         }
         createSearchContext()?.let {
             if (force || !componentManager.isAlreadyInstalled(it)) {
@@ -48,7 +48,7 @@ abstract class BaseInstallCommand : BaseComponentCommand() {
                         resolve(it)
                     }
                 }
-                component?.let { upload(it, repository) }
+                component?.let { upload(it, repositories) }
                 printWriter.println()
                 printWriter.println(messages["install.finished"].green())
             } else {

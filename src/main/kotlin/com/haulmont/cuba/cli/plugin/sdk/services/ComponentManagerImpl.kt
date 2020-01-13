@@ -228,14 +228,14 @@ class ComponentManagerImpl : ComponentManager {
         }
     }
 
-    override fun upload(component: Component, repository: Repository?, progress: UploadProcessCallback?) {
+    override fun upload(component: Component, repositories: List<Repository>, progress: UploadProcessCallback?) {
         val artifacts = component.collectAllDependencies()
 
         val total = artifacts.size
         var uploaded = 0
 
         artifactsStream(artifacts).forEach { artifact ->
-            repositoriesToUpload(repository).forEach {
+            repositories.forEach {
                 mvnArtifactManager.upload(it, artifact)
             }
             progress?.let { it(artifact, ++uploaded, total) }

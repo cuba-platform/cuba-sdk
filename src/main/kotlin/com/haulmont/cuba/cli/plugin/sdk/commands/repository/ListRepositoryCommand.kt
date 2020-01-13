@@ -18,11 +18,13 @@ package com.haulmont.cuba.cli.plugin.sdk.commands.repository
 
 import com.beust.jcommander.Parameters
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
+import com.haulmont.cuba.cli.green
 import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryType
 import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
 import com.haulmont.cuba.cli.plugin.sdk.utils.doubleUnderline
+import com.haulmont.cuba.cli.red
 import org.kodein.di.generic.instance
 
 @Parameters(commandDescription = "Add source repository for SDK")
@@ -39,6 +41,11 @@ open class ListRepositoryCommand : AbstractSdkCommand() {
                     printWriter.println("URL: ${repository.url}")
                 } else {
                     printWriter.println("Path: ${repository.url}")
+                }
+                if (RepositoryTarget.SEARCH != target) {
+                    val repositoryStatus =
+                        if (repositoryManager.isOnline(repository)) messages["repository.online"].green() else messages["repository.offline"].red()
+                    printWriter.println("Status: $repositoryStatus")
                 }
                 printWriter.println("Type: ${repository.type}")
                 if (repository.authentication != null) {

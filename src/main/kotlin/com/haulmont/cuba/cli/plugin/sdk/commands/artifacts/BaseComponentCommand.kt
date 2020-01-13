@@ -24,6 +24,8 @@ import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
 import com.haulmont.cuba.cli.plugin.sdk.commands.CommonSdkParameters
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
+import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
+import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryType
 import com.haulmont.cuba.cli.plugin.sdk.services.ComponentManager
 import com.haulmont.cuba.cli.plugin.sdk.services.ComponentVersionManager
 import com.haulmont.cuba.cli.plugin.sdk.services.MetadataHolder
@@ -75,10 +77,10 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
 
     abstract fun createSearchContext(): Component?
 
-    internal fun upload(component: Component, repository: Repository?) {
+    internal fun upload(component: Component, repositories: List<Repository>) {
         printWriter.println()
         printWriter.println("Uploading dependencies...")
-        componentManager.upload(component, repository) { artifact, uploaded, total ->
+        componentManager.upload(component, repositories) { artifact, uploaded, total ->
             printProgress(
                 messages["upload.progress"].format(artifact.mvnCoordinates()),
                 calculateProgress(uploaded, total)
@@ -96,6 +98,23 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
             )
         }
         printWriter.println(messages["resolve.finished"].green())
+    }
+
+    internal fun repositories(repositoryNames: List<String>?): List<Repository>? {
+        repositoryNames ?: return null
+        return repositoryNames.map { repositoryName ->
+            val repository = repositoryManager.getRepository(repositoryName, RepositoryTarget.TARGET)
+            if (repository == null) {
+                throw ValidationException(messages["repository.unknown"].format(repositoryName))
+            }
+            if (!repositoryManager.isOnline(repository)) {
+                val msg = if (RepositoryType.LOCAL == repository.type)
+                    messages["repository.pathNotExists"]
+                else messages["repository.isOffline"]
+                throw ValidationException(msg.format(repositoryName, repository.url))
+            }
+            repository as Repository
+        }
     }
 
     internal fun register(component: Component) {

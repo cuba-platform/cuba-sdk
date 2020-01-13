@@ -26,6 +26,7 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryType
 import com.haulmont.cuba.cli.plugin.sdk.utils.authorizeIfRequired
+import com.haulmont.cuba.cli.prompting.ValidationException
 import org.kodein.di.generic.instance
 import org.redundent.kotlin.xml.Node
 import org.redundent.kotlin.xml.xml
@@ -120,6 +121,9 @@ class RepositoryManagerImpl : RepositoryManager {
     }
 
     override fun removeRepository(name: String, target: RepositoryTarget) {
+        if (RepositoryTarget.TARGET == target && name == sdkSettings["repository.name"]) {
+            throw ValidationException("Unable to delete configured local SDK repository")
+        }
         getInternalRepositories(target).remove(getRepository(name, target))
         flush()
     }
@@ -135,11 +139,15 @@ class RepositoryManagerImpl : RepositoryManager {
     }
 
     override fun isOnline(repository: Repository): Boolean {
+        var url = repository.url
         if (RepositoryType.LOCAL == repository.type) {
-            return Files.exists(Path.of(repository.url.substringAfter("file:///")))
+            return Files.exists(Path.of(url.substringAfter("file:///")))
         } else {
+            if (sdkSettings["repository.name"] == repository.name) {
+                url = sdkSettings["repository.url"]
+            }
             val (_, response, _) =
-                Fuel.head(repository.url)
+                Fuel.head(url)
                     .authorizeIfRequired(repository)
                     .response()
             return response.statusCode == 200

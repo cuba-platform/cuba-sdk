@@ -18,15 +18,11 @@ package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
 import com.beust.jcommander.Parameter
 import com.beust.jcommander.Parameters
-import com.haulmont.cuba.cli.WorkingDirectoryManager
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
-import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
-import com.haulmont.cuba.cli.plugin.sdk.services.ComponentManager
 import com.haulmont.cuba.cli.plugin.sdk.services.ImportExportService
-import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
 import com.haulmont.cuba.cli.plugin.sdk.utils.doubleUnderline
 import com.haulmont.cuba.cli.red
 import org.kodein.di.generic.instance
@@ -34,26 +30,26 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 @Parameters(commandDescription = "Import SDK")
-class ImportCommand : AbstractSdkCommand() {
+class ImportCommand : BaseComponentCommand() {
 
     internal val exportService: ImportExportService by sdkKodein.instance()
-    internal val componentManager: ComponentManager by sdkKodein.instance()
-    internal val repositoryManager: RepositoryManager by sdkKodein.instance()
-    internal val workingDirectoryManager: WorkingDirectoryManager by kodein.instance()
 
     @Parameter(description = "SDK archive to import")
     private var importFile: String? = null
 
     @Parameter(
-        names = ["--repo"],
+        names = ["--r"],
         description = "Repository",
-        hidden = true
+        hidden = true,
+        variableArity = true
     )
-    private var repositoryName: String? = null
+    private var repositoryNames: List<String>? = null
 
     @Parameter(names = ["--no-upload"], description = "Do not upload components to repositories", hidden = true)
     var noUpload: Boolean = false
         private set
+
+    override fun createSearchContext(): Component? = null
 
     override fun run() {
         val importFilePath = Path.of(importFile)
@@ -62,36 +58,34 @@ class ImportCommand : AbstractSdkCommand() {
             return
         }
 
-        var repository: Repository? = null
-        if (repositoryName != null) {
-            repository = repositoryManager.getRepository(repositoryName!!, RepositoryTarget.TARGET)
-            if (repository == null) {
-                printWriter.println(messages["repository.unknown"].format(repositoryName).red())
-                return
-            }
+        val repositories: List<Repository>? =
+            repositories(repositoryNames ?: repositoryManager.getRepositories(RepositoryTarget.TARGET).map { it.name })
+
+        if (repositories == null) {
+            printWriter.println(messages["repository.noTargetRepositories"].red())
+            return
         }
 
         import(importFilePath)
-            .also { upload(it, repository) }
+            .also { upload(it, repositories) }
             .also { components ->
                 printWriter.println(messages["import.components"].doubleUnderline())
                 components.sortedBy { "${it.type}_${it}" }.forEach {
                     printWriter.println("${messages[it.type.toString().toLowerCase()]} $it")
                 }
             }
+        printWriter.println()
     }
 
-    private fun import(importFilePath: Path): Collection<Component> {
-        val components = exportService.import(importFilePath, !noUpload) { count, total ->
+    private fun import(importFilePath: Path): Collection<Component> =
+        exportService.import(importFilePath, !noUpload) { count, total ->
             printProgress(
                 messages["unzipProgress"],
                 calculateProgress(count, total)
             )
         }
-        return components
-    }
 
-    private fun upload(components: Collection<Component>, repository: Repository?) {
+    private fun upload(components: Collection<Component>, repositories: List<Repository>) {
         if (!noUpload && components.isNotEmpty()) {
             printProgress(messages["upload.progress"].format(""), 0f)
             var totalUploaded = 0
@@ -99,7 +93,7 @@ class ImportCommand : AbstractSdkCommand() {
             components.forEach { component ->
                 componentManager.upload(
                     component,
-                    repository
+                    repositories
                 ) { artifact, _, _ ->
                     printProgress(
                         messages["upload.progress"].format(artifact.mvnCoordinates()),

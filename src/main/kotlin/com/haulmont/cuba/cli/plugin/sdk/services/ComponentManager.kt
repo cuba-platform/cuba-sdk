@@ -34,7 +34,7 @@ interface ComponentManager {
 
     fun resolve(component: Component, progress: ResolveProgressCallback? = null)
 
-    fun upload(component: Component, repository: Repository? = null, progress: UploadProcessCallback? = null)
+    fun upload(component: Component, repositories: List<Repository>, progress: UploadProcessCallback? = null)
 
     fun remove(componentToRemove: Component, removeFromRepo:Boolean, progress: RemoveProcessCallback? = null)
 
