@@ -34,7 +34,7 @@ class Nexus3Search(repository: Repository) : AbstractRepositorySearch(repository
         )
     }
 
-    override fun handleResultJson(it: FuelJson, component: Component): Component {
+    override fun handleResultJson(it: FuelJson, component: Component): Component? {
         val array = it.array()
         if (array.isEmpty) {
             throw IllegalStateException("Unknown ${component.type}: ${component.packageName}")
@@ -44,8 +44,8 @@ class Nexus3Search(repository: Repository) : AbstractRepositorySearch(repository
         if (itemsArray.isEmpty) {
             throw IllegalStateException("Unknown version: ${component.version}")
         }
-        itemsArray
-            .map { it as JSONObject }
+        val components = mutableListOf<Component>()
+        itemsArray.map { it as JSONObject }
             .map { dataObj ->
                 val groupId = dataObj.getString("group")
                 val artifactId = dataObj.getString("name")
@@ -64,10 +64,10 @@ class Nexus3Search(repository: Repository) : AbstractRepositorySearch(repository
                 return@map Component(groupId, artifactId, version, classifiers = classifiers)
             }
             .forEach {
-                if (!componentAlreadyExists(component.components, it)) {
-                    component.components.add(it)
-                }
+                components.add(it)
             }
+        component.components.clear()
+        component.components.addAll(components)
         log.info("Component found in ${repository}: ${component}")
         return component
     }

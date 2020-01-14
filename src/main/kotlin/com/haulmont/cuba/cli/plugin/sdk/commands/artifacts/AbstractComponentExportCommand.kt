@@ -22,16 +22,16 @@ import com.haulmont.cuba.cli.prompting.Prompts
 
 abstract class AbstractComponentExportCommand : AbstractExportCommand() {
 
-    var componetToExport: Component? = null
+    var componentToExport: Component? = null
 
-    override fun componentsToExport(): List<Component>? = componentToExport()?.let { listOf(it) }
+    override fun componentsToExport(): List<Component>? = componentToExport()?.let { componentWithDependents(it) }
 
     fun componentToExport(): Component? {
-        componetToExport?.let { return it }
+        componentToExport?.let { return it }
         createSearchContext()?.let {
-            componetToExport = searchInMetadata(it)
+            componentToExport = searchInMetadata(it)
         }
-        return componetToExport
+        return componentToExport
     }
 
     override fun exportName(): String {
@@ -56,7 +56,7 @@ abstract class AbstractComponentExportCommand : AbstractExportCommand() {
                 searchContext?.let {
                     val component = search(it)
                     component?.let {
-                        resolve(component)
+                        resolve(componentWithDependents(component))
                     }
                     printWriter.println()
                     printWriter.println(messages["resolved"].green())

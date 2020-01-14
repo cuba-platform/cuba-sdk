@@ -29,7 +29,7 @@ class BintraySearch(repository: Repository) : AbstractRepositorySearch(repositor
         "subject" to repository.repositoryName
     )
 
-    override fun handleResultJson(it: FuelJson, component: Component): Component {
+    override fun handleResultJson(it: FuelJson, component: Component): Component? {
         val array = it.array()
         if (array.isEmpty) {
             throw IllegalStateException("Unknown ${component.type}: ${component.packageName}")
@@ -41,20 +41,33 @@ class BintraySearch(repository: Repository) : AbstractRepositorySearch(repositor
         }
 
         val systemIds = json.get("system_ids") as JSONArray
+        val components = mutableListOf<Component>()
         systemIds.toList().stream()
             .map { it as String }
             .map {
                 val split = it.split(":")
                 return@map Component(split[0], split[1], component.version)
             }.forEach {
-                if (!componentAlreadyExists(component.components, it)) {
-                    component.components.add(it)
+                componentAlreadyExists(component.components, it)?.let {
+                    it.classifiers.addAll(it.classifiers)
                 }
+                components.add(it)
             }
+
+        component.components.clear()
+        component.components.addAll(components)
 
         log.info("Component found in ${repository}: ${component}")
         return component
     }
+
+    private fun componentAlreadyExists(componentsList: Collection<Component>, toAdd: Component): Component? =
+        componentsList.filter {
+            it.packageName == toAdd.packageName
+                    && it.name == toAdd.name
+                    && it.version == toAdd.version
+                    && it.type == toAdd.type
+        }.firstOrNull()
 
 
 }

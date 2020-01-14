@@ -28,10 +28,12 @@ fun BaseComponentCommand.askResolvedFrameworkNameVersion(nameVersion: NameVersio
         addons.map { it.name }
             .requireNoNulls()
             .distinct()
+            .sorted()
             .toList()) { name ->
         addons.filter { it.name == name }
             .map { it.version }
             .distinct()
+            .sortedDescending()
             .toList()
     }
 }
@@ -41,7 +43,7 @@ fun BaseComponentCommand.askAllFrameworkNameVersion(nameVersion: NameVersion?): 
     "framework",
     listOf("cuba")
 ) {
-    platformVersionsManager.versions
+    platformVersionsManager.versions.sorted()
 }
 
 

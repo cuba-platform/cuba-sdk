@@ -21,12 +21,10 @@ data class Component(
     val name: String? = null,
     val version: String,
     val type: ComponentType = ComponentType.LIB,
-    val classifiers: MutableList<Classifier> = arrayListOf(
-        Classifier.pom(),
+    val classifiers: MutableList<Classifier> = mutableListOf(
         Classifier.default(),
-        Classifier.sources(),
-        Classifier.javadoc(),
-        Classifier.client()
+        Classifier.pom(),
+        Classifier.sources()
     ),
     val url: String? = null,
     val components: MutableSet<Component> = HashSet(),

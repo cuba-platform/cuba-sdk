@@ -18,6 +18,7 @@ package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
 import com.beust.jcommander.Parameter
 import com.haulmont.cuba.cli.green
+import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
 import com.haulmont.cuba.cli.red
@@ -43,12 +44,14 @@ abstract class BaseInstallCommand : BaseComponentCommand() {
         createSearchContext()?.let {
             if (force || !componentManager.isAlreadyInstalled(it)) {
                 var component = searchInMetadata(it)
+                val componentsToResolve = mutableListOf<Component>()
                 if (force || component == null) {
                     component = search(it)?.also {
-                        resolve(it)
+                        componentsToResolve.addAll(componentWithDependents(it))
+                        resolve(componentsToResolve)
                     }
                 }
-                component?.let { upload(it, repositories) }
+                component?.let { upload(componentsToResolve, repositories) }
                 printWriter.println()
                 printWriter.println(messages["install.finished"].green())
             } else {

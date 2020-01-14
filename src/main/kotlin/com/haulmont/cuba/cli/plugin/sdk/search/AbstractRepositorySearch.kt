@@ -63,7 +63,7 @@ abstract class AbstractRepositorySearch : RepositorySearch {
     abstract fun handleResultJson(
         it: FuelJson,
         component: Component
-    ): Component
+    ): Component?
 
     internal fun createSearchRequest(searchUrl: String, component: Component): Request {
         return searchUrl.httpGet(searchParameters(component))
@@ -71,18 +71,5 @@ abstract class AbstractRepositorySearch : RepositorySearch {
             .header(Headers.CONTENT_TYPE, "application/json")
             .header(Headers.ACCEPT, "application/json")
             .header(Headers.CACHE_CONTROL, "no-cache")
-    }
-
-    fun componentAlreadyExists(componentsList: Collection<Component>, toAdd: Component): Boolean {
-        for (component in componentsList) {
-            if (component.packageName == toAdd.packageName
-                && component.name == toAdd.name
-                && component.version == toAdd.version
-                && component.type == toAdd.type
-            ) {
-                return true
-            }
-        }
-        return false
     }
 }

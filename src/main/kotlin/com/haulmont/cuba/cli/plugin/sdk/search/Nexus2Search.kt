@@ -30,7 +30,7 @@ class Nexus2Search(repository: Repository) : AbstractRepositorySearch(repository
         "v" to component.version
     )
 
-    override fun handleResultJson(it: FuelJson, component: Component): Component {
+    override fun handleResultJson(it: FuelJson, component: Component): Component? {
         val array = it.array()
         if (array.isEmpty) {
             throw IllegalStateException("Unknown ${component.type}: ${component.packageName}")
@@ -40,6 +40,7 @@ class Nexus2Search(repository: Repository) : AbstractRepositorySearch(repository
         if (dataArray.isEmpty) {
             throw IllegalStateException("Unknown version: ${component.version}")
         }
+        val components = mutableListOf<Component>()
         dataArray
             .map { it as JSONObject }
             .map { dataObj ->
@@ -62,10 +63,10 @@ class Nexus2Search(repository: Repository) : AbstractRepositorySearch(repository
                 return@map Component(groupId, artifactId, version, classifiers = classifiers)
             }
             .forEach {
-                if (!componentAlreadyExists(component.components, it)) {
-                    component.components.add(it)
-                }
+                components.add(it)
             }
+        component.components.clear()
+        component.components.addAll(components)
         log.info("Component found in ${repository}: ${component}")
         return component
     }

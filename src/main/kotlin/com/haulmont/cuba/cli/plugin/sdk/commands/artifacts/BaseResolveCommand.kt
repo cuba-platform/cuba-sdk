@@ -31,10 +31,8 @@ abstract class BaseResolveCommand : BaseComponentCommand() {
                 return
             }
             component?.let {
-                resolve(component)
+                resolve(componentWithDependents(component))
             }
-            printWriter.println()
-            printWriter.println(messages["resolved"].green())
         }
     }
 }

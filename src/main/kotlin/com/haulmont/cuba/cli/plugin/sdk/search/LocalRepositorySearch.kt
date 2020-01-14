@@ -42,6 +42,7 @@ class LocalRepositorySearch : RepositorySearch {
         }
         val baseDir = baseSearchPath.toFile()
         val componentsList = mutableListOf<Component>()
+        val components = mutableListOf<Component>()
         if (baseDir.listFiles() != null) {
             baseDir.listFiles()
                 .filter { it.isDirectory }
@@ -66,24 +67,10 @@ class LocalRepositorySearch : RepositorySearch {
                 }
         }
         componentsList.forEach {
-            if (!componentAlreadyExists(component.components, it)) {
-                component.components.add(it)
-            }
+            components.add(it)
         }
+        component.components.clear()
+        component.components.addAll(components)
         return if (componentsList.isNotEmpty()) component else null
-    }
-
-
-    fun componentAlreadyExists(componentsList: Collection<Component>, toAdd: Component): Boolean {
-        for (component in componentsList) {
-            if (component.packageName == toAdd.packageName
-                && component.name == toAdd.name
-                && component.version == toAdd.version
-                && component.type == toAdd.type
-            ) {
-                return true
-            }
-        }
-        return false
     }
 }

@@ -32,11 +32,13 @@ interface ComponentManager {
 
     fun search(component: Component): Component?
 
-    fun resolve(component: Component, progress: ResolveProgressCallback? = null)
+    fun resolve(component: Component, progress: ResolveProgressCallback? = null): Component?
+
+    fun searchForAdditionalComponents(component: Component): Set<Component>
 
     fun upload(component: Component, repositories: List<Repository>, progress: UploadProcessCallback? = null)
 
-    fun remove(componentToRemove: Component, removeFromRepo:Boolean, progress: RemoveProcessCallback? = null)
+    fun remove(componentToRemove: Component, removeFromRepo: Boolean, progress: RemoveProcessCallback? = null)
 
     fun register(component: Component)
 }

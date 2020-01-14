@@ -16,8 +16,11 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.services
 
+import com.google.gson.Gson
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
+import com.haulmont.cuba.cli.generation.VelocityHelper
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
+import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier.Companion.client
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier.Companion.default
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier.Companion.javadoc
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier.Companion.pom
@@ -34,6 +37,7 @@ class ComponentTemplatesImpl : ComponentTemplates {
     private val log: Logger = Logger.getLogger(ComponentTemplatesImpl::class.java.name)
 
     private val componentManager: ComponentVersionManager by sdkKodein.instance()
+    private val velocityHelper: VelocityHelper = VelocityHelper()
 
     private val templates: List<Component> by lazy {
         val templates = ArrayList<Component>()
@@ -46,6 +50,39 @@ class ComponentTemplatesImpl : ComponentTemplates {
         return@lazy templates
     }
 
+    override fun findTemplate(component: Component): Component? =
+        getTemplates().searchTemplate(component)?.let {
+            log.fine("Template for $component found")
+            processComponentTemplate(component, it)
+        }
+
+    private fun processComponentTemplate(
+        component: Component,
+        template: Component
+    ): Component? = Gson().fromJson<Component>(
+        velocityHelper.generate(
+            Gson().toJson(template), component.packageName,
+            mapOf(
+                "version" to component.version,
+                "name" to (component.name ?: ""),
+                "packageName" to component.packageName
+            )
+        ), Component::class.java
+    )
+
+    private fun Collection<Component>.searchTemplate(component: Component): Component? = find {
+        matchTemplate(it, component)
+    }
+
+    private fun matchTemplate(it: Component, component: Component) =
+        listOfNotNull(it.name, it.packageName)
+            .intersect(
+                listOfNotNull(
+                    component.name,
+                    component.packageName
+                )
+            ).isNotEmpty() && it.type == component.type
+
     private fun getBaseTemplates(): Collection<Component> {
         return listOf(
             cubaTemplate(),
@@ -55,36 +92,93 @@ class ComponentTemplatesImpl : ComponentTemplates {
 
     private fun cubaTemplate(): Component {
         return Component(
-            "com.haulmont.cuba", "cuba", "\${version}", type = ComponentType.FRAMEWORK, components =
-            mutableSetOf(
-                Component(
-                    "com.haulmont.gradle", "cuba-plugin", "\${version}", classifiers = mutableListOf(
-                        default(), pom(), sdk(), Classifier("sources")
-                    )
-                ),
-                Component(
-                    "com.haulmont.cuba", "cuba-core", "\${version}", classifiers = mutableListOf(
-                        default(),
-                        pom(),
-                        sources(),
-                        javadoc(),
-                        Classifier("db", "zip")
-                    )
-                ),
-                Component(
-                    "com.haulmont.cuba", "cuba-web", "\${version}", classifiers = mutableListOf(
-                        default(),
-                        pom(),
-                        sources(),
+            "com.haulmont.cuba",
+            "cuba",
+            "\${version}",
+            type = ComponentType.FRAMEWORK,
+            components = defaultComponents("com.haulmont.cuba", "cuba", "\${version}")
+        ).apply {
+            components.addAll(
+                mutableSetOf(
+                    Component(
+                        "com.haulmont.cuba-resources", "cuba-png-icons", "1.0.1", classifiers = mutableListOf(
+                            default(), pom()
+                        )
+                    ),
+                    Component(
+                        "com.haulmont.gradle", "cuba-plugin", "\${version}", classifiers = mutableListOf(
+                            default(), pom(), sdk(), sources()
+                        )
+                    ),
+
+                    Component("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext", "gradle-idea-ext", "0.5"),
+                    Component("javax.xml.bind", "jaxb-api", "2.3.1"),
+                    Component("org.glassfish.jaxb", "jaxb-runtime", "2.3.1")
+                )
+            )
+        }
+    }
+
+    private fun defaultComponents(packageName: String, name: String, version: String): MutableSet<Component> {
+        return mutableSetOf(
+            Component(packageName, "$name-client", version),
+            Component(packageName, "$name-client-tests", version),
+            Component(packageName, "$name-core", version).apply {
+                classifiers.add(Classifier("db", "zip"))
+            },
+            Component(packageName, "$name-core-tests", version),
+            Component(packageName, "$name-desktop", version),
+            Component(packageName, "$name-front", version),
+            Component(packageName, "$name-global", version),
+            Component(packageName, "$name-gui", version),
+            Component(packageName, "$name-idp", version).apply {
+                classifiers.add(Classifier("web"))
+            },
+            Component(packageName, "$name-portal", version),
+            Component(packageName, "$name-rest-api", version),
+            Component(packageName, "$name-shared-lib", version),
+            Component(packageName, "$name-uberjar", version),
+            Component(packageName, "$name-web", version).apply {
+                classifiers.addAll(
+                    listOf(
                         javadoc(),
                         Classifier("themes"),
                         Classifier("web", "zip")
                     )
-                ),
-                Component("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext", "gradle-idea-ext", "0.5"),
-                Component("javax.xml.bind", "jaxb-api", "2.3.1"),
-                Component("org.glassfish.jaxb", "jaxb-runtime", "2.3.1")
-            )
+                )
+            },
+            Component(packageName, "$name-web-auth", version),
+            Component(packageName, "$name-web-tests", version),
+            Component(packageName, "$name-web-themes", version),
+            Component(packageName, "$name-web-toolkit", version).apply {
+                classifiers.addAll(
+                    listOf(
+                        client(),
+                        Classifier("debug-client")
+                    )
+                )
+            },
+            Component(packageName, "$name-web-widgets", version).apply {
+                classifiers.addAll(
+                    listOf(
+                        client(),
+                        Classifier("debug-client")
+                    )
+                )
+            },
+            Component(packageName, "$name-web6", version).apply {
+                classifiers.add(Classifier("web"))
+            },
+            Component(packageName, "$name-web6", version).apply {
+                classifiers.add(Classifier("web"))
+            },
+            Component(
+                packageName, "$name-web6-themes", version, classifiers = mutableListOf(
+                    default(),
+                    pom()
+                )
+            ),
+            Component(packageName, "$name-web6-toolkit", version)
         )
     }
 
@@ -94,28 +188,7 @@ class ComponentTemplatesImpl : ComponentTemplates {
             name = "\${name}",
             version = "\${version}",
             type = ComponentType.ADDON,
-            components =
-            mutableSetOf(
-                Component(
-                    "\${packageName}", "\${name}-core", "\${version}", classifiers = mutableListOf(
-                        default(),
-                        pom(),
-                        sources(),
-                        javadoc(),
-                        Classifier("db", "zip")
-                    )
-                ),
-                Component(
-                    "\${packageName}", "\${name}-web", "\${version}", classifiers = mutableListOf(
-                        default(),
-                        pom(),
-                        sources(),
-                        javadoc(),
-                        Classifier("themes"),
-                        Classifier("web", "zip")
-                    )
-                )
-            )
+            components = defaultComponents("\${packageName}", "\${name}", "\${version}")
         )
     }
 
@@ -128,28 +201,7 @@ class ComponentTemplatesImpl : ComponentTemplates {
             name = componentName,
             version = "\${version}",
             type = ComponentType.ADDON,
-            components =
-            mutableSetOf(
-                Component(
-                    packageName, "${name}-core", "\${version}", classifiers = mutableListOf(
-                        default(),
-                        pom(),
-                        sources(),
-                        javadoc(),
-                        Classifier("db", "zip")
-                    )
-                ),
-                Component(
-                    packageName, "${name}-web", "\${version}", classifiers = mutableListOf(
-                        default(),
-                        pom(),
-                        sources(),
-                        javadoc(),
-                        Classifier("themes"),
-                        Classifier("web", "zip")
-                    )
-                )
-            )
+            components = defaultComponents(packageName, name, "\${version}")
         )
     }
 

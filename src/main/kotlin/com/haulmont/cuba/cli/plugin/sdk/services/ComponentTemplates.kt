@@ -20,4 +20,6 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 
 interface ComponentTemplates {
     fun getTemplates(): Collection<Component>
+
+    fun findTemplate(component: Component): Component?
 }

@@ -30,6 +30,7 @@ import com.haulmont.cuba.cli.plugin.sdk.services.ComponentManager
 import com.haulmont.cuba.cli.plugin.sdk.services.ComponentVersionManager
 import com.haulmont.cuba.cli.plugin.sdk.services.MetadataHolder
 import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
+import com.haulmont.cuba.cli.plugin.sdk.utils.doubleUnderline
 import com.haulmont.cuba.cli.prompting.Prompts
 import com.haulmont.cuba.cli.prompting.ValidationException
 import org.kodein.di.generic.instance
@@ -52,16 +53,20 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
     var printMaven: Boolean = false
         private set
 
-    @Parameter(names = ["--f", "--force"], description = "Force resolve and upload component with dependencies", hidden = true)
+    @Parameter(
+        names = ["--f", "--force"],
+        description = "Force resolve and upload component with dependencies",
+        hidden = true
+    )
     var force: Boolean = false
         private set
 
     @Parameter(
-        names = ["--parallel"],
+        names = ["--single"],
         description = "Resolve component dependencies in parallel",
         hidden = true
     )
-    var parallel: Boolean = true
+    var single: Boolean = false
         private set
 
     override fun postExecute() {
@@ -72,33 +77,70 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
     override fun preExecute() {
         super.preExecute()
         CommonSdkParameters.printMaven = printMaven
-        CommonSdkParameters.singleThread = printMaven || !parallel
+        CommonSdkParameters.singleThread = printMaven || single
     }
 
     abstract fun createSearchContext(): Component?
 
     internal fun upload(component: Component, repositories: List<Repository>) {
-        printWriter.println()
-        printWriter.println("Uploading dependencies...")
-        componentManager.upload(component, repositories) { artifact, uploaded, total ->
-            printProgress(
-                messages["upload.progress"].format(artifact.mvnCoordinates()),
-                calculateProgress(uploaded, total)
-            )
+        upload(listOf(component), repositories)
+    }
+
+    internal fun upload(components: List<Component>, repositories: List<Repository>) {
+        components.forEach { component ->
+            printWriter.println(messages["upload.progress"].format(component))
+            componentManager.upload(component, repositories) { artifact, uploaded, total ->
+                printProgress(
+                    messages["upload.progress"].format(artifact.mvnCoordinates()),
+                    calculateProgress(uploaded, total)
+                )
+            }
         }
         printWriter.println(messages["upload.finished"].green())
     }
 
     internal fun resolve(component: Component) {
-        printWriter.println("Resolving dependencies...")
-        componentManager.resolve(component) { resolvedComponent, resolved, total ->
-            printProgress(
-                messages["resolve.progress"].format(resolvedComponent),
-                calculateProgress(resolved, total)
-            )
+        resolve(listOf(component))
+    }
+
+    internal fun resolve(components: List<Component>) {
+        components.forEach { component ->
+            componentManager.resolve(component) { resolvedComponent, resolved, total ->
+                printProgress(
+                    messages["resolve.progress"].format(component),
+                    calculateProgress(resolved, total)
+                )
+            }
+            componentManager.register(component)
         }
         printWriter.println(messages["resolve.finished"].green())
     }
+
+    internal fun searchAdditionalComponents(
+        component: Component
+    ): Collection<Component> {
+        printWriter.println(messages["search.searchAdditionalComponents"])
+        componentManager.searchForAdditionalComponents(component).let {
+            if (it.isNotEmpty()) {
+                printWriter.println(messages["search.foundAdditionalComponents"].doubleUnderline())
+                it.sortedBy { it.toString() }.forEach { component ->
+                    printWriter.println(component)
+                }
+                val answer = Prompts.create {
+                    confirmation("resolve", messages["base.resolveAddonsCaption"])
+                }.ask()
+
+                if (answer["resolve"] as Boolean) {
+                    return it
+                }
+            }
+        }
+        return emptyList()
+    }
+
+    internal fun componentWithDependents(component: Component): List<Component> =
+        mutableListOf(component).apply { addAll(searchAdditionalComponents(component)) }
+
 
     internal fun repositories(repositoryNames: List<String>?): List<Repository>? {
         repositoryNames ?: return null

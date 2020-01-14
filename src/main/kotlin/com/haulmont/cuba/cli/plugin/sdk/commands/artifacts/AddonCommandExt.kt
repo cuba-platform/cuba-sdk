@@ -28,10 +28,12 @@ fun BaseComponentCommand.askResolvedAddonNameVersion(nameVersion: NameVersion?):
         addons.map { it.name }
             .requireNoNulls()
             .distinct()
+            .sorted()
             .toList()) { addonName ->
         addons.filter { it.name == addonName }
             .map { it.version }
             .distinct()
+            .sortedDescending()
             .toList()
     }
 }
@@ -41,11 +43,12 @@ fun BaseComponentCommand.askAllAddonsNameVersion(nameVersion: NameVersion?): Nam
     return askNameVersion(
         nameVersion,
         "addon",
-        addons.map { it.id }.toList()
+        addons.map { it.id }.sorted().toList()
     ) { addonName ->
         addons.filter { it.id == addonName }
             .flatMap { it.compatibilityList }
             .flatMap { it.artifactVersions }
+            .sortedDescending()
             .toList()
     }
 }

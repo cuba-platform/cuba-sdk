@@ -54,7 +54,7 @@ open class RemoveRepositoryCommand : AbstractSdkCommand() {
     }
 
     private fun QuestionsList.askRepositorySettings() {
-        if (target != null) {
+        if (target == null) {
             textOptions("target", messages["repository.target"], listOf("source", "sdk", "search"))
         }
     }
