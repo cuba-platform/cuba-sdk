@@ -45,7 +45,7 @@ abstract class AbstractComponentExportCommand : AbstractExportCommand() {
     }
 
     override fun run() {
-        if (componentsToExport() == null) {
+        if (componentToExport() == null) {
             val searchContext = createSearchContext()
             val answers = Prompts.create {
                 confirmation("need-to-resolve", messages["export.needToResolve"].format(searchContext)) {
