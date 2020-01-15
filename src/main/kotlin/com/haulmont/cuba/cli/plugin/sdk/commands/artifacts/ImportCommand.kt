@@ -83,7 +83,7 @@ class ImportCommand : BaseComponentCommand() {
     private fun import(importFilePath: Path): Collection<Component> =
         exportService.import(importFilePath, !noUpload) { count, total ->
             printProgress(
-                messages["unzipProgress"],
+                rootMessages["unzipProgress"],
                 calculateProgress(count, total)
             )
         }

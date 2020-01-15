@@ -335,7 +335,7 @@ class SetupCommand : AbstractSdkCommand() {
         printWriter.println(messages["setup.unzipRepositoryCaption"].format(answers["repository.path"]))
         FileUtils.unzip(it, Path.of((answers["repository.path"]) as String)) { count, total ->
             printProgress(
-                messages["unzipProgress"],
+                rootMessages["unzipProgress"],
                 calculateProgress(count, total)
             )
         }

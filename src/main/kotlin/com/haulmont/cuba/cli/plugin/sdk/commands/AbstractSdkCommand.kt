@@ -17,6 +17,7 @@
 package com.haulmont.cuba.cli.plugin.sdk.commands
 
 import com.beust.jcommander.Parameter
+import com.haulmont.cuba.cli.Messages
 import com.haulmont.cuba.cli.WorkingDirectoryManager
 import com.haulmont.cuba.cli.commands.AbstractCommand
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
@@ -36,6 +37,7 @@ abstract class AbstractSdkCommand : AbstractCommand() {
     internal val printWriter: PrintWriter by sdkKodein.instance()
     internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
     internal val workingDirectoryManager: WorkingDirectoryManager by sdkKodein.instance()
+    internal val rootMessages = Messages(AbstractSdkCommand::class.java)
 
     @Parameter(
         names = ["--s", "--settings"],
@@ -52,11 +54,13 @@ abstract class AbstractSdkCommand : AbstractCommand() {
     )
     internal var parameters: List<String>? = null
 
+
+
     override fun preExecute() {
         super.preExecute()
         if (settingsFile != null) {
             var file = Path.of(settingsFile)
-            if (!file.isAbsolute){
+            if (!file.isAbsolute) {
                 file = workingDirectoryManager.workingDirectory.resolve(file)
             }
             sdkSettings.setExternalProperties(file)
@@ -69,7 +73,7 @@ abstract class AbstractSdkCommand : AbstractCommand() {
             }
         }
         if (onlyForConfiguredSdk() && !sdkSettings.sdkConfigured()) {
-            throw ValidationException(messages["sdk.notConfigured"])
+            throw ValidationException(rootMessages["sdk.notConfigured"])
         }
     }
 
@@ -89,7 +93,7 @@ abstract class AbstractSdkCommand : AbstractCommand() {
     internal fun calculateProgress(count: Float, total: Float) = count / total * 100
 
     internal fun printProgress(message: String, progress: Float) {
-        val progressStr = messages["progress"].format(progress).green()
+        val progressStr = rootMessages["progress"].format(progress).green()
         val maxLength = PROGRESS_LINE_LENGHT - progressStr.length
 
         val trim = if (message.length > maxLength - 1) message.substring(IntRange(0, maxLength - 1)) else message
