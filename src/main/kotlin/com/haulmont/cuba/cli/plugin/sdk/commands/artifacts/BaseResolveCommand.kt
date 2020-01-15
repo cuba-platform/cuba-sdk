@@ -17,6 +17,7 @@
 package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
 import com.haulmont.cuba.cli.green
+import com.haulmont.cuba.cli.red
 
 abstract class BaseResolveCommand : BaseComponentCommand() {
 
@@ -32,7 +33,7 @@ abstract class BaseResolveCommand : BaseComponentCommand() {
             }
             component?.let {
                 resolve(componentWithDependents(component))
-            }
+            } ?: printWriter.println(messages["resolve.notFound"].format(it).red())
         }
     }
 }

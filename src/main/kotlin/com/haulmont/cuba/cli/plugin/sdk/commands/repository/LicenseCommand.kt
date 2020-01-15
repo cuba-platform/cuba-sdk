@@ -16,6 +16,7 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.commands.repository
 
+import com.beust.jcommander.Parameter
 import com.beust.jcommander.Parameters
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.green
@@ -29,18 +30,34 @@ class LicenseCommand : AbstractSdkCommand() {
 
     internal val repositoryManager: RepositoryManager by sdkKodein.instance()
 
+    @Parameter(
+        description = "License key in format ************-************",
+        hidden = true
+    )
+    private var licenseKey: String? = null
+
     override fun run() {
-        val licenseKey = Prompts.create {
-            question("licenseKey", messages["license.askLicenseCaption"]) {
-                validate {
-                    checkRegex("[0-9a-zA-Z]+-[0-9a-zA-Z]+", "License key should be form of ************-************")
+        if (licenseKey == null) {
+            licenseKey = Prompts.create {
+                question("licenseKey", messages["license.askLicenseCaption"]) {
+                    validate {
+                        checkRegex(this.value)
+                    }
                 }
-            }
-        }.ask()["licenseKey"] as String
+            }.ask()["licenseKey"] as String
+        }
 
-        activate(licenseKey)
+        if (licenseKey != null) {
+            checkRegex(licenseKey!!)
+            activate(licenseKey!!)
 
-        printWriter.println(messages["license.licenseKeyconfigured"].green())
+            printWriter.println(messages["license.licenseKeyconfigured"].green())
+        }
+    }
+
+    private fun checkRegex(licenseKey: String) {
+        if (!Regex("[0-9a-zA-Z]+-[0-9a-zA-Z]+").matches(licenseKey))
+            fail("License key should be form of ************-************")
     }
 
     private fun activate(licenseKey: String) {

@@ -52,6 +52,7 @@ abstract class BaseInstallCommand : BaseComponentCommand() {
                     }
                 }
                 component?.let { upload(componentsToResolve, repositories) }
+                    ?: printWriter.println(messages["resolve.notFound"].format(it).red())
                 printWriter.println(messages["install.finished"].green())
             } else {
                 printWriter.println(messages["install.alreadyInstalled"].green())

@@ -31,6 +31,9 @@ class Nexus2Search(repository: Repository) : AbstractRepositorySearch(repository
     )
 
     override fun handleResultJson(it: FuelJson, component: Component): Component? {
+        if (!it.content.startsWith("[")){
+            return null
+        }
         val array = it.array()
         if (array.isEmpty) {
             log.info("Unknown ${component.type}: ${component.packageName}")
