@@ -62,12 +62,27 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
         private set
 
     @Parameter(
+        names = ["--r", "--resolve-addons"],
+        description = "Force resolve and upload component with dependencies",
+        hidden = true
+    )
+    var searchAdditionalDependencies: Boolean? = null
+
+    @Parameter(
         names = ["--single"],
         description = "Resolve component dependencies in parallel",
         hidden = true
     )
     var single: Boolean = false
         private set
+
+    @Parameter(
+        names = ["--mo", "--maven-option"],
+        description = "Maven option",
+        hidden = true,
+        variableArity = true
+    )
+    internal var mavenOpts: List<String>? = null
 
     override fun postExecute() {
         super.postExecute()
@@ -78,6 +93,7 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
         super.preExecute()
         CommonSdkParameters.printMaven = printMaven
         CommonSdkParameters.singleThread = printMaven || single
+        CommonSdkParameters.mavenOptions = mavenOpts
     }
 
     abstract fun createSearchContext(): Component?
@@ -119,19 +135,25 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
     internal fun searchAdditionalComponents(
         component: Component
     ): Collection<Component> {
-        printWriter.println(messages["search.searchAdditionalComponents"])
-        componentManager.searchForAdditionalComponents(component).let {
-            if (it.isNotEmpty()) {
-                printWriter.println(messages["search.foundAdditionalComponents"].doubleUnderline())
-                it.sortedBy { it.toString() }.forEach { component ->
-                    printWriter.println(component)
-                }
-                val answer = Prompts.create {
-                    confirmation("resolve", messages["base.resolveAddonsCaption"])
-                }.ask()
+        if (searchAdditionalDependencies != false) {
+            printWriter.println(messages["search.searchAdditionalComponents"])
+            componentManager.searchForAdditionalComponents(component).let {
+                if (it.isNotEmpty()) {
+                    printWriter.println(messages["search.foundAdditionalComponents"].doubleUnderline())
+                    it.sortedBy { it.toString() }.forEach { component ->
+                        printWriter.println(component)
+                    }
+                    if (searchAdditionalDependencies == null) {
+                        val answer = Prompts.create {
+                            confirmation("resolve", messages["base.resolveAddonsCaption"])
+                        }.ask()
 
-                if (answer["resolve"] as Boolean) {
-                    return it
+                        searchAdditionalDependencies = answer["resolve"] as Boolean
+                    }
+
+                    if (searchAdditionalDependencies == true) {
+                        return it
+                    }
                 }
             }
         }
@@ -146,9 +168,7 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
         repositoryNames ?: return null
         return repositoryNames.map { repositoryName ->
             val repository = repositoryManager.getRepository(repositoryName, RepositoryTarget.TARGET)
-            if (repository == null) {
-                throw ValidationException(messages["repository.unknown"].format(repositoryName))
-            }
+                ?: throw ValidationException(messages["repository.unknown"].format(repositoryName))
             if (!repositoryManager.isOnline(repository)) {
                 val msg = if (RepositoryType.LOCAL == repository.type)
                     messages["repository.pathNotExists"]

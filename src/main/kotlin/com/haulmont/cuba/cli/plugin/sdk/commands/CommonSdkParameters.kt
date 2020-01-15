@@ -19,9 +19,11 @@ package com.haulmont.cuba.cli.plugin.sdk.commands
 object CommonSdkParameters {
     var printMaven: Boolean = false
     var singleThread: Boolean = false
+    var mavenOptions: List<String>? = null
 
     fun reset() {
         printMaven = false
         singleThread = false
+        mavenOptions = null
     }
 }

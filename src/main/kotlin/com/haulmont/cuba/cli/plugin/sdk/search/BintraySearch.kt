@@ -32,12 +32,14 @@ class BintraySearch(repository: Repository) : AbstractRepositorySearch(repositor
     override fun handleResultJson(it: FuelJson, component: Component): Component? {
         val array = it.array()
         if (array.isEmpty) {
-            throw IllegalStateException("Unknown ${component.type}: ${component.packageName}")
+            log.info("Unknown ${component.type}: ${component.packageName}")
+            return null
         }
         val json = array.get(0) as JSONObject
         val versions = json.get("versions") as JSONArray
         if (!versions.contains(component.version)) {
-            throw IllegalStateException("Unknown version: ${component.version}")
+            log.info("Unknown version: ${component.version}")
+            return null
         }
 
         val systemIds = json.get("system_ids") as JSONArray

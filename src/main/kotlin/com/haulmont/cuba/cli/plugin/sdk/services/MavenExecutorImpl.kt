@@ -56,6 +56,8 @@ class MavenExecutorImpl : MavenExecutor {
             cliCommandsList.add("-e")
         }
 
+        CommonSdkParameters.mavenOptions?.let { cliCommandsList.addAll(it) }
+
         val cliCommands = arrayOfNulls<String>(cliCommandsList.size)
         cliCommandsList.toArray(cliCommands)
 

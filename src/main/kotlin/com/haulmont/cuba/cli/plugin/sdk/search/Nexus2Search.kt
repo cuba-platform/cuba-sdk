@@ -33,12 +33,14 @@ class Nexus2Search(repository: Repository) : AbstractRepositorySearch(repository
     override fun handleResultJson(it: FuelJson, component: Component): Component? {
         val array = it.array()
         if (array.isEmpty) {
-            throw IllegalStateException("Unknown ${component.type}: ${component.packageName}")
+            log.info("Unknown ${component.type}: ${component.packageName}")
+            return null
         }
         val json = array.get(0) as JSONObject
         val dataArray = json.get("data") as JSONArray
         if (dataArray.isEmpty) {
-            throw IllegalStateException("Unknown version: ${component.version}")
+            log.info("Unknown version: ${component.version}")
+            return null
         }
         val components = mutableListOf<Component>()
         dataArray
