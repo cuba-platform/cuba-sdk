@@ -50,7 +50,7 @@ open class ListRepositoryCommand : AbstractSdkCommand() {
                 printWriter.println("Type: ${messages["repository.${repository.type}"]}")
                 if (repository.authentication != null) {
                     printWriter.println("Login: ${repository.authentication.login}")
-                    printWriter.println("Password: ${repository.authentication.password}")
+                    printWriter.println("Password: ${password(repository.authentication.password)}")
                 }
                 if (repository.repositoryName.isNotBlank()) {
                     printWriter.println("Repository name: ${repository.repositoryName}")

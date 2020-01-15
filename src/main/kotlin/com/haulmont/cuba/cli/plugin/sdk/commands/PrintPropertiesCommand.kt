@@ -35,11 +35,16 @@ class PrintPropertiesCommand : AbstractSdkCommand() {
     override fun run() {
         printWriter.println(messages["sdk.properties"].doubleUnderline())
         for (property in propertyNames().sorted()) {
-            printWriter.println("$property: ${sdkSettings[property].green()}")
+            if (property.toLowerCase().endsWith(".password")) {
+                printWriter.println("$property: ${password(sdkSettings[property]).green()}")
+            } else {
+                printWriter.println("$property: ${sdkSettings[property].green()}")
+            }
+
         }
     }
 
     private fun propertyNames(): Collection<String> = names ?: sdkSettings.propertyNames()
 
-    override fun onlyForConfiguredSdk(): Boolean  = false
+    override fun onlyForConfiguredSdk(): Boolean = false
 }

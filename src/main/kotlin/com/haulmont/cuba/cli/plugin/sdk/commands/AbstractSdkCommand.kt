@@ -103,5 +103,7 @@ abstract class AbstractSdkCommand : AbstractCommand() {
         }
     }
 
+    internal fun password(password:String) = "*****"
+
     open fun onlyForConfiguredSdk(): Boolean = true
 }
