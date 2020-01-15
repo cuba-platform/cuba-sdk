@@ -31,7 +31,7 @@ class SdkCommand : AbstractSdkCommand() {
 
     override fun run() {
         if (!sdkSettings.sdkConfigured()){
-            printWriter.println(messages["sdk.notConfigured"].red())
+            printWriter.println(messages["sdk.notConfigured"])
             return
         }
         printWriter.println(messages["sdk.title"].doubleUnderline())
