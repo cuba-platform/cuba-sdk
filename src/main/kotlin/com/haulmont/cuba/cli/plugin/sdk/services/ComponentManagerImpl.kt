@@ -27,6 +27,7 @@ import org.json.JSONObject
 import org.kodein.di.generic.instance
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.logging.Logger
 import java.util.stream.Collectors
 
@@ -111,14 +112,14 @@ class ComponentManagerImpl : ComponentManager {
             log.info("Resolve complex component: ${component}")
             val resolvedComponents = ArrayList<Component>()
             val total = component.components.size
-            var resolved = 0f
+            val resolved = AtomicInteger(0)
 
             componentResolveStream(component).forEach { componentToResolve ->
                 val resolvedComponent = resolveDependencies(componentToResolve) { _, localProgress, _ ->
-                    progress?.let { it(componentToResolve, resolved + localProgress, total) }
+                    progress?.let { it(componentToResolve, resolved.get() + localProgress, total) }
                 }
                 resolvedComponent?.let { resolvedComponents.add(it) }
-                resolved++
+                resolved.incrementAndGet()
             }
 //            progress?.let { it(component, 1f, 1) }
             component.components.clear()
@@ -252,13 +253,13 @@ class ComponentManagerImpl : ComponentManager {
         val artifacts = component.collectAllDependencies()
 
         val total = artifacts.size
-        var uploaded = 0
+        val uploaded = AtomicInteger(0)
 
         artifactsStream(artifacts).forEach { artifact ->
             repositories.forEach {
                 mvnArtifactManager.upload(it, artifact)
             }
-            progress?.let { it(artifact, ++uploaded, total) }
+            progress?.let { it(artifact, uploaded.incrementAndGet(), total) }
         }
 
         metadataHolder.getMetadata().installedComponents.add(
@@ -277,12 +278,12 @@ class ComponentManagerImpl : ComponentManager {
                 .flatMap { it.collectAllDependencies() }
             val dependencies = component.collectAllDependencies()
             val total = dependencies.size
-            var removed = 0
+            val removed = AtomicInteger(0)
             dependencies.forEach { artifact ->
                 if (!allOtherDependencies.contains(artifact)) {
                     removeArtifact(artifact, removeFromRepo)
                 }
-                progress?.let { it(artifact, ++removed, total) }
+                progress?.let { it(artifact, removed.incrementAndGet(), total) }
             }
             removeFromMetadata(component)
             metadataHolder.flushMetadata()
