@@ -239,4 +239,8 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
         val name = nameAnswers["name"] as String
         return name
     }
+
+    internal fun force(component: Component): Boolean =
+        force || component.version.endsWith("-SNAPSHOT")
+
 }

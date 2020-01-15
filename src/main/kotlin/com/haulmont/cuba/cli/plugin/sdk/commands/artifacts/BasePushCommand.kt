@@ -41,7 +41,7 @@ abstract class BasePushCommand : BaseComponentCommand() {
             return
         }
         createSearchContext()?.let {
-            if (force || !componentManager.isAlreadyInstalled(it)) {
+            if (force(it) || !componentManager.isAlreadyInstalled(it)) {
                 val component = searchInMetadata(it)
                 if (component != null) {
                     upload(component, repositories)

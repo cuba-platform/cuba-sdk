@@ -25,7 +25,7 @@ abstract class BaseResolveCommand : BaseComponentCommand() {
         createSearchContext()?.let {
             var component = searchInMetadata(it)
 
-            if (force || component == null) {
+            if (force(it) || component == null) {
                 component = search(it)
             } else {
                 printWriter.println(messages["resolve.alreadyResolved"].green())

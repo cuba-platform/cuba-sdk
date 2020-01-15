@@ -42,10 +42,10 @@ abstract class BaseInstallCommand : BaseComponentCommand() {
             return
         }
         createSearchContext()?.let {
-            if (force || !componentManager.isAlreadyInstalled(it)) {
+            if (force(it) || !componentManager.isAlreadyInstalled(it)) {
                 var component = searchInMetadata(it)
                 val componentsToResolve = mutableListOf<Component>()
-                if (force || component == null) {
+                if (force(it) || component == null) {
                     component = search(it)?.also {
                         componentsToResolve.addAll(componentWithDependents(it))
                         resolve(componentsToResolve)
