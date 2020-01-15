@@ -42,7 +42,6 @@ class LocalRepositorySearch : RepositorySearch {
         }
         val baseDir = baseSearchPath.toFile()
         val componentsList = mutableListOf<Component>()
-        val components = mutableListOf<Component>()
         if (baseDir.listFiles() != null) {
             baseDir.listFiles()
                 .filter { it.isDirectory }
@@ -66,11 +65,13 @@ class LocalRepositorySearch : RepositorySearch {
 
                 }
         }
-        componentsList.forEach {
-            components.add(it)
+
+        if (componentsList.isNotEmpty()) {
+            val copy = component.copy()
+            copy.components.clear()
+            copy.components.addAll(componentsList)
+            return copy
         }
-        component.components.clear()
-        component.components.addAll(components)
-        return if (componentsList.isNotEmpty()) component else null
+        return null
     }
 }

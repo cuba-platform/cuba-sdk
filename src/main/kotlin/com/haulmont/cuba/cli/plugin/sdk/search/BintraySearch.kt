@@ -50,17 +50,22 @@ class BintraySearch(repository: Repository) : AbstractRepositorySearch(repositor
                 val split = it.split(":")
                 return@map Component(split[0], split[1], component.version)
             }.forEach {
-                componentAlreadyExists(component.components, it)?.let {
-                    it.classifiers.addAll(it.classifiers)
+                componentAlreadyExists(component.components, it)?.let { existComponent ->
+                    for (classifier in existComponent.classifiers) {
+                        if (!it.classifiers.contains(classifier)) {
+                            it.classifiers.add(classifier)
+                        }
+
+                    }
                 }
                 components.add(it)
             }
+        val copy = component.copy()
+        copy.components.clear()
+        copy.components.addAll(components)
 
-        component.components.clear()
-        component.components.addAll(components)
-
-        log.info("Component found in ${repository}: ${component}")
-        return component
+        log.info("Component found in ${repository}: ${copy}")
+        return copy
     }
 
     private fun componentAlreadyExists(componentsList: Collection<Component>, toAdd: Component): Component? =

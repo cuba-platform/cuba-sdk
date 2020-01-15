@@ -67,9 +67,11 @@ class Nexus2Search(repository: Repository) : AbstractRepositorySearch(repository
             .forEach {
                 components.add(it)
             }
-        component.components.clear()
-        component.components.addAll(components)
-        log.info("Component found in ${repository}: ${component}")
-        return component
+
+        val copy = component.copy()
+        copy.components.clear()
+        copy.components.addAll(components)
+        log.info("Component found in ${repository}: ${copy}")
+        return copy
     }
 }
