@@ -113,7 +113,8 @@ class ComponentTemplatesImpl : ComponentTemplates {
 
                     Component("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext", "gradle-idea-ext", "0.5"),
                     Component("javax.xml.bind", "jaxb-api", "2.3.1"),
-                    Component("org.glassfish.jaxb", "jaxb-runtime", "2.3.1")
+                    Component("org.glassfish.jaxb", "jaxb-runtime", "2.3.1"),
+                    Component("org.hsqldb", "hsqldb", "2.4.1")
                 )
             )
         }
@@ -121,23 +122,12 @@ class ComponentTemplatesImpl : ComponentTemplates {
 
     private fun defaultComponents(packageName: String, name: String, version: String): MutableSet<Component> {
         return mutableSetOf(
-            Component(packageName, "$name-client", version),
-            Component(packageName, "$name-client-tests", version),
             Component(packageName, "$name-core", version).apply {
                 classifiers.add(Classifier("db", "zip"))
             },
-            Component(packageName, "$name-core-tests", version),
-            Component(packageName, "$name-desktop", version),
-            Component(packageName, "$name-front", version),
-            Component(packageName, "$name-global", version),
-            Component(packageName, "$name-gui", version),
             Component(packageName, "$name-idp", version).apply {
                 classifiers.add(Classifier("web"))
             },
-            Component(packageName, "$name-portal", version),
-            Component(packageName, "$name-rest-api", version),
-            Component(packageName, "$name-shared-lib", version),
-            Component(packageName, "$name-uberjar", version),
             Component(packageName, "$name-web", version).apply {
                 classifiers.addAll(
                     listOf(
@@ -147,9 +137,6 @@ class ComponentTemplatesImpl : ComponentTemplates {
                     )
                 )
             },
-            Component(packageName, "$name-web-auth", version),
-            Component(packageName, "$name-web-tests", version),
-            Component(packageName, "$name-web-themes", version),
             Component(packageName, "$name-web-toolkit", version).apply {
                 classifiers.addAll(
                     listOf(
