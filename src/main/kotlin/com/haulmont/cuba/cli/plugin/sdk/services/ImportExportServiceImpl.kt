@@ -38,7 +38,7 @@ class ImportExportServiceImpl : ImportExportService {
     private val componentManager: ComponentManager by sdkKodein.instance()
 
     override fun export(fileName: String, components: Collection<Component>, progress: ExportProcessCallback?): Path {
-        val exportDir = Path.of(sdkSettings["sdk.export"]).also {
+        val exportDir = Path.of(sdkSettings["sdk.export.path"]).also {
             if (!Files.exists(it)) Files.createDirectories(it)
         }
         val metadata = SdkMetadata().apply {

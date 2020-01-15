@@ -25,14 +25,12 @@ import com.haulmont.cuba.cli.plugin.sdk.commands.PrintPropertiesCommand
 import com.haulmont.cuba.cli.plugin.sdk.commands.SdkCommand
 import com.haulmont.cuba.cli.plugin.sdk.commands.artifacts.*
 import com.haulmont.cuba.cli.plugin.sdk.commands.repository.*
-import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusManager
 import com.haulmont.cuba.cli.plugin.sdk.services.ComponentVersionManager
 import org.kodein.di.generic.instance
 
 class SdkPlugin : CliPlugin {
 
     private val componentVersionsManager: ComponentVersionManager by sdkKodein.instance()
-    private val nexusManager: NexusManager by sdkKodein.instance()
 
     override val apiVersion: Int
         get() = 5
@@ -46,6 +44,8 @@ class SdkPlugin : CliPlugin {
                 command("setup", SetupCommand())
                 command("start", StartCommand())
                 command("stop", StopCommand())
+                command("set-license", LicenseCommand())
+                command("cleanup", CleanCommand())
 
                 command("repository", RepositoryCommandGroup()) {
                     command("list", ListRepositoryCommand()) {
@@ -64,9 +64,6 @@ class SdkPlugin : CliPlugin {
                         command("search", RemoveSearchRepositoryCommand())
                     }
                 }
-
-                command("set-license", LicenseCommand())
-                command("cleanup", CleanCommand())
 
                 command("import", ImportCommand())
 

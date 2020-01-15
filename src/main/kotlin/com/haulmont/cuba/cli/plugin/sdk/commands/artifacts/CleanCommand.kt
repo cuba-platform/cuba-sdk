@@ -16,6 +16,7 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
+import com.beust.jcommander.Parameter
 import com.beust.jcommander.Parameters
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.green
@@ -38,6 +39,10 @@ class CleanCommand : AbstractSdkCommand() {
     internal val nexusManager: NexusManager by sdkKodein.instance()
     internal val nexusScriptManager: NexusScriptManager by sdkKodein.instance()
 
+    @Parameter(names = ["--local-only"], description = "Do not remove from local repository", hidden = true)
+    var localOnly: Boolean = false
+        private set
+
     override fun run() {
         Prompts.create(kodein) { askConfirmation() }
             .let(Prompts::ask)
@@ -54,7 +59,7 @@ class CleanCommand : AbstractSdkCommand() {
                 Files.createDirectories(it)
             }
 
-            if (nexusManager.isLocal() && nexusManager.isStarted()) {
+            if (nexusManager.isLocal() && nexusManager.isStarted() && !localOnly) {
                 nexusScriptManager.run(
                     sdkSettings["repository.login"],
                     sdkSettings["repository.password"],
@@ -73,7 +78,7 @@ class CleanCommand : AbstractSdkCommand() {
         confirmation("needToStartRepo", messages["remove.needToStartRepo"]) {
             default(true)
             askIf {
-                it["confirmed"] as Boolean && nexusManager.isLocal() && !nexusManager.isStarted()
+                it["confirmed"] as Boolean && nexusManager.isLocal() && !nexusManager.isStarted() && !localOnly
             }
         }
     }

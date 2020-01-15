@@ -17,6 +17,7 @@
 package com.haulmont.cuba.cli.plugin.sdk.commands
 
 import com.beust.jcommander.Parameter
+import com.haulmont.cuba.cli.WorkingDirectoryManager
 import com.haulmont.cuba.cli.commands.AbstractCommand
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.green
@@ -34,6 +35,7 @@ abstract class AbstractSdkCommand : AbstractCommand() {
     internal val messages by localMessages()
     internal val printWriter: PrintWriter by sdkKodein.instance()
     internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
+    internal val workingDirectoryManager: WorkingDirectoryManager by sdkKodein.instance()
 
     @Parameter(
         names = ["--s", "--settings"],
@@ -43,7 +45,7 @@ abstract class AbstractSdkCommand : AbstractCommand() {
     internal var settingsFile: String? = null
 
     @Parameter(
-        names = ["--sp", "--parameter"],
+        names = ["--sp", "--setting-property"],
         description = "Settings parameter",
         hidden = true,
         variableArity = true
@@ -53,7 +55,11 @@ abstract class AbstractSdkCommand : AbstractCommand() {
     override fun preExecute() {
         super.preExecute()
         if (settingsFile != null) {
-            sdkSettings.setExternalProperties(Path.of(settingsFile))
+            var file = Path.of(settingsFile)
+            if (!file.isAbsolute){
+                file = workingDirectoryManager.workingDirectory.resolve(file)
+            }
+            sdkSettings.setExternalProperties(file)
         }
         parameters?.let {
             it.forEach {

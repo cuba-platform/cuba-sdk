@@ -49,6 +49,8 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
 
     internal val platformVersionsManager: PlatformVersionsManager by sdkKodein.instance()
 
+    internal var needToFindDependentAddons: Boolean? = null
+
     @Parameter(names = ["--print-maven"], description = "Print maven output", hidden = true)
     var printMaven: Boolean = false
         private set
@@ -62,11 +64,11 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
         private set
 
     @Parameter(
-        names = ["--r", "--resolve-addons"],
-        description = "Force resolve and upload component with dependencies",
+        names = ["--nra", "--not-resolve-addons"],
+        description = "Do not resolve additional addons",
         hidden = true
     )
-    var searchAdditionalDependencies: Boolean? = null
+    var notSearchAdditionalDependencies: Boolean? = false
 
     @Parameter(
         names = ["--single"],
@@ -135,7 +137,7 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
     internal fun searchAdditionalComponents(
         component: Component
     ): Collection<Component> {
-        if (searchAdditionalDependencies != false) {
+        if (notSearchAdditionalDependencies != true && needToFindDependentAddons != false) {
             printWriter.println(messages["search.searchAdditionalComponents"])
             componentManager.searchForAdditionalComponents(component).let {
                 if (it.isNotEmpty()) {
@@ -143,15 +145,15 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
                     it.sortedBy { it.toString() }.forEach { component ->
                         printWriter.println(component)
                     }
-                    if (searchAdditionalDependencies == null) {
+                    if (needToFindDependentAddons == null) {
                         val answer = Prompts.create {
                             confirmation("resolve", messages["base.resolveAddonsCaption"])
                         }.ask()
 
-                        searchAdditionalDependencies = answer["resolve"] as Boolean
+                        needToFindDependentAddons = answer["resolve"] as Boolean
                     }
 
-                    if (searchAdditionalDependencies == true) {
+                    if (needToFindDependentAddons == true) {
                         return it
                     }
                 }

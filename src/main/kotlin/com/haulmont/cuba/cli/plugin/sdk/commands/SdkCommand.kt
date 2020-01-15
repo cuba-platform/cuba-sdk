@@ -30,6 +30,10 @@ class SdkCommand : AbstractSdkCommand() {
     private val nexusManager: NexusManager by sdkKodein.instance()
 
     override fun run() {
+        if (!sdkSettings.sdkConfigured()){
+            printWriter.println(messages["sdk.notConfigured"].red())
+            return
+        }
         printWriter.println(messages["sdk.title"].doubleUnderline())
         printWriter.println("SDK home: ${sdkSettings["sdk.home"].green()}")
         printWriter.print("Repository type: ${sdkSettings["repository.type"].green()} ")
@@ -43,6 +47,7 @@ class SdkCommand : AbstractSdkCommand() {
         }
         printWriter.println("Maven install path: ${sdkSettings["maven.path"].green()}")
         printWriter.println("Maven local repository: ${sdkSettings["maven.local.repo"].green()}")
-
     }
+
+    override fun onlyForConfiguredSdk() = false
 }

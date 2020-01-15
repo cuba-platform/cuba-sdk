@@ -358,7 +358,7 @@ class SetupCommand : AbstractSdkCommand() {
         sdkSettings["repository.type"] = answers["repository.type"] as String
         sdkSettings["repository.path"] = answers["repository.path"] as String
         sdkSettings["sdk.home"] = sdkSettings.sdkHome().toString()
-        sdkSettings["sdk.export"] = sdkSettings.sdkHome().resolve("export").toString()
+        sdkSettings["sdk.export.path"] = sdkSettings.sdkHome().resolve("export").toString()
         sdkSettings["sdk.metadata"] = sdkSettings.sdkHome().resolve("sdk.metadata").toString()
         sdkSettings["sdk.repositories"] = sdkSettings.sdkHome().resolve("sdk.repositories").toString()
         sdkSettings["maven.settings"] = sdkSettings.sdkHome().resolve("sdk-settings.xml").toString()
