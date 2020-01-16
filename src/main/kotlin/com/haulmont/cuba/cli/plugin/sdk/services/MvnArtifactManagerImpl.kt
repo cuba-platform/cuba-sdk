@@ -23,9 +23,9 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
 import com.haulmont.cuba.cli.plugin.sdk.dto.MvnArtifact
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
-import com.haulmont.cuba.cli.plugin.sdk.perf.SdkPerformance.performance
 import com.haulmont.cuba.cli.plugin.sdk.utils.FileUtils
 import com.haulmont.cuba.cli.plugin.sdk.utils.authorizeIfRequired
+import com.haulmont.cuba.cli.plugin.sdk.utils.performance
 import org.apache.maven.model.Model
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
 import org.kodein.di.generic.instance

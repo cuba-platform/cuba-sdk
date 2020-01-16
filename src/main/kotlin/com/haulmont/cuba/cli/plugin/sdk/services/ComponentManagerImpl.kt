@@ -22,8 +22,8 @@ import com.haulmont.cuba.cli.plugin.sdk.commands.CommonSdkParameters
 import com.haulmont.cuba.cli.plugin.sdk.dto.*
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusManager
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusScriptManager
-import com.haulmont.cuba.cli.plugin.sdk.perf.SdkPerformance.performance
 import com.haulmont.cuba.cli.plugin.sdk.search.*
+import com.haulmont.cuba.cli.plugin.sdk.utils.performance
 import org.json.JSONObject
 import org.kodein.di.generic.instance
 import java.nio.file.Files

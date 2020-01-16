@@ -35,16 +35,6 @@ object SdkPerformance {
 
     internal var mainTask: TaskInfo? = null
 
-    fun <T> performance(tag: String, funToExecute: () -> T): T {
-        if (!CommonSdkParameters.measurePerformance) return funToExecute()
-        val task = start(tag)
-        try {
-            return funToExecute()
-        } finally {
-            stop(task)
-        }
-    }
-
     fun init(name: String) {
         if (!CommonSdkParameters.measurePerformance) return
         mainTask = TaskInfo(name).apply { timers.add(this) }
