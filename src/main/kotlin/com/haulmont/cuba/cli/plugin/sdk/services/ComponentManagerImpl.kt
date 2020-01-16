@@ -22,6 +22,7 @@ import com.haulmont.cuba.cli.plugin.sdk.commands.CommonSdkParameters
 import com.haulmont.cuba.cli.plugin.sdk.dto.*
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusManager
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusScriptManager
+import com.haulmont.cuba.cli.plugin.sdk.perf.SdkPerformance.performance
 import com.haulmont.cuba.cli.plugin.sdk.search.*
 import org.json.JSONObject
 import org.kodein.di.generic.instance
@@ -106,20 +107,28 @@ class ComponentManagerImpl : ComponentManager {
         progress?.let { it(component, 0f, 1) }
         if (component.components.isNotEmpty()) {
             if (ComponentType.FRAMEWORK == component.type) {
-                resolveSdkBom(component)
+                performance("Resolve SDK BOM") {
+                    resolveSdkBom(component)
+                }
             }
-            checkComponent(component)
+            performance("Read framework version") {
+                readFrameworkVersion(component)
+            }
             log.info("Resolve complex component: ${component}")
             val resolvedComponents = ArrayList<Component>()
             val total = component.components.size
             val resolved = AtomicInteger(0)
 
-            componentResolveStream(component).forEach { componentToResolve ->
-                val resolvedComponent = resolveDependencies(componentToResolve) { _, localProgress, _ ->
-                    progress?.let { it(componentToResolve, resolved.get() + localProgress, total) }
+            performance("Resolve all components") {
+                componentResolveStream(component).forEach { componentToResolve ->
+                    val resolvedComponent = performance("Resolve component") {
+                        resolveDependencies(componentToResolve) { _, localProgress, _ ->
+                            progress?.let { it(componentToResolve, resolved.get() + localProgress, total) }
+                        }
+                    }
+                    resolvedComponent?.let { resolvedComponents.add(it) }
+                    resolved.incrementAndGet()
                 }
-                resolvedComponent?.let { resolvedComponents.add(it) }
-                resolved.incrementAndGet()
             }
 //            progress?.let { it(component, 1f, 1) }
             component.components.clear()
@@ -134,7 +143,7 @@ class ComponentManagerImpl : ComponentManager {
     private fun MutableSet<Component>.globalModule() =
         filter { it.name != null && it.name.endsWith("-global") }.firstOrNull()
 
-    private fun checkComponent(component: Component) {
+    private fun readFrameworkVersion(component: Component) {
         if (listOf(ComponentType.FRAMEWORK, ComponentType.ADDON).contains(component.type)) {
             component.components.globalModule()?.let {
                 val model = mvnArtifactManager.readPom(
@@ -148,6 +157,8 @@ class ComponentManagerImpl : ComponentManager {
                     log.info("Component not found: ${component}")
                     throw IllegalStateException("Component not found: ${component}")
                 }
+                component.frameworkVersion =
+                    model.dependencies.filter { it.artifactId == "cuba-global" }.map { it.version }.firstOrNull()
             }
         }
     }
@@ -355,12 +366,18 @@ class ComponentManagerImpl : ComponentManager {
                 return null
             }
 
-            for (classifier in component.classifiers) {
-                mvnArtifactManager.getArtifact(artifact, classifier)
-                artifact.classifiers.add(classifier)
+            performance("Read all classifiers") {
+                for (classifier in component.classifiers) {
+                    performance("Read classifier $classifier") {
+                        mvnArtifactManager.getOrDownloadArtifactFile(artifact, classifier)
+                    }
+                    artifact.classifiers.add(classifier)
+                }
             }
 
-            val dependencies = mvnArtifactManager.resolve(artifact)
+            val dependencies: List<MvnArtifact> = performance("Resolve") {
+                mvnArtifactManager.resolve(artifact)
+            }
 
             log.fine("Component ${component} dependencies: ${dependencies}")
             progress?.let { it(component, localProgressCount(progressCount++, component), 1) }
@@ -369,27 +386,36 @@ class ComponentManagerImpl : ComponentManager {
             component.dependencies.addAll(dependencies)
 
             progress?.let { it(component, localProgressCount(progressCount++, component), 1) }
-            val additionalDependencies = artifactsStream(component.dependencies)
-                .flatMap { mvnArtifactManager.searchAdditionalDependencies(it).stream() }
-                .collect(Collectors.toSet())
+
+            val additionalDependencies = performance("Search additional dependencies") {
+                artifactsStream(component.dependencies)
+                    .flatMap { mvnArtifactManager.searchAdditionalDependencies(it).stream() }
+                    .collect(Collectors.toSet())
+            }
 
             component.dependencies.addAll(additionalDependencies)
 
-            for (classifier in getClassifiersToResolve(component)) {
-                progress?.let { it(component, localProgressCount(progressCount++, component), 1) }
-                if (classifier.type != "" || classifier.extension == "sdk") {
-                    if (dependencies.isNotEmpty()) {
-                        log.info("Resolve ${component.packageName} classifier \"${classifier}\" dependencies")
-                        mvnArtifactManager.resolve(artifact, classifier)
+            performance("Resolve all classifiers") {
+                for (classifier in getClassifiersToResolve(component)) {
+                    progress?.let { it(component, localProgressCount(progressCount++, component), 1) }
+                    if (classifier.type != "" || classifier.extension == "sdk") {
+                        if (dependencies.isNotEmpty()) {
+                            log.info("Resolve $component classifier \"$classifier\" dependencies")
+                            performance("Resolve classifier \"$classifier\" dependencies") {
+                                mvnArtifactManager.resolve(artifact, classifier)
+                            }
+                        }
                     }
+                    component.dependencies.forEach { it.classifiers.add(classifier.copy()) }
                 }
-                component.dependencies.forEach { it.classifiers.add(classifier.copy()) }
             }
 
             progress?.let { it(component, localProgressCount(progressCount++, component), 1) }
             log.fine("Resolve ${component.packageName} classifiers")
-            artifactsStream(component.dependencies).forEach {
-                mvnArtifactManager.resolveClassifiers(it)
+            performance("Check classifiers resolved") {
+                artifactsStream(component.dependencies).forEach {
+                    mvnArtifactManager.checkClassifiers(it)
+                }
             }
             progress?.let { it(component, localProgressCount(progressCount, component), 1) }
 
@@ -405,9 +431,7 @@ class ComponentManagerImpl : ComponentManager {
         return listOf(
             Classifier.pom(),
             Classifier.default(),
-            Classifier.sources(),
-            Classifier.javadoc(),
-            Classifier.client()
+            Classifier.sources()
         )
     }
 

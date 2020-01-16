@@ -23,9 +23,13 @@ import com.haulmont.cuba.cli.red
 @Parameters(commandDescription = "Stop SDK")
 class StopCommand : NexusCommand() {
 
+    var checkStated = true
+
     override fun run() {
         if (!nexusManager.isStarted()) {
-            printWriter.println(messages["start.repositoryNotStarted"])
+            if (checkStated) {
+                printWriter.println(messages["start.repositoryNotStarted"])
+            }
             return
         }
         nexusManager.stopRepository()

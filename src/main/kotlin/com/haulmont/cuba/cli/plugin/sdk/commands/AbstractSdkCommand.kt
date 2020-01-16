@@ -23,6 +23,7 @@ import com.haulmont.cuba.cli.commands.AbstractCommand
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.green
 import com.haulmont.cuba.cli.localMessages
+import com.haulmont.cuba.cli.plugin.sdk.perf.SdkPerformance
 import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
 import com.haulmont.cuba.cli.prompting.ValidationException
 import org.kodein.di.generic.instance
@@ -54,10 +55,18 @@ abstract class AbstractSdkCommand : AbstractCommand() {
     )
     internal var parameters: List<String>? = null
 
-
+    @Parameter(
+        names = ["--performance"],
+        description = "Measure task performance",
+        hidden = true
+    )
+    var performance: Boolean = false
+        private set
 
     override fun preExecute() {
         super.preExecute()
+        CommonSdkParameters.measurePerformance=performance
+        SdkPerformance.init(this.javaClass.name)
         if (settingsFile != null) {
             var file = Path.of(settingsFile)
             if (!file.isAbsolute) {
@@ -79,6 +88,7 @@ abstract class AbstractSdkCommand : AbstractCommand() {
 
     override fun postExecute() {
         super.postExecute()
+        SdkPerformance.finish()
         if (settingsFile != null || parameters != null) {
             sdkSettings.resetProperties()
         }
@@ -103,7 +113,29 @@ abstract class AbstractSdkCommand : AbstractCommand() {
         }
     }
 
-    internal fun password(password:String) = "*****"
+    internal fun printProgressMessage(msg: String, periodMs: Long = 100, i: Int = 0) {
+        val padLength = 10
+        if (i % padLength == 0) {
+            printWriter.print("\r$msg".padEnd(msg.length + padLength))
+        }
+        waitAndPrintProgress(periodMs, msg.padEnd(msg.length + i % padLength, '.'))
+    }
+
+    internal fun waitAndPrintProgress(period: Long, msg: String) {
+        Thread.sleep(period)
+        printWriter.print("\r$msg")
+    }
+
+    internal fun waitTask(msg: String, periodMs: Long = 100, waitConditionFun: () -> Boolean) {
+        printProgressMessage(msg)
+        var i = 0
+        while (waitConditionFun()) {
+            printProgressMessage(msg, periodMs, i++)
+        }
+        printWriter.println()
+    }
+
+    internal fun password(password: String) = "*****"
 
     open fun onlyForConfiguredSdk(): Boolean = true
 }

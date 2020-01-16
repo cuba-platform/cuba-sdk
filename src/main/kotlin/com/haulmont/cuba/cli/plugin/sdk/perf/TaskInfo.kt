@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2018 Haulmont.
+ * Copyright (c) 2008-2020 Haulmont.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,8 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.commands
+package com.haulmont.cuba.cli.plugin.sdk.perf
 
-object CommonSdkParameters {
-    var printMaven: Boolean = false
-    var singleThread: Boolean = false
-    var mavenOptions: List<String>? = null
-    var measurePerformance: Boolean = false
-
-    fun reset() {
-        printMaven = false
-        singleThread = false
-        mavenOptions = null
-    }
-}
+data class TaskInfo(val taskName:String,
+                    var startTimeMillis: Long=System.currentTimeMillis(),
+                    var stopTimeMillis: Long?=null)

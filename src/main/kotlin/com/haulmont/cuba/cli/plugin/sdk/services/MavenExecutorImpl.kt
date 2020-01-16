@@ -18,14 +18,18 @@ package com.haulmont.cuba.cli.plugin.sdk.services
 
 import com.haulmont.cuba.cli.commands.CommonParameters
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
+import com.haulmont.cuba.cli.plugin.sdk.SdkPlugin
 import com.haulmont.cuba.cli.plugin.sdk.commands.CommonSdkParameters
 import com.haulmont.cuba.cli.plugin.sdk.dto.OsType
+import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
+import com.haulmont.cuba.cli.plugin.sdk.utils.copyInputStreamToFile
 import com.haulmont.cuba.cli.plugin.sdk.utils.currentOsType
 import org.kodein.di.generic.instance
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
 import java.io.PrintWriter
+import java.nio.file.Files
 import java.nio.file.Path
 import java.util.logging.Logger
 
@@ -35,6 +39,20 @@ class MavenExecutorImpl : MavenExecutor {
     private val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
     private val repositoryManager: RepositoryManager by sdkKodein.instance()
     private val printWriter: PrintWriter by sdkKodein.instance()
+
+    override fun init() {
+        val emptyPomFile = Files.createTempFile("empty-pom", "xml").toFile()
+        emptyPomFile.copyInputStreamToFile(SdkPlugin::class.java.getResourceAsStream("empty-pom.xml"))
+        mvn(
+            RepositoryTarget.SOURCE.getId(),
+            "dependency:resolve-plugins",
+            arrayListOf(
+                "-Dtransitive=true",
+                "-DincludeParents=true",
+                "-f", emptyPomFile.toString()
+            )
+        )
+    }
 
     override fun mvn(profile: String, command: String, commands: List<String>, ignoreErrors: Boolean): String {
         val rt = Runtime.getRuntime()
@@ -48,12 +66,17 @@ class MavenExecutorImpl : MavenExecutor {
                 ).toString(),
                 command,
                 "-s", "\"$settingsFile\"",
-                "-P", profile
+                "-P", profile,
+                "-Dmaven.test.skip", "-DskipTests"
             ).asList()
         )
         cliCommandsList.addAll(commands)
         if (CommonParameters.stacktrace) {
             cliCommandsList.add("-e")
+        }
+
+        if (!CommonSdkParameters.singleThread) {
+            cliCommandsList.add("-T 1C")
         }
 
         CommonSdkParameters.mavenOptions?.let { cliCommandsList.addAll(it) }

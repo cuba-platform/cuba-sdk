@@ -120,8 +120,8 @@ class RepositoryManagerImpl : RepositoryManager {
         flush()
     }
 
-    override fun removeRepository(name: String, target: RepositoryTarget) {
-        if (RepositoryTarget.TARGET == target && name == sdkSettings["repository.name"]) {
+    override fun removeRepository(name: String, target: RepositoryTarget, force: Boolean) {
+        if (!force && RepositoryTarget.TARGET == target && name == sdkSettings["repository.name"]) {
             throw ValidationException("Unable to delete configured local SDK repository")
         }
         getInternalRepositories(target).remove(getRepository(name, target))

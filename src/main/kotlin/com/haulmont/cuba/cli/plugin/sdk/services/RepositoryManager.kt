@@ -28,13 +28,13 @@ interface RepositoryManager {
 
     fun addRepository(repository: Repository, target: RepositoryTarget)
 
-    fun removeRepository(name: String, target: RepositoryTarget)
+    fun removeRepository(name: String, target: RepositoryTarget, force: Boolean = false)
 
     fun getRepositories(target: RepositoryTarget): Collection<Repository>
 
     fun addPremiumRepository(licenseKey: String)
 
-    fun isOnline(repository: Repository):Boolean
+    fun isOnline(repository: Repository): Boolean
 
     fun buildMavenSettingsFile()
 

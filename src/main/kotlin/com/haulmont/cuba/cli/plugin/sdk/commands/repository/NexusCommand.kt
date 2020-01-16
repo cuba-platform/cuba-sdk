@@ -32,26 +32,4 @@ abstract class NexusCommand : AbstractSdkCommand() {
             .response()
         return response.statusCode == 200
     }
-
-    internal fun printProgressMessage(msg: String, i: Int = 0) {
-        val padLength = 10
-        if (i % padLength == 0) {
-            printWriter.print(msg.padEnd(msg.length + padLength))
-        }
-        waitAndPrintProgress(100, msg.padEnd(msg.length + i % padLength, '.'))
-    }
-
-    internal fun waitAndPrintProgress(period: Long, msg: String) {
-        Thread.sleep(period)
-        printWriter.print(msg)
-    }
-
-    internal fun waitTask(msg: String, waitConditionFun: () -> Boolean) {
-        printProgressMessage(msg)
-        var i = 0
-        while (waitConditionFun()) {
-            printProgressMessage(msg, i++)
-        }
-        printWriter.println()
-    }
 }

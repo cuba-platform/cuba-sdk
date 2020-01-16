@@ -10,6 +10,7 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryType
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusScriptManager
 import com.haulmont.cuba.cli.plugin.sdk.services.FileDownloadService
+import com.haulmont.cuba.cli.plugin.sdk.services.MavenExecutor
 import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
 import com.haulmont.cuba.cli.plugin.sdk.utils.FileUtils
 import com.haulmont.cuba.cli.prompting.Answer
@@ -26,6 +27,7 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
+import kotlin.concurrent.thread
 
 
 @Parameters(commandDescription = "Setup SDK")
@@ -34,8 +36,9 @@ class SetupCommand : AbstractSdkCommand() {
     internal val fileDownloadService: FileDownloadService by sdkKodein.instance()
     internal val repositoryManager: RepositoryManager by sdkKodein.instance()
     internal val nexusScriptManager: NexusScriptManager by sdkKodein.instance()
+    internal val mvnExecutor: MavenExecutor by sdkKodein.instance()
 
-    override fun onlyForConfiguredSdk(): Boolean  = false
+    override fun onlyForConfiguredSdk(): Boolean = false
 
     override fun run() {
         Prompts.create(kodein) { askRepositorySettings() }
@@ -136,6 +139,12 @@ class SetupCommand : AbstractSdkCommand() {
 
     private fun configureMaven(answers: Map<String, Answer>, it: Path) {
         repositoryManager.mvnSettingFile()
+        val thread = thread {
+            mvnExecutor.init()
+        }
+        waitTask(messages["setup.configuringMaven"], 500) {
+            thread.isAlive
+        }
     }
 
     private fun unzipMaven(answers: Map<String, Answer>, it: Path) {
@@ -182,7 +191,7 @@ class SetupCommand : AbstractSdkCommand() {
 
     private fun addRepository(repositoryName: String, repositoryType: RepositoryType, answers: Answers) {
         repositoryManager.getRepository(repositoryName, RepositoryTarget.TARGET)
-            ?.let { repositoryManager.removeRepository(repositoryName, RepositoryTarget.TARGET) }
+            ?.let { repositoryManager.removeRepository(repositoryName, RepositoryTarget.TARGET, true) }
         repositoryManager.addRepository(
             repositoryFromAnswers(repositoryName, repositoryType, answers), RepositoryTarget.TARGET
         )
@@ -212,7 +221,7 @@ class SetupCommand : AbstractSdkCommand() {
 
     private fun configureRepository(answers: Map<String, Answer>, path: Path) {
         configureNexusProperties(answers)
-        StopCommand().execute()
+        StopCommand().apply { checkStated = false }.execute()
         StartCommand().execute()
         configureNexus(answers)
         printWriter.println(messages["setup.nexusConfigured"].green())

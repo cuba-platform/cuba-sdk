@@ -108,7 +108,7 @@ class SdkPlugin : CliPlugin {
 
     @Subscribe
     fun onDestroy(event: DestroyPluginEvent) {
-        StopCommand().execute()
+        StopCommand().apply { checkStated=false }.execute()
     }
 
 }

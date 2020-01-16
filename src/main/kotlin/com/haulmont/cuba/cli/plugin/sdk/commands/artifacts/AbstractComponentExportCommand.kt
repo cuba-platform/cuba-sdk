@@ -35,7 +35,7 @@ abstract class AbstractComponentExportCommand : AbstractExportCommand() {
     }
 
     override fun exportName(): String {
-        createSearchContext()?.let {
+        (componentToExport ?: createSearchContext())?.let {
             val component = searchInMetadata(it)
             component?.let {
                 return "${it.toString().replace(":", "-")}_${it.type.toString().toLowerCase()}_sdk"

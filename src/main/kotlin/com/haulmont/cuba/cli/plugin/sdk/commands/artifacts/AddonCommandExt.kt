@@ -18,6 +18,7 @@ package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.ComponentType
+import com.haulmont.cuba.cli.prompting.Option
 
 fun BaseComponentCommand.askResolvedAddonNameVersion(nameVersion: NameVersion?): NameVersion {
     val addons = metadataHolder.getMetadata().components
@@ -26,14 +27,20 @@ fun BaseComponentCommand.askResolvedAddonNameVersion(nameVersion: NameVersion?):
         nameVersion,
         "addon",
         addons.map { it.name }
-            .requireNoNulls()
+            .filterNotNull()
             .distinct()
             .sorted()
             .toList()) { addonName ->
         addons.filter { it.name == addonName }
-            .map { it.version }
-            .distinct()
-            .sortedDescending()
+            .distinctBy { it.version }
+            .sortedByDescending { it.version }
+            .map {
+                Option(
+                    it.version,
+                    rootMessages["framework.cuba.version"].format(it.version, it.frameworkVersion),
+                    it.version
+                )
+            }
             .toList()
     }
 }
@@ -47,8 +54,16 @@ fun BaseComponentCommand.askAllAddonsNameVersion(nameVersion: NameVersion?): Nam
     ) { addonName ->
         addons.filter { it.id == addonName }
             .flatMap { it.compatibilityList }
-            .flatMap { it.artifactVersions }
-            .sortedDescending()
+            .flatMap {
+                it.artifactVersions.map { version ->
+                    Option(
+                        version,
+                        rootMessages["framework.cuba.version"].format(version, it.platformRequirement),
+                        version
+                    )
+                }
+            }
+            .sortedByDescending { it.value }
             .toList()
     }
 }

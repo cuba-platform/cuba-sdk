@@ -27,6 +27,12 @@ import java.util.zip.ZipOutputStream
 
 typealias UnzipProcessCallback = (count: Int, total: Int) -> Unit
 
+fun File.copyInputStreamToFile(inputStream: InputStream) {
+    this.outputStream().use { fileOut ->
+        inputStream.copyTo(fileOut)
+    }
+}
+
 class FileUtils {
     companion object {
 

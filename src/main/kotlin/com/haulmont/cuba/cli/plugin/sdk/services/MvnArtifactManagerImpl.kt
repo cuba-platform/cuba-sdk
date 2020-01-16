@@ -23,6 +23,7 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
 import com.haulmont.cuba.cli.plugin.sdk.dto.MvnArtifact
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
+import com.haulmont.cuba.cli.plugin.sdk.perf.SdkPerformance.performance
 import com.haulmont.cuba.cli.plugin.sdk.utils.FileUtils
 import com.haulmont.cuba.cli.plugin.sdk.utils.authorizeIfRequired
 import org.apache.maven.model.Model
@@ -63,18 +64,22 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
         log.info("Read POM: ${artifact.mvnCoordinates(classifier)}")
         val pomFile = getArtifactPomFile(artifact, classifier)
 
-        if (!Files.exists(pomFile)) {
-            mavenExecutor.mvn(
-                RepositoryTarget.SOURCE.getId(),
-                "org.apache.maven.plugins:maven-dependency-plugin:3.1.1:get",
-                arrayListOf("-Dartifact=${artifact.mvnCoordinates(classifier)}"),
-                ignoreErrors = true
-            )
+        performance("Read POM") {
+            if (!Files.exists(pomFile)) {
+                mavenExecutor.mvn(
+                    RepositoryTarget.SOURCE.getId(),
+                    "org.apache.maven.plugins:maven-dependency-plugin:3.1.1:get",
+                    arrayListOf("-Dartifact=${artifact.mvnCoordinates(classifier)}"),
+                    ignoreErrors = true
+                )
+            }
         }
 
         if (Files.exists(pomFile)) {
             FileReader(pomFile.toFile()).use {
-                return MavenXpp3Reader().read(it)
+                return performance("Read model from POM") {
+                    MavenXpp3Reader().read(it)
+                }
             }
         }
         log.info("POM does not exist: ${artifact.mvnCoordinates(classifier)}")
@@ -211,6 +216,7 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
             arrayListOf(
                 "-Dtransitive=true",
                 "-DincludeParents=true",
+                "-DoverWriteSnapshots=true",
                 "-Dclassifier=${classifier.type}",
                 "-f", getArtifactPomFile(artifact, pomClassifier).toString()
             )
@@ -241,17 +247,19 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
 
     override fun getArtifact(artifact: MvnArtifact, classifier: Classifier) {
         log.info("Get with dependencies ${artifact.mvnCoordinates(classifier)}")
-        mavenExecutor.mvn(
-            RepositoryTarget.SOURCE.getId(),
-            "org.apache.maven.plugins:maven-dependency-plugin:3.1.1:get",
-            arrayListOf(
-                "-Dartifact=${artifact.mvnCoordinates(classifier)}"
-            ),
-            ignoreErrors = true
-        )
+        performance("Get artifact") {
+            mavenExecutor.mvn(
+                RepositoryTarget.SOURCE.getId(),
+                "org.apache.maven.plugins:maven-dependency-plugin:3.1.1:get",
+                arrayListOf(
+                    "-Dartifact=${artifact.mvnCoordinates(classifier)}"
+                ),
+                ignoreErrors = true
+            )
+        }
     }
 
-    override fun resolveClassifiers(artifact: MvnArtifact) {
+    override fun checkClassifiers(artifact: MvnArtifact) {
         artifact.classifiers.removeAll { !artifactDownloaded(artifact, it) }
     }
 
@@ -266,33 +274,35 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
         try {
             val model = readPom(artifact)
             if (model == null || model.dependencyManagement == null) return ArrayList()
-            return model.dependencyManagement.dependencies.stream()
-                .filter { it.type == "pom" }
-                .flatMap { dependency ->
-                    val version = if (dependency.version.startsWith("\${")) {
-                        val propertiesMap = HashMap<String, String>()
-                        for (entry in (model.properties.toMap() as Map<String, String>).entries) {
-                            propertiesMap.put(entry.key.replace(".", "_"), entry.value)
+            return performance("Search additional dependencies") {
+                model.dependencyManagement.dependencies.stream()
+                    .filter { it.type == "pom" }
+                    .flatMap { dependency ->
+                        val version = if (dependency.version.startsWith("\${")) {
+                            val propertiesMap = HashMap<String, String>()
+                            for (entry in (model.properties.toMap() as Map<String, String>).entries) {
+                                propertiesMap.put(entry.key.replace(".", "_"), entry.value)
+                            }
+                            propertiesMap.put("project_version", model.version)
+                            val version = dependency.version.replace(".", "_")
+                            velocityHelper.generate(
+                                version,
+                                dependency.groupId,
+                                propertiesMap
+                            )
+                        } else {
+                            dependency.version
                         }
-                        propertiesMap.put("project_version", model.version)
-                        val version = dependency.version.replace(".", "_")
-                        velocityHelper.generate(
-                            version,
-                            dependency.groupId,
-                            propertiesMap
+                        val artifactList = ArrayList<MvnArtifact>()
+                        val artifact = MvnArtifact(
+                            dependency.groupId, dependency.artifactId, version,
+                            classifiers = arrayListOf(Classifier("", dependency.type ?: "jar"))
                         )
-                    } else {
-                        dependency.version
-                    }
-                    val artifactList = ArrayList<MvnArtifact>()
-                    val artifact = MvnArtifact(
-                        dependency.groupId, dependency.artifactId, version,
-                        classifiers = arrayListOf(Classifier("", dependency.type ?: "jar"))
-                    )
-                    artifactList.add(artifact)
-                    artifactList.addAll(searchAdditionalDependencies(artifact))
-                    return@flatMap artifactList.stream()
-                }.collect(Collectors.toList())
+                        artifactList.add(artifact)
+                        artifactList.addAll(searchAdditionalDependencies(artifact))
+                        return@flatMap artifactList.stream()
+                    }.collect(Collectors.toList())
+            }
         } catch (e: Exception) {
             log.throwing(
                 MvnArtifactManagerImpl::class.java.name,
@@ -310,7 +320,7 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
     private fun getArtifactPomFile(artifact: MvnArtifact, pomClassifier: Classifier = Classifier.pom()) =
         getArtifactFile(artifact, pomClassifier)
 
-    private fun getOrDownloadArtifactFile(
+    override fun getOrDownloadArtifactFile(
         artifact: MvnArtifact,
         classifier: Classifier
     ): Path {

@@ -31,6 +31,7 @@ import com.haulmont.cuba.cli.plugin.sdk.services.ComponentVersionManager
 import com.haulmont.cuba.cli.plugin.sdk.services.MetadataHolder
 import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
 import com.haulmont.cuba.cli.plugin.sdk.utils.doubleUnderline
+import com.haulmont.cuba.cli.prompting.Option
 import com.haulmont.cuba.cli.prompting.Prompts
 import com.haulmont.cuba.cli.prompting.ValidationException
 import org.kodein.di.generic.instance
@@ -199,7 +200,7 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
         nameVersion: NameVersion?,
         msgPrefix: String,
         names: List<String>,
-        versions: (name: String) -> List<String>
+        versions: (name: String) -> List<Option<String>>
     ): NameVersion {
         if (nameVersion == null) {
             val name = askName(msgPrefix, names)
@@ -216,11 +217,11 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
 
     private fun askVersion(
         msgPrefix: String,
-        versions: (name: String) -> List<String>,
+        versions: (name: String) -> List<Option<String>>,
         name: String
     ): String {
         val versionAnswers = Prompts.create {
-            textOptions(
+            options(
                 "version",
                 messages["$msgPrefix.version"],
                 versions(name)

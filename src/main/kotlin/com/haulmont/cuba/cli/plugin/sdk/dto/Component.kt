@@ -27,6 +27,7 @@ data class Component(
         Classifier.sources()
     ),
     val url: String? = null,
+    var frameworkVersion: String? = null,
     val components: MutableSet<Component> = HashSet(),
     val dependencies: MutableSet<MvnArtifact> = HashSet()
 ) {

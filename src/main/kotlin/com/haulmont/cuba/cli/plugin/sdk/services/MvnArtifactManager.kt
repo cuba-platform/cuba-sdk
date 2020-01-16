@@ -20,6 +20,7 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
 import com.haulmont.cuba.cli.plugin.sdk.dto.MvnArtifact
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 import org.apache.maven.model.Model
+import java.nio.file.Path
 
 interface MvnArtifactManager {
 
@@ -29,9 +30,11 @@ interface MvnArtifactManager {
 
     fun getArtifact(artifact: MvnArtifact, classifier: Classifier)
 
+    fun getOrDownloadArtifactFile(artifact: MvnArtifact, classifier: Classifier): Path
+
     fun resolve(artifact: MvnArtifact, classifier: Classifier = Classifier.default()): List<MvnArtifact>
 
-    fun resolveClassifiers(artifact: MvnArtifact)
+    fun checkClassifiers(artifact: MvnArtifact)
 
     fun remove(artifact: MvnArtifact)
 

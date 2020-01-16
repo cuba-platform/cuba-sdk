@@ -18,6 +18,7 @@ package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.ComponentType
+import com.haulmont.cuba.cli.prompting.Option
 
 fun BaseComponentCommand.askResolvedFrameworkNameVersion(nameVersion: NameVersion?): NameVersion {
     val addons = metadataHolder.getMetadata().components
@@ -26,7 +27,7 @@ fun BaseComponentCommand.askResolvedFrameworkNameVersion(nameVersion: NameVersio
         nameVersion,
         "framework",
         addons.map { it.name }
-            .requireNoNulls()
+            .filterNotNull()
             .distinct()
             .sorted()
             .toList()) { name ->
@@ -34,6 +35,7 @@ fun BaseComponentCommand.askResolvedFrameworkNameVersion(nameVersion: NameVersio
             .map { it.version }
             .distinct()
             .sortedDescending()
+            .map { Option(it, null, it) }
             .toList()
     }
 }
@@ -43,7 +45,7 @@ fun BaseComponentCommand.askAllFrameworkNameVersion(nameVersion: NameVersion?): 
     "framework",
     listOf("cuba")
 ) {
-    platformVersionsManager.versions.sorted()
+    platformVersionsManager.versions.sortedDescending().map { Option(it, null, it) }
 }
 
 
