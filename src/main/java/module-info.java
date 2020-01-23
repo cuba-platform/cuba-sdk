@@ -30,11 +30,9 @@ module com.haulmont.cuba.cli.plugin.sdk {
     requires kodein.di.generic.jvm;
     requires practicalxml;
     requires fuel;
-    requires fuel.coroutines;
     requires maven.model;
     requires gson;
     requires result;
-    requires fuel.json;
     requires org.json;
     requires java.logging;
     requires kotlin.xml.builder;

@@ -16,7 +16,6 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.search
 
-import com.github.kittinunf.fuel.json.FuelJson
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
@@ -30,11 +29,8 @@ class Nexus2Search(repository: Repository) : AbstractRepositorySearch(repository
         "v" to component.version
     )
 
-    override fun handleResultJson(it: FuelJson, component: Component): Component? {
-        if (!it.content.startsWith("[")){
-            return null
-        }
-        val array = it.array()
+    override fun handleResultJson(it: JSONArray, component: Component): Component? {
+        val array = it
         if (array.isEmpty) {
             log.info("Unknown ${component.type}: ${component.packageName}")
             return null

@@ -17,7 +17,6 @@
 package com.haulmont.cuba.cli.plugin.sdk.dto
 
 import com.github.kittinunf.fuel.core.Request
-import com.github.kittinunf.fuel.core.extensions.authentication
 
 open class Repository(
     val active: Boolean = true,
@@ -30,7 +29,7 @@ open class Repository(
     public fun Request.authorizeIfRequired(repository: Repository): Request {
         if (repository.authentication != null) {
             val authentication: Authentication = repository.authentication
-            this.authentication().basic(authentication.login, authentication.password)
+            this.authenticate(authentication.login, authentication.password)
         }
         return this
     }

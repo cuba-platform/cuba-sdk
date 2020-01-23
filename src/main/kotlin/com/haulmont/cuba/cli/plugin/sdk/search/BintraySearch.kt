@@ -16,7 +16,6 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.search
 
-import com.github.kittinunf.fuel.json.FuelJson
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 import org.json.JSONArray
@@ -29,8 +28,8 @@ class BintraySearch(repository: Repository) : AbstractRepositorySearch(repositor
         "subject" to repository.repositoryName
     )
 
-    override fun handleResultJson(it: FuelJson, component: Component): Component? {
-        val array = it.array()
+    override fun handleResultJson(it: JSONArray, component: Component): Component? {
+        val array = it
         if (array.isEmpty) {
             log.info("Unknown ${component.type}: ${component.packageName}")
             return null

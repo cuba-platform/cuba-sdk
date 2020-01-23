@@ -293,6 +293,7 @@ class SetupCommand : AbstractSdkCommand() {
                 }
                 return true
             }
+        return false
     }
 
     private fun runNexusScript(answers: Answers, login: String, password: String): Boolean {
@@ -308,6 +309,7 @@ class SetupCommand : AbstractSdkCommand() {
             }
             return true
         }
+        return false
     }
 
     private fun persistSdkCredentials(answers: Answers) {

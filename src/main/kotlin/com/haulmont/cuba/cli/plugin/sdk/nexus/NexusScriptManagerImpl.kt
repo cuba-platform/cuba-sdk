@@ -16,14 +16,14 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.nexus
 
-import com.github.kittinunf.fuel.core.Headers
 import com.github.kittinunf.fuel.core.Response
-import com.github.kittinunf.fuel.core.extensions.authentication
 import com.github.kittinunf.fuel.httpDelete
 import com.github.kittinunf.fuel.httpPost
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.SdkPlugin
 import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
+import com.haulmont.cuba.cli.plugin.sdk.utils.Headers
+import com.haulmont.cuba.cli.plugin.sdk.utils.header
 import org.json.JSONObject
 import org.kodein.di.generic.instance
 
@@ -46,8 +46,7 @@ class NexusScriptManagerImpl : NexusScriptManager {
         val (_, response, _) =
             "${sdkSettings["repository.url"]}service/rest/v1/script"
                 .httpPost()
-                .authentication()
-                .basic(login, password)
+                .authenticate(login, password)
                 .header(Headers.CONTENT_TYPE, "application/json")
                 .header(Headers.ACCEPT, "application/json")
                 .header(Headers.CACHE_CONTROL, "no-cache")
@@ -60,8 +59,7 @@ class NexusScriptManagerImpl : NexusScriptManager {
         val (_, response, _) =
             "${sdkSettings["repository.url"]}service/rest/v1/script/$name/run"
                 .httpPost()
-                .authentication()
-                .basic(login, password)
+                .authenticate(login, password)
                 .header(Headers.CONTENT_TYPE, "application/json")
                 .header(Headers.ACCEPT, "application/json")
                 .header(Headers.CACHE_CONTROL, "no-cache")
@@ -76,8 +74,7 @@ class NexusScriptManagerImpl : NexusScriptManager {
         val (_, response, _) =
             "${sdkSettings["repository.url"]}service/rest/v1/script/${name}"
                 .httpDelete()
-                .authentication()
-                .basic(login, password)
+                .authenticate(login, password)
                 .header(Headers.ACCEPT, "application/json")
                 .response()
         return response

@@ -49,8 +49,11 @@ data class MvnArtifact(
         return Classifier.pom()
     }
 
-    fun pomClassifiers(): List<Classifier> =
-        classifiers.filter { it.extension == "pom" || it.extension == "sdk" }.ifEmpty { listOf(Classifier.pom()) }
+    fun pomClassifiers(): List<Classifier> {
+        val classifiers = classifiers.filter { it.extension == "pom" || it.extension == "sdk" }
+        if (classifiers.isEmpty()) return listOf(Classifier.pom())
+        return classifiers
+    }
 
     fun localPath(repoPath: Path, classifier: Classifier = Classifier.default()): Path {
         var path: Path = repoPath

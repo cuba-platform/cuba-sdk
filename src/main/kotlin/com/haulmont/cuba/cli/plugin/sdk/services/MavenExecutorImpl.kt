@@ -121,7 +121,7 @@ class MavenExecutorImpl : MavenExecutor {
     fun InputStream.readMvn(handleResult: (m: String?) -> Unit) {
         InputStreamReader(this).use {
             BufferedReader(it).use {
-                var s: String?
+                var s: String? = null
                 while (it.readLine().also { s = it } != null) {
                     handleResult(s)
                 }

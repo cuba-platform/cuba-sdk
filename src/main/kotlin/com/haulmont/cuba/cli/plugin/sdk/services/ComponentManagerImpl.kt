@@ -207,7 +207,7 @@ class ComponentManagerImpl : ComponentManager {
             Files.createDirectories(componentPath.parent)
             if (component.url != null) {
                 val (_, response, _) = Fuel.download(component.url)
-                    .fileDestination { response, Url ->
+                    .destination { response, Url ->
                         componentPath.toFile()
                     }
                     .response()
