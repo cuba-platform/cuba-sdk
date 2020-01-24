@@ -120,6 +120,30 @@ class ComponentTemplatesImpl : ComponentTemplates {
         }
     }
 
+    private fun addonComponents(packageName: String, name: String, version: String): MutableSet<Component> {
+        return mutableSetOf(
+            Component(packageName, "$name-global", version),
+            Component(packageName, "$name-gui", version),
+            Component(packageName, "$name-portal", version),
+            Component(packageName, "$name-core", version).apply {
+                classifiers.add(Classifier("db", "zip"))
+            },
+            Component(packageName, "$name-web", version).apply {
+                classifiers.addAll(
+                    listOf(
+                        javadoc(),
+                        Classifier("themes"),
+                        Classifier("web", "zip")
+                    )
+                )
+            },
+            Component(packageName, "$name-web-themes", version),
+            Component(packageName, "$name-web-toolkit", version).apply {
+                classifiers.add(client())
+            }
+        )
+    }
+
     private fun defaultComponents(packageName: String, name: String, version: String): MutableSet<Component> {
         return mutableSetOf(
             Component(packageName, "$name-core", version).apply {
@@ -175,7 +199,7 @@ class ComponentTemplatesImpl : ComponentTemplates {
             name = "\${name}",
             version = "\${version}",
             type = ComponentType.ADDON,
-            components = defaultComponents("\${packageName}", "\${name}", "\${version}")
+            components = addonComponents("\${packageName}", "\${name}", "\${version}")
         )
     }
 
@@ -188,8 +212,12 @@ class ComponentTemplatesImpl : ComponentTemplates {
             name = componentName,
             version = "\${version}",
             type = ComponentType.ADDON,
-            components = defaultComponents(packageName, name, "\${version}")
-        )
+            components = addonComponents(packageName, name, "\${version}")
+        ).apply {
+            if (componentName == "bproc") {
+                this.components.add(Component(packageName, "$name-modeler", version))
+            }
+        }
     }
 
     override fun getTemplates(): Collection<Component> {

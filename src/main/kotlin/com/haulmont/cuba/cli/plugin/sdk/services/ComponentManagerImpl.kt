@@ -47,15 +47,17 @@ class ComponentManagerImpl : ComponentManager {
     private fun localProgress(component: Component) =
         1f / (3 + getClassifiersToResolve(component).size)
 
-    override fun search(component: Component): Component? =
-        searchInExternalRepo(componentTemplates.findTemplate(component) ?: component)?.let { resolved ->
+    override fun search(component: Component): Component? {
+        val template = componentTemplates.findTemplate(component)
+        return searchInExternalRepo(template ?: component)?.let { resolved ->
             if (resolved.name == null || resolved.name.isBlank()) {
                 resolved.components.find { it.name != null && it.name.endsWith("-global") }?.let {
                     return resolved.copy(name = it.name?.substringBefore("-global"))
                 }
             }
             return resolved
-        }
+        } ?: template
+    }
 
     override fun isAlreadyInstalled(component: Component): Boolean {
         val componentTemplate = componentTemplates.findTemplate(component) ?: component

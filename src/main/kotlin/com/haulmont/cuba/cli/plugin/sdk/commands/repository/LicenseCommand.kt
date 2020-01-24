@@ -21,6 +21,10 @@ import com.beust.jcommander.Parameters
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.green
 import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
+import com.haulmont.cuba.cli.plugin.sdk.dto.Authentication
+import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
+import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
+import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryType
 import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
 import com.haulmont.cuba.cli.prompting.Prompts
 import org.kodein.di.generic.instance
@@ -61,6 +65,49 @@ class LicenseCommand : AbstractSdkCommand() {
     }
 
     private fun activate(licenseKey: String) {
-        repositoryManager.addPremiumRepository(licenseKey)
+        licenseKey.split("-").also {
+            val login = it[0]
+            val password = it[1]
+
+            repositoryManager.removeRepository("cuba-bintray-premium",RepositoryTarget.SEARCH)
+            repositoryManager.addRepository(
+                Repository(
+                    name = "cuba-bintray-premium",
+                    type = RepositoryType.BINTRAY,
+                    url = "https://api.bintray.com/search/packages/maven?",
+                    authentication = Authentication("$login@cuba-platform", password),
+                    repositoryName = "cuba-platform"
+                ), RepositoryTarget.SEARCH
+            )
+            repositoryManager.removeRepository("cuba-nexus-premium",RepositoryTarget.SEARCH)
+            repositoryManager.addRepository(
+                Repository(
+                    name = "cuba-nexus-premium",
+                    type = RepositoryType.NEXUS2,
+                    url = "https://repo.cuba-platform.com/service/local/lucene/search",
+                    authentication = Authentication(login, password)
+                ), RepositoryTarget.SEARCH
+            )
+
+            repositoryManager.removeRepository("cuba-bintray-premium",RepositoryTarget.SOURCE)
+            repositoryManager.addRepository(
+                Repository(
+                    name = "cuba-bintray-premium",
+                    type = RepositoryType.BINTRAY,
+                    url = "https://cuba-platform.bintray.com/premium",
+                    authentication = Authentication("$login@cuba-platform", password)
+                ), RepositoryTarget.SOURCE
+            )
+
+            repositoryManager.removeRepository("cuba-nexus-premium",RepositoryTarget.SOURCE)
+            repositoryManager.addRepository(
+                Repository(
+                    name = "cuba-nexus-premium",
+                    type = RepositoryType.NEXUS2,
+                    url = "https://repo.cuba-platform.com/content/groups/premium",
+                    authentication = Authentication(login, password)
+                ), RepositoryTarget.SOURCE
+            )
+        }
     }
 }

@@ -32,8 +32,6 @@ interface RepositoryManager {
 
     fun getRepositories(target: RepositoryTarget): Collection<Repository>
 
-    fun addPremiumRepository(licenseKey: String)
-
     fun isOnline(repository: Repository): Boolean
 
     fun buildMavenSettingsFile()
