@@ -19,12 +19,12 @@ package com.haulmont.cuba.cli.plugin.sdk.search
 import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.httpGet
 import com.google.gson.Gson
+import com.google.gson.JsonElement
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 import com.haulmont.cuba.cli.plugin.sdk.utils.Headers
 import com.haulmont.cuba.cli.plugin.sdk.utils.authorizeIfRequired
 import com.haulmont.cuba.cli.plugin.sdk.utils.header
-import org.json.JSONArray
 import java.util.logging.Logger
 
 abstract class AbstractRepositorySearch : RepositorySearch {
@@ -52,7 +52,7 @@ abstract class AbstractRepositorySearch : RepositorySearch {
         result.fold(
             success = {
                 log.info("Component found in ${repository}: ${component}")
-                return handleResultJson(Gson().fromJson<JSONArray>(it, JSONArray::class.java), component)
+                return handleResultJson(Gson().fromJson<JsonElement>(it, JsonElement::class.java), component)
             },
             failure = { error ->
                 log.info("Component not found in ${repository}: ${component}")
@@ -62,7 +62,7 @@ abstract class AbstractRepositorySearch : RepositorySearch {
     }
 
     abstract fun handleResultJson(
-        it: JSONArray,
+        it: JsonElement,
         component: Component
     ): Component?
 

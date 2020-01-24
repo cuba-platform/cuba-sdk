@@ -31,6 +31,7 @@ class FileDownloadServiceImpl : FileDownloadService {
         }.progress { readBytes, totalBytes ->
             progressFun(readBytes, totalBytes, readBytes >= totalBytes)
         }.response()
+        val s=""
     }
 
 

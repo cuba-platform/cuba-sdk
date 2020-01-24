@@ -13,9 +13,9 @@ All resolved dependencies will be stored in local SDK maven repository. This too
 
 CUBA CLI and SDK compatibility
 
-| CUBA CLI Version | SDK Version |
+| CUBA CLI Version | SDK Version    |
 |------------------|----------------|
-| 2.1-SNAPSHOT     | 0.1-SNAPSHOT   |  
+| 2.1.0            | 0.1-SNAPSHOT   |  
 
 ## Manual installation from sources
 
@@ -41,6 +41,7 @@ To configure SDK please run `sdk setup` command. Before first usage SDK should b
 - `sdk setup` - run SDK configuration. This command will configure SDK properties and download, install and configure *m2* and nexus repository. For already configured SDK this command will not cleanup current SDK metadata
 - `sdk cleanup` - cleanup SDK metadata and remove all artifacts from local *m2* repository and from embedded Nexus repository. If `--local-only` flag provided then only local *m2* repository will be cleaned
 - `sdk set-license` - set license key and configure Premium repositories for *source* repository 
+- `sdk check-updates` - check available minor updates for framework and addons.  Specific target repository can be configured with `--r` or `--repository` additional parameters, example `sdk import --r sdk2`. If `--no-upload` additional parameter presented then SDK archive will be imported to local *m2* repository only.
 
 ## 4.2. Embedded nexus repository commands <a name="common-commands-sdk"></a>
 

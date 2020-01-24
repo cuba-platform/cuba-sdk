@@ -16,11 +16,12 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.search
 
+import com.google.gson.JsonArray
+import com.google.gson.JsonElement
+import com.google.gson.JsonObject
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
-import org.json.JSONArray
-import org.json.JSONObject
 
 class Nexus2Search(repository: Repository) : AbstractRepositorySearch(repository) {
     override fun searchParameters(component: Component): List<Pair<String, String>> = listOf(
@@ -29,34 +30,35 @@ class Nexus2Search(repository: Repository) : AbstractRepositorySearch(repository
         "v" to component.version
     )
 
-    override fun handleResultJson(it: JSONArray, component: Component): Component? {
-        val array = it
-        if (array.isEmpty) {
+    override fun handleResultJson(it: JsonElement, component: Component): Component? {
+        if (!it.isJsonArray) return null
+        val array = it as JsonArray
+        if (array.size()==0) {
             log.info("Unknown ${component.type}: ${component.packageName}")
             return null
         }
-        val json = array.get(0) as JSONObject
-        val dataArray = json.get("data") as JSONArray
-        if (dataArray.isEmpty) {
+        val json = array.get(0) as JsonObject
+        val dataArray = json.get("data") as JsonArray
+        if (dataArray.size()==0) {
             log.info("Unknown version: ${component.version}")
             return null
         }
         val components = mutableListOf<Component>()
         dataArray
-            .map { it as JSONObject }
+            .map { it as JsonObject }
             .map { dataObj ->
-                val groupId = dataObj.getString("groupId")
-                val artifactId = dataObj.getString("artifactId")
-                val version = dataObj.getString("latestRelease")
-                val classifiers = dataObj.getJSONArray("artifactHits")
-                    .map { it as JSONObject }
+                val groupId = dataObj.get("groupId").asString
+                val artifactId = dataObj.get("artifactId").asString
+                val version = dataObj.get("latestRelease").asString
+                val classifiers = dataObj.getAsJsonArray("artifactHits")
+                    .map { it as JsonObject }
                     .flatMap { artifactHit ->
-                        return@flatMap artifactHit.getJSONArray("artifactLinks")
-                            .map { it as JSONObject }
+                        return@flatMap artifactHit.getAsJsonArray("artifactLinks")
+                            .map { it as JsonObject }
                             .map { classifier ->
                                 Classifier(
-                                    classifier.getString("classifier"),
-                                    classifier.getString("extension")
+                                    classifier.get("classifier").asString,
+                                    classifier.get("extension").asString
                                 )
                             }
                     }

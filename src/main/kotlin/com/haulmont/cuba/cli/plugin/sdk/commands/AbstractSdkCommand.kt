@@ -65,7 +65,7 @@ abstract class AbstractSdkCommand : AbstractCommand() {
 
     override fun preExecute() {
         super.preExecute()
-        CommonSdkParameters.measurePerformance=performance
+        CommonSdkParameters.measurePerformance = performance
         SdkPerformance.init(this.javaClass.name)
         if (settingsFile != null) {
             var file = Path.of(settingsFile)

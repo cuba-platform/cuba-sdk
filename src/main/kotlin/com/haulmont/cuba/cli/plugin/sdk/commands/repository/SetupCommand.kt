@@ -3,16 +3,16 @@ package com.haulmont.cuba.cli.plugin.sdk.commands.repository
 import com.beust.jcommander.Parameters
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.green
+import com.haulmont.cuba.cli.plugin.sdk.SdkPlugin
 import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
-import com.haulmont.cuba.cli.plugin.sdk.dto.Authentication
-import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
-import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
-import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryType
+import com.haulmont.cuba.cli.plugin.sdk.dto.*
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusScriptManager
 import com.haulmont.cuba.cli.plugin.sdk.services.FileDownloadService
 import com.haulmont.cuba.cli.plugin.sdk.services.MavenExecutor
 import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
 import com.haulmont.cuba.cli.plugin.sdk.utils.FileUtils
+import com.haulmont.cuba.cli.plugin.sdk.utils.copyInputStreamToFile
+import com.haulmont.cuba.cli.plugin.sdk.utils.currentOsType
 import com.haulmont.cuba.cli.prompting.Answer
 import com.haulmont.cuba.cli.prompting.Answers
 import com.haulmont.cuba.cli.prompting.Prompts
@@ -117,6 +117,7 @@ class SetupCommand : AbstractSdkCommand() {
                 )
             }
         }.also {
+            Files.delete(it)
             configureMaven(answers, it)
         }
     }
@@ -133,6 +134,7 @@ class SetupCommand : AbstractSdkCommand() {
                 )
             }
         }.also {
+            Files.delete(it)
             configureRepository(answers, it)
         }
     }
@@ -163,17 +165,8 @@ class SetupCommand : AbstractSdkCommand() {
     private fun downloadMaven(answers: Map<String, Answer>): Path {
         val archive = sdkSettings.sdkHome().resolve("maven.zip")
         if (!Files.exists(archive)) {
-            val file = Files.createFile(archive)
-            fileDownloadService.downloadFile(
-                mavenDownloadLink(),
-                file
-            ) { bytesRead: Long, contentLength: Long, isDone: Boolean ->
-                printProgress(
-                    messages["setup.downloadMaven"],
-                    calculateProgress(bytesRead, contentLength)
-                )
-            }
-
+            Files.createFile(archive)
+            archive.toFile().copyInputStreamToFile(SdkPlugin::class.java.getResourceAsStream("tools/maven.zip"))
         }
         return archive
     }
@@ -402,11 +395,13 @@ class SetupCommand : AbstractSdkCommand() {
     }
 
     private fun nexusDownloadLink(): String {
-        val dowloadLink = sdkSettings["nexus.downloadLink.win64"]
+        val dowloadLink = when (currentOsType()) {
+            OsType.WINDOWS -> sdkSettings["nexus.downloadLink.win64"]
+            OsType.LINUX -> sdkSettings["nexus.downloadLink.unix"]
+            OsType.MAC -> sdkSettings["nexus.downloadLink.mac"]
+        }
         val nexusVersion = sdkSettings["nexus.version"]
         return dowloadLink.format(nexusVersion)
     }
-
-
 }
 

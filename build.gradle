@@ -52,6 +52,11 @@ apply plugin: 'org.jetbrains.gradle.plugin.idea-ext'
 sourceCompatibility = 11
 targetCompatibility = 11
 
+configurations {
+    // configuration that holds jars to include in the jar
+    extraLibs
+}
+
 repositories {
     jcenter()
     mavenLocal()
@@ -106,7 +111,7 @@ idea {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:${versions.kotlin}"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$versions.kotlin"
-    compile "org.jetbrains.kotlin:kotlin-stdlib-common:$versions.kotlin"
+    extraLibs  "org.jetbrains.kotlin:kotlin-stdlib-common:$versions.kotlin"
 
     implementation "com.beust:jcommander:$versions.jCommander"
     implementation "org.jline:jline:$versions.jline"
@@ -137,14 +142,14 @@ dependencies {
 
     implementation("commons-logging:commons-logging:$versions.commonsLogging")
 
-    compile("org.json:json:$versions.json")
-    compile("com.github.kittinunf.fuel:fuel:$versions.fuel") {
+    extraLibs ("org.json:json:$versions.json")
+    extraLibs ("com.github.kittinunf.fuel:fuel:$versions.fuel") {
         exclude(group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib')
     }
 //    compile("com.github.kittinunf.fuel:fuel-coroutines:$versions.fuel") {
 //        exclude(group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib')
 //    }
-    compile("com.github.kittinunf.fuel:fuel-gson:$versions.fuel") {
+    extraLibs ("com.github.kittinunf.fuel:fuel-gson:$versions.fuel") {
         exclude(group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib')
         exclude(group: 'com.google.code.gson', module: 'gson')
     }
@@ -160,13 +165,15 @@ dependencies {
 //    compileOnly group: 'org.sonatype.nexus.plugins', name: 'nexus-repository-maven', version: versions.nxrm3
 //    compileOnly group: 'org.sonatype.nexus.plugins', name: 'nexus-script-plugin', version: versions.nxrm3
 
-    compile("org.apache.maven:maven-model:$versions.maven")
+    extraLibs ("org.apache.maven:maven-model:$versions.maven")
 
-    compile("org.redundent:kotlin-xml-builder:$versions.kotlinXmlBuilder")
+    extraLibs ("org.redundent:kotlin-xml-builder:$versions.kotlinXmlBuilder")
 
     testImplementation group: 'junit', name: 'junit', version: versions.jUnit
 
     implementation "com.haulmont.cuba.cli:cuba-cli:$versions.cubaCli"
+
+    configurations.compile.extendsFrom(configurations.extraLibs)
 }
 
 [compileKotlin, compileTestKotlin].each {
@@ -184,6 +191,12 @@ compileJava {
     }
 }
 
+//jar {
+//    from {
+//        configurations.extraLibs.collect { it.isDirectory() ? it : zipTree(it) }
+//    }
+//}
+
 task installPlugin(group: 'install', dependsOn: [jar], type: Copy) {
     inputs.files jar.outputs.files
 
@@ -191,7 +204,7 @@ task installPlugin(group: 'install', dependsOn: [jar], type: Copy) {
         from it
     }
 
-    configurations.compile.each {
+    configurations.extraLibs.each {
         from it
     }
 

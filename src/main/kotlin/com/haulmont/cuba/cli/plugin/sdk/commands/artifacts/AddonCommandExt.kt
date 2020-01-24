@@ -52,7 +52,7 @@ fun BaseComponentCommand.askAllAddonsNameVersion(nameVersion: NameVersion?): Nam
         "addon",
         addons.map { it.id }.sorted().toList()
     ) { addonName ->
-        addons.filter { it.id == addonName }
+        addons.filter { it.id == addonName || "${it.groupId}.${it.artifactId}" == addonName }
             .flatMap { it.compatibilityList }
             .flatMap {
                 it.artifactVersions.map { version ->

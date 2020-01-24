@@ -112,7 +112,7 @@
         "Features"
       ],
       "vendor":"Haulmont",
-      "updateDateTime":1573202602684,
+      "updateDateTime":1579597580527,
       "groupId":"com.haulmont.fts",
       "artifactId":"fts-global",
       "compatibilityList":[
@@ -136,7 +136,7 @@
         "UI"
       ],
       "vendor":"Haulmont",
-      "updateDateTime":1573202622546,
+      "updateDateTime":1579597608325,
       "groupId":"com.haulmont.charts",
       "artifactId":"charts-global",
       "compatibilityList":[
@@ -160,7 +160,7 @@
         "Features"
       ],
       "vendor":"Haulmont",
-      "updateDateTime":1573202613555,
+      "updateDateTime":1579597587056,
       "groupId":"com.haulmont.bpm",
       "artifactId":"bpm-global",
       "compatibilityList":[
@@ -184,7 +184,7 @@
         "Features"
       ],
       "vendor":"Haulmont",
-      "updateDateTime":1573202625596,
+      "updateDateTime":1579597610084,
       "groupId":"com.haulmont.reports",
       "artifactId":"reports-global",
       "compatibilityList":[
@@ -947,7 +947,7 @@
         "Features"
       ],
       "vendor":"Haulmont",
-      "updateDateTime":1567565100000,
+      "updateDateTime":1572230700000,
       "groupId":"com.haulmont.webdav",
       "artifactId":"webdav-global",
       "compatibilityList":[
@@ -1134,7 +1134,7 @@
         {
           "platformRequirement":"7.1",
           "artifactVersions":[
-            "0.11.0"
+            "0.11.1"
           ]
         }
       ],
@@ -1783,9 +1783,9 @@
         "Security"
       ],
       "vendor":"Haulmont",
-      "updateDateTime":1568359783592,
+      "updateDateTime":1570019214339,
       "groupId":"com.haulmont.addon.saml",
-      "artifactId":"saml-global",
+      "artifactId":"saml-addon-global",
       "compatibilityList":[
         {
           "platformRequirement":"6.10",
@@ -1796,13 +1796,13 @@
         {
           "platformRequirement":"7.0",
           "artifactVersions":[
-            "0.2.2"
+            "0.2.3"
           ]
         },
         {
           "platformRequirement":"7.1",
           "artifactVersions":[
-            "0.3.0"
+            "0.3.1"
           ]
         }
       ],
@@ -1879,14 +1879,14 @@
         "Features"
       ],
       "vendor":"Haulmont",
-      "updateDateTime":1575244800000,
+      "updateDateTime":1576540800000,
       "groupId":"com.haulmont.addon.bproc",
       "artifactId":"bproc-global",
       "compatibilityList":[
         {
           "platformRequirement":"7.1",
           "artifactVersions":[
-            "1.0.1"
+            "1.0.2"
           ]
         }
       ],
@@ -1927,13 +1927,13 @@
       "id":"rest-api",
       "name":"REST API",
       "about":"The add-on provides a universal REST API that uses the OAuth2 protocol for authentication and supports anonymous access.",
-      "description":"## Overview\nThe add-on provides a universal REST API that uses the OAuth2 protocol for authentication and supports anonymous access. All REST API endpoints work with data according to the authenticated user permissions set in the security subsystem.\n\n## Features\n- CRUD operations on entities.\n- Execution of predefined JPQL queries.\n- Execution of service methods.\n- Getting metadata: entities, views, enumerations, data types.\n- Getting current user permissions: access to entities and attributes, specific permissions.\n- Getting current user information: name, language, time zone, etc.\n- Uploading and downloading files.\n\n## Links\n- [Documentation](https://doc.cuba-platform.com/restapi-7.1/)\n- [Demo project](https://github.com/cuba-labs/restapi-demo)\n\n",
+      "description":"## Overview\nThe add-on provides a universal REST API that uses the OAuth2 protocol for authentication and supports anonymous access. All REST API endpoints work with data according to the authenticated user permissions set in the security subsystem.\n\n## Features\n- CRUD operations on entities.\n- Execution of predefined JPQL queries.\n- Execution of service methods.\n- Getting metadata: entities, views, enumerations, data types.\n- Getting current user permissions: access to entities and attributes, specific permissions.\n- Getting current user information: name, language, time zone, etc.\n- Uploading and downloading files.\n\n## Links\n- [Documentation](https://doc.cuba-platform.com/restapi-7.1/)\n\n",
       "category":"Add-on",
       "tags":[
         "Integration"
       ],
       "vendor":"Haulmont",
-      "updateDateTime":1573203001227,
+      "updateDateTime":1579606151253,
       "groupId":"com.haulmont.addon.restapi",
       "artifactId":"restapi-global",
       "compatibilityList":[
@@ -1941,6 +1941,12 @@
           "platformRequirement":"7.1",
           "artifactVersions":[
             "7.1.1"
+          ]
+        },
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "7.2.0.BETA1"
           ]
         }
       ],
@@ -1987,7 +1993,7 @@
       "id":"default-values",
       "name":"Default Values",
       "about":"This application component lets you configure default values for entities at runtime.",
-      "description":"## Overview\n\nThis application component lets you configure default values for entities at runtime.\n\n## Supported DBMS\n\nThe following databases are supported by this application component:\n\n- HSQLDB\n- PostgreSQL\n- MySQL\n\nAll other DMBS systems are also possible to work with as CUBA Studio generates the corresponding init/update scripts within the application.\n\n## Links\n\n- [Documentation](https://github.com/mariodavid/cuba-component-default-values/blob/master/README.md)\n- [Example of use](https://github.com/mariodavid/cuba-example-using-default-values)",
+      "description":"## Overview\n\nThis application component lets you configure default values for entities at runtime.\n\n## Supported DBMS\n\nThe following databases are supported by this application component:\n\n- HSQLDB\n- PostgreSQL\n- MySQL\n\nAll other DBMS systems are also possible to work with as CUBA Studio generates the corresponding init/update scripts within the application.\n\n## Links\n\n- [Documentation](https://github.com/mariodavid/cuba-component-default-values/blob/master/README.md)\n- [Example of use](https://github.com/mariodavid/cuba-example-using-default-values)",
       "category":"Add-on",
       "tags":[
         "Maintenance"
@@ -1995,12 +2001,12 @@
       "vendor":"Mario David",
       "updateDateTime":1574409141879,
       "groupId":"de.diedavids.cuba.defaultvalues",
-      "artifactId":"defaultvalues-core",
+      "artifactId":"defaultvalues-global",
       "compatibilityList":[
         {
           "platformRequirement":"7.1",
           "artifactVersions":[
-            "0.1.2"
+            "0.1.3"
           ]
         }
       ],
@@ -2031,6 +2037,49 @@
       ],
       "commercial":false,
       "weight":642
+    },
+    {
+      "id":"image-cropper",
+      "name":"Image Cropper",
+      "about":"This component will be helpful for processing an image to fit the application restriction.",
+      "description":"## Overview \n\nIn modern enterprise applications, uploading images is a popular requirement, for example, upload ID Card images, avatar images or image attachments, etc. Almost all applications have restrictions on image size in order to reduce upload time and stored file size.\n\nGenerally, if the original image does not fit the size requirement, we need to process the raw image to fit the application restriction. This component will be helpful for processing the original image.\n\n## Features\n\n- Based on the Croppie Project, so investigating that project will be helpful before using this component\n- Working with FileUploadField from CUBA\n- A simple API for using the component\n- Options for customizing the component appearance, cropping area, image quality, etc\n- Reviewing the cropping result in real time",
+      "category":"Add-on",
+      "tags":[
+        "UI"
+      ],
+      "vendor":"CUBA Platform China",
+      "updateDateTime":1577445554214,
+      "groupId":"cubacn.cmp.crop",
+      "artifactId":"cubacnimgcrop-global",
+      "compatibilityList":[
+        {
+          "platformRequirement":"7.1",
+          "artifactVersions":[
+            "1.1.1"
+          ]
+        }
+      ],
+      "commercial":false,
+      "weight":725
+    },
+    {
+      "id":"cuba-cli",
+      "name":"CUBA CLI",
+      "about":"CUBA CLI is a command line utility that enables you to easily create projects based on CUBA Platform. Also, it provides the lightweight scaffolding of the main project artifacts.",
+      "description":"## Overview\n\nCUBA CLI is a command line utility that enables you to easily create projects based on CUBA Platform. Also, it provides the lightweight scaffolding of the main project artifacts: entities, screens, services, etc.\n\nWith this tool, you can use CUBA Platform without any additional proprietary tools. Just command line, framework and you.\n\n## Useful links\n\n*   [Download](https://www.cuba-platform.com/download/previous-cli/)\n*   [Github Wiki](https://github.com/cuba-platform/cuba-cli/wiki)\n*   [Quick Start Webinar](https://www.cuba-platform.com/webinars/cuba-cli-quick-start)\n\n## Installation\n\n**Windows** — use [EXE](https://cdn.cuba-platform.com/cuba-cli/2.1.0/cuba-cli-2.1.0.exe) installer\n\n**Mac OS** — install via Homebrew:\n\n```$ brew install cuba-platform/tools/cuba-cli```\n\n**Linux** — install via SDK MAN\n\n```sdk install cuba``` \n\nThe full installation guide is available [here](https://github.com/cuba-platform/cuba-cli/wiki/Installation).\n\n## Plugins\n\nYou can extend CLI functionality by adding a published plugin or creating your own one.\n\n*   [Available plugins](https://github.com/topics/cuba-cli)\n*   [How to create a plugin?](https://github.com/cuba-platform/cuba-cli/wiki/Plugin-Development)\n*   [How to create custom templates?](https://github.com/cuba-platform/cuba-cli/wiki/Custom-templates)\n\n## Quick Start Tutorial\n\n<iframe width=\"770\" height=\"433\" src=\"https://www.youtube.com/embed/5nHeA57-628\" frameborder=\"0\" allow=\"accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen></iframe>",
+      "category":"Tools",
+      "tags":[
+        "Tools"
+      ],
+      "vendor":"Haulmont",
+      "updateDateTime":1555893900000,
+      "groupId":"",
+      "artifactId":"",
+      "compatibilityList":[
+
+      ],
+      "commercial":false,
+      "weight":940
     },
     {
       "id":"grapesjs-html-editor",

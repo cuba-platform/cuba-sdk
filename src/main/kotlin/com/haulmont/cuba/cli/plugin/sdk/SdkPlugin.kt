@@ -46,6 +46,7 @@ class SdkPlugin : CliPlugin {
                 command("stop", StopCommand())
                 command("set-license", LicenseCommand())
                 command("cleanup", CleanCommand())
+                command("check-updates", CheckForMinorUpdatesCommand())
 
                 command("repository", RepositoryCommandGroup()) {
                     command("list", ListRepositoryCommand()) {
@@ -108,7 +109,7 @@ class SdkPlugin : CliPlugin {
 
     @Subscribe
     fun onDestroy(event: DestroyPluginEvent) {
-        StopCommand().apply { checkStated=false }.execute()
+        StopCommand().apply { checkStated = false }.execute()
     }
 
 }

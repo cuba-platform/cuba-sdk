@@ -16,11 +16,12 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.search
 
+import com.google.gson.JsonArray
+import com.google.gson.JsonElement
+import com.google.gson.JsonObject
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
-import org.json.JSONArray
-import org.json.JSONObject
 
 class Nexus3Search(repository: Repository) : AbstractRepositorySearch(repository) {
 
@@ -33,28 +34,29 @@ class Nexus3Search(repository: Repository) : AbstractRepositorySearch(repository
         )
     }
 
-    override fun handleResultJson(it: JSONArray, component: Component): Component? {
-        val array = it
-        if (array.isEmpty) {
+    override fun handleResultJson(it: JsonElement, component: Component): Component? {
+        if (!it.isJsonArray) return null
+        val array = it as JsonArray
+        if (array.size() == 0) {
             log.info("Unknown ${component.type}: ${component.packageName}")
             return null
         }
-        val json = array.get(0) as JSONObject
-        val itemsArray = json.get("items") as JSONArray
-        if (itemsArray.isEmpty) {
+        val json = array.get(0) as JsonObject
+        val itemsArray = json.getAsJsonArray("items")
+        if (itemsArray.size() == 0) {
             log.info("Unknown version: ${component.version}")
             return null
         }
         val components = mutableListOf<Component>()
-        itemsArray.map { it as JSONObject }
+        itemsArray.map { it as JsonObject }
             .map { dataObj ->
-                val groupId = dataObj.getString("group")
-                val artifactId = dataObj.getString("name")
-                val version = dataObj.getString("version")
-                val classifiers = dataObj.getJSONArray("assets")
-                    .map { it as JSONObject }
+                val groupId = dataObj.get("group").asString
+                val artifactId = dataObj.get("name").asString
+                val version = dataObj.get("version").asString
+                val classifiers = dataObj.getAsJsonArray("assets")
+                    .map { it as JsonObject }
                     .map { asset ->
-                        val path = asset.getString("path")
+                        val path = asset.get("path").asString
                         val classifierAndExtension = path.substringAfterLast("${groupId}-${version}")
                         val classifier = if (classifierAndExtension.isNotEmpty())
                             classifierAndExtension.substringAfter("-").substringBefore(".") else ""

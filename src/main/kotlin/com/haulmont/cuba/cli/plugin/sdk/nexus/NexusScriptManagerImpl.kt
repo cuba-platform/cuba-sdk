@@ -47,10 +47,8 @@ class NexusScriptManagerImpl : NexusScriptManager {
             "${sdkSettings["repository.url"]}service/rest/v1/script"
                 .httpPost()
                 .authenticate(login, password)
-                .header(Headers.CONTENT_TYPE, "application/json")
                 .header(Headers.ACCEPT, "application/json")
-                .header(Headers.CACHE_CONTROL, "no-cache")
-                .body(jsonObject.toString())
+                .jsonBody(jsonObject.toString())
                 .response()
         return response
     }
@@ -60,11 +58,10 @@ class NexusScriptManagerImpl : NexusScriptManager {
             "${sdkSettings["repository.url"]}service/rest/v1/script/$name/run"
                 .httpPost()
                 .authenticate(login, password)
-                .header(Headers.CONTENT_TYPE, "application/json")
                 .header(Headers.ACCEPT, "application/json")
                 .header(Headers.CACHE_CONTROL, "no-cache")
                 .also { request ->
-                    jsonObject?.let { request.body(jsonObject.toString()) }
+                    jsonObject?.let { request.jsonBody(jsonObject.toString()) }
                 }
                 .response()
         return response

@@ -16,6 +16,7 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.services
 
+import com.github.kittinunf.fuel.Fuel
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.haulmont.cuba.cli.commands.LaunchOptions
@@ -38,26 +39,23 @@ class ComponentVersionManagerImpl : ComponentVersionManager {
     var addons: List<MarketplaceAddon>? = null
 
     private fun loadSync(): List<MarketplaceAddon> {
-        //TODO load addons from cuba-site
-//        val result = Fuel.get(sdkSettings.getApplicationProperty("addon.marketplaceUrl"))
-//            .responseString().third
-//
-//        result.fold(
-//            success = {
-//                return readAddons(it)
-//            },
-//            failure = { error ->
-//                log.severe("error: ${error}")
-//            }
-//        )
+
         if (LaunchOptions.skipVersionLoading) {
             return readAddons(
                 readAddonsFile()
             )
         } else {
-            //TODO load from site
-            return readAddons(
-                readAddonsFile()
+            val result = Fuel.get(sdkSettings["addon.marketplaceUrl"])
+                .responseString().third
+
+            result.fold(
+                success = {
+                    return readAddons(it)
+                },
+                failure = { error ->
+                    log.severe("error: ${error}")
+                    throw IllegalStateException("Unable to load components from CUBA marketplace. Error ${error}")
+                }
             )
         }
     }

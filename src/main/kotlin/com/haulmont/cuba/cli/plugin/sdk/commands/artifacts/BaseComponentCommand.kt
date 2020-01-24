@@ -178,7 +178,7 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
                 else messages["repository.isOffline"]
                 throw ValidationException(msg.format(repositoryName, repository.url))
             }
-            repository as Repository
+            repository
         }
     }
 

@@ -16,10 +16,11 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.search
 
+import com.google.gson.JsonArray
+import com.google.gson.JsonElement
+import com.google.gson.JsonObject
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
-import org.json.JSONArray
-import org.json.JSONObject
 
 class BintraySearch(repository: Repository) : AbstractRepositorySearch(repository) {
     override fun searchParameters(component: Component): List<Pair<String, String>> = listOf(
@@ -28,23 +29,24 @@ class BintraySearch(repository: Repository) : AbstractRepositorySearch(repositor
         "subject" to repository.repositoryName
     )
 
-    override fun handleResultJson(it: JSONArray, component: Component): Component? {
-        val array = it
-        if (array.isEmpty) {
+    override fun handleResultJson(it: JsonElement, component: Component): Component? {
+        if (!it.isJsonArray) return null
+        val array = it as JsonArray
+        if (array.size()==0) {
             log.info("Unknown ${component.type}: ${component.packageName}")
             return null
         }
-        val json = array.get(0) as JSONObject
-        val versions = json.get("versions") as JSONArray
+        val json = array.get(0) as JsonObject
+        val versions = json.getAsJsonArray("versions").map { it.asString }
         if (!versions.contains(component.version)) {
             log.info("Unknown version: ${component.version}")
             return null
         }
 
-        val systemIds = json.get("system_ids") as JSONArray
+        val systemIds = json.getAsJsonArray("system_ids")
         val components = mutableListOf<Component>()
         systemIds.toList().stream()
-            .map { it as String }
+            .map { it.asString }
             .map {
                 val split = it.split(":")
                 return@map Component(split[0], split[1], component.version)
