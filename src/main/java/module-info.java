@@ -36,6 +36,9 @@ module com.haulmont.cuba.cli.plugin.sdk {
     requires org.json;
     requires java.logging;
     requires kotlin.xml.builder;
+    requires gradle.tooling.api;
+    requires java.management;
+    requires java.desktop;
 
     opens com.haulmont.cuba.cli.plugin.sdk;
     opens com.haulmont.cuba.cli.plugin.sdk.dto;

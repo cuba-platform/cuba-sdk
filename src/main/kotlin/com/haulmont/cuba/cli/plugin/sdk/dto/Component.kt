@@ -38,8 +38,8 @@ data class Component(
     fun collectAllDependencies(): Set<MvnArtifact> {
         val list = mutableSetOf<MvnArtifact>()
         list.addAll(dependencies)
-        for (child in components) {
-            list.addAll(child.dependencies)
+        components.forEach {
+            list.addAll(it.dependencies)
         }
         return list
     }

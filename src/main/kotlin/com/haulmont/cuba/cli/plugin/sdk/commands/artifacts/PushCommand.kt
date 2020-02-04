@@ -18,11 +18,21 @@ package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
 import com.beust.jcommander.Parameters
 import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
+import com.haulmont.cuba.cli.plugin.sdk.gradle.GradleConnector
 
 @Parameters(commandDescription = "Upload artifact to SDK target repository")
 class PushCommand : AbstractSdkCommand() {
 
     override fun run() {
         printWriter.println("Use 'framework', 'addon' or 'lib' subcommands.")
+        val connector =
+            GradleConnector(sdkSettings.sdkHome().resolve("gradle").toString(), sdkSettings.sdkHome().toString())
+        printWriter.println(
+            connector.runTask(
+                "resolve",
+                mapOf("toResolve" to "com.haulmont.addon.dashboard:dashboard-core:3.2.0.BETA1")
+            )
+        )
+
     }
 }

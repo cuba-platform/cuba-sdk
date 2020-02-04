@@ -17,10 +17,13 @@
 package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
 import com.beust.jcommander.Parameters
-import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
+import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 
-@Parameters(commandDescription = "Install artifact in SDK")
-class ResolveCommand : AbstractSdkCommand() {
+@Parameters(commandDescription = "Resolve artifact with dependencies in SDK")
+class ResolveCommand : BaseComponentCommand() {
+    override fun createSearchContext(): Component? {
+        return null
+    }
 
     override fun run() {
         printWriter.println("Use 'framework', 'addon' or 'lib' subcommands.")

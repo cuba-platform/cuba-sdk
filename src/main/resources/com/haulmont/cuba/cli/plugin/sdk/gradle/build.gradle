@@ -1,0 +1,82 @@
+import groovy.json.JsonOutput
+
+buildscript {
+
+    repositories {
+        mavenLocal()
+        maven {
+            credentials {
+                username System.getenv('HAULMONT_REPOSITORY_USER') ?: 'cuba'
+                password System.getenv('HAULMONT_REPOSITORY_PASSWORD') ?: 'cuba123'
+            }
+            url System.getenv('HAULMONT_REPOSITORY_URL') ?: 'https://repo.cuba-platform.com/content/groups/work'
+        }
+        mavenCentral()
+    }
+}
+
+repositories {
+    jcenter()
+    mavenLocal()
+
+    maven {
+        url "https://dl.bintray.com/cuba-platform/main"
+    }
+}
+
+configurations {
+    extraLibs
+}
+
+apply plugin: 'maven'
+
+ext.getAllArtifacts = { artifact ->
+    // get the pom
+    def component = project.dependencies.createArtifactResolutionQuery()
+            .forComponents(artifact.id.componentIdentifier)
+            .withArtifacts(MavenModule, MavenPomArtifact)
+            .execute()
+            .resolvedComponents[0]
+    def pomFile = component?.getArtifacts(MavenPomArtifact)[0]?.file
+    component = project.dependencies.createArtifactResolutionQuery()
+            .forComponents(artifact.id.componentIdentifier)
+            .withArtifacts(JvmLibrary, SourcesArtifact)
+            .execute()
+            .resolvedComponents[0]
+    def sourceFile = component?.getArtifacts(SourcesArtifact)[0]?.file
+    def javadocFile = component?.getArtifacts(JavadocArtifact)[0]?.file
+    return [pomFile, sourceFile, javadocFile]
+}
+
+task resolve() {
+    doLast{
+        project.ext.properties["toResolve"].tokenize(';').each {
+            dependencies.add 'extraLibs', it
+        }
+        def resolved = [:]
+        configurations.all.collect {
+            if (it.canBeResolved) {
+                it.resolvedConfiguration.lenientConfiguration.artifacts.each { art ->
+                    try {
+                        def name = art.id.componentIdentifier.displayName
+                        def component = resolved[name]
+                        if (component == null) {
+                            resolved[name] = [:]
+                            component = resolved[name]
+                        }
+                        component[art.classifier == null ? "jar" : art.classifier] = art.file?.path
+                        if (art.classifier == null) {
+                            def classifiers = getAllArtifacts(art)
+                            component["pom"] = classifiers[0]?.path
+                            component["sources"] = classifiers[1]?.path
+                        }
+                    } catch (e) {
+                        logger.error("Error: " + e.getMessage(), e)
+                        logger.error("could not find pom for {}", art.file)
+                    }
+                }
+            }
+        }
+        println JsonOutput.toJson(resolved)
+    }
+}

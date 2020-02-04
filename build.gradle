@@ -18,7 +18,8 @@ buildscript {
             commonsConfiguration: "1.10",
             commonsLogging      : "1.1.1",
             kotlinXmlBuilder    : "1.6.0",
-            jUnit               : "4.12"
+            jUnit               : "4.12",
+            toolingApi          : "6.1.1"
     ]
 
     repositories {
@@ -64,6 +65,7 @@ repositories {
     maven {
         url "https://dl.bintray.com/cuba-platform/main"
     }
+    maven { url 'https://repo.gradle.org/gradle/libs-releases' }
 }
 
 task sourceJar(type: Jar) {
@@ -111,7 +113,7 @@ idea {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:${versions.kotlin}"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$versions.kotlin"
-    extraLibs  "org.jetbrains.kotlin:kotlin-stdlib-common:$versions.kotlin"
+    extraLibs "org.jetbrains.kotlin:kotlin-stdlib-common:$versions.kotlin"
 
     implementation "com.beust:jcommander:$versions.jCommander"
     implementation "org.jline:jline:$versions.jline"
@@ -142,17 +144,22 @@ dependencies {
 
     implementation("commons-logging:commons-logging:$versions.commonsLogging")
 
-    extraLibs ("org.json:json:$versions.json")
-    extraLibs ("com.github.kittinunf.fuel:fuel:$versions.fuel") {
+    extraLibs("org.json:json:$versions.json")
+    extraLibs("com.github.kittinunf.fuel:fuel:$versions.fuel") {
         exclude(group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib')
     }
 //    compile("com.github.kittinunf.fuel:fuel-coroutines:$versions.fuel") {
 //        exclude(group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib')
 //    }
-    extraLibs ("com.github.kittinunf.fuel:fuel-gson:$versions.fuel") {
+    extraLibs("com.github.kittinunf.fuel:fuel-gson:$versions.fuel") {
         exclude(group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib')
         exclude(group: 'com.google.code.gson', module: 'gson')
     }
+
+    extraLibs "org.gradle:gradle-tooling-api:$versions.toolingApi"
+    // The tooling API need an SLF4J implementation available at runtime, replace this with any other implementation
+    extraLibs 'org.slf4j:slf4j-simple:1.7.10'
+
 //    compile("com.github.kittinunf.fuel:fuel-json:$versions.fuel") {
 //        exclude(group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib')
 //    }
@@ -165,9 +172,9 @@ dependencies {
 //    compileOnly group: 'org.sonatype.nexus.plugins', name: 'nexus-repository-maven', version: versions.nxrm3
 //    compileOnly group: 'org.sonatype.nexus.plugins', name: 'nexus-script-plugin', version: versions.nxrm3
 
-    extraLibs ("org.apache.maven:maven-model:$versions.maven")
+    extraLibs("org.apache.maven:maven-model:$versions.maven")
 
-    extraLibs ("org.redundent:kotlin-xml-builder:$versions.kotlinXmlBuilder")
+    extraLibs("org.redundent:kotlin-xml-builder:$versions.kotlinXmlBuilder")
 
     testImplementation group: 'junit', name: 'junit', version: versions.jUnit
 
