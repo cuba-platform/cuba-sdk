@@ -16,71 +16,78 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.gradle
 
+import com.google.gson.Gson
+import com.google.gson.JsonElement
+import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
+import com.haulmont.cuba.cli.plugin.sdk.commands.CommonSdkParameters
+import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
 import org.gradle.tooling.GradleConnector
+import org.gradle.tooling.ProgressEvent
 import org.gradle.tooling.model.GradleProject
-import org.gradle.tooling.model.GradleTask
-import org.gradle.tooling.model.idea.IdeaProject
-import org.gradle.util.GradleVersion
+import org.kodein.di.generic.instance
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.util.*
-import java.util.stream.Collectors
+import java.io.PrintWriter
+import java.nio.file.Files
+import java.nio.file.Path
 
+typealias ProgressCallback = (event: ProgressEvent?) -> Unit
 
-class GradleConnector(gradleInstallationDir: String?, projectDir: String?) {
-    public val connector: GradleConnector
-    val gradleVersion: String
-        get() = GradleVersion.current().version
-
-    val gradleTaskNames: List<String>
-        get() {
-            val taskNames: List<String> = ArrayList()
-            val tasks = gradleTasks
-            return tasks.stream()
-                .map { task: GradleTask -> task.name }
-                .collect(Collectors.toList())
-        }
-
-    val gradleTasks: List<GradleTask>
-        get() {
-            val tasks: MutableList<GradleTask> = ArrayList()
-            val connection = connector.connect()
-            connection.model(GradleProject::class.java)
-            try {
-                val project = connection.getModel(GradleProject::class.java)
-                for (task in project.tasks) {
-                    tasks.add(task)
-                }
-                connection.newBuild()
-                    .withArguments("-PtoResolve=com.haulmont.addon.dashboard:dashboard-core:3.2.0.BETA1")
-                    .forTasks("resolve")
-                    .setStandardOutput(System.out)
-                    .run()
-            } finally {
-                connection.close()
-            }
-            return tasks
-        }
+class GradleConnector() {
+    private val connector: GradleConnector
+    private val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
+    private val printWriter: PrintWriter by sdkKodein.instance()
 
     init {
         connector = GradleConnector.newConnector()
-        connector.useInstallation(File(gradleInstallationDir))
-        connector.forProjectDirectory(File(projectDir))
+        val gradleHome = Path.of(sdkSettings["gradle.home"]).also {
+            if (!Files.exists(it)) {
+                Files.createDirectories(it)
+            }
+        }.toFile()
+        connector.useGradleVersion(sdkSettings["gradle.version"])
+        connector.useGradleUserHomeDir(File(sdkSettings["gradle.home"]))
+        connector.useBuildDistribution()
+        connector.forProjectDirectory(gradleHome)
     }
 
-    fun runTask(name: String, params: Map<String, String>): String {
+    fun runTask(
+        name: String, params: Map<String, Any> = mapOf(),
+        progressFun: ProgressCallback? = null
+    ): JsonElement? {
         val connection = connector.connect()
         connection.model(GradleProject::class.java)
         try {
-            val project = connection.getModel(IdeaProject::class.java)
             val outputStream = ByteArrayOutputStream()
-
-            connection.newBuild()
+            if (CommonSdkParameters.info) {
+                printWriter.println()
+            }
+            val buildLauncher = connection.newBuild()
                 .withArguments(params.map { "-P${it.key}=${it.value}" }.toList())
+                .addArguments("-g", sdkSettings["gradle.cache"])
                 .forTasks(name)
                 .setStandardOutput(outputStream)
-                .run()
-            return outputStream.toString()
+
+            if (progressFun != null) {
+                buildLauncher.addProgressListener(progressFun)
+            }
+            if (CommonSdkParameters.info) {
+                buildLauncher.addProgressListener { event: ProgressEvent? ->
+                    printWriter.println(event?.description)
+                }
+            }
+            buildLauncher.run()
+            if (CommonSdkParameters.info) {
+                printWriter.println()
+            }
+            val stringResult = outputStream.toString()
+            if (stringResult.contains("<JSON>") && stringResult.contains("</JSON>")) {
+                val json = stringResult.substringAfter("<JSON>").substringBefore("</JSON>")
+                return Gson().fromJson<JsonElement>(json, JsonElement::class.java)
+            } else {
+                return null
+            }
+
         } finally {
             connection.close()
         }

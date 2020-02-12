@@ -36,8 +36,8 @@ private val sdkModule = Kodein.Module {
         FileDownloadServiceImpl()
     }
 
-    bind<MvnArtifactManager>() with singleton {
-        MvnArtifactManagerImpl()
+    bind<ArtifactManager>() with singleton {
+        GradleArtifactManagerImpl()
     }
 
     bind<MavenExecutor>() with singleton {

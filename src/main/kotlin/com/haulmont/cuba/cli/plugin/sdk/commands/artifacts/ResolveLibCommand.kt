@@ -21,13 +21,13 @@ import com.beust.jcommander.Parameters
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.MvnArtifact
-import com.haulmont.cuba.cli.plugin.sdk.services.MvnArtifactManager
+import com.haulmont.cuba.cli.plugin.sdk.services.ArtifactManager
 import org.kodein.di.generic.instance
 
 @Parameters(commandDescription = "Resolve library with dependencies and download to local SDK repository")
 class ResolveLibCommand : BaseResolveCommand() {
 
-    internal val mvnArtifactManager: MvnArtifactManager by sdkKodein.instance()
+    internal val artifactManager: ArtifactManager by sdkKodein.instance()
 
     @Parameter(description = "Lib group, name and version <group>:<name>:<version>")
     private var nameVersion: String? = null
@@ -37,7 +37,7 @@ class ResolveLibCommand : BaseResolveCommand() {
     }
 
     override fun search(component: Component): Component? {
-        mvnArtifactManager.readPom(MvnArtifact(component.packageName, component.name as String, component.version))
+        artifactManager.readPom(MvnArtifact(component.packageName, component.name as String, component.version))
             ?: return null
         return component
     }

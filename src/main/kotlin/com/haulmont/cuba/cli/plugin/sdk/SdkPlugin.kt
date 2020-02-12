@@ -25,6 +25,8 @@ import com.haulmont.cuba.cli.plugin.sdk.commands.PrintPropertiesCommand
 import com.haulmont.cuba.cli.plugin.sdk.commands.SdkCommand
 import com.haulmont.cuba.cli.plugin.sdk.commands.artifacts.*
 import com.haulmont.cuba.cli.plugin.sdk.commands.repository.*
+import com.haulmont.cuba.cli.plugin.sdk.gradle.GradleConnector
+import com.haulmont.cuba.cli.plugin.sdk.services.ArtifactManager
 import com.haulmont.cuba.cli.plugin.sdk.services.ComponentVersionManager
 import org.kodein.di.generic.instance
 
@@ -32,12 +34,15 @@ class SdkPlugin : CliPlugin {
 
     private val componentVersionsManager: ComponentVersionManager by sdkKodein.instance()
 
+    private val artifactManager: ArtifactManager by sdkKodein.instance()
+
     override val apiVersion: Int
         get() = 5
 
     @Subscribe
     fun onInit(event: InitPluginEvent) {
         componentVersionsManager.load {}
+        artifactManager.init()
         event.commandsRegistry {
             command("sdk", SdkCommand()) {
                 command("properties", PrintPropertiesCommand())
@@ -109,7 +114,8 @@ class SdkPlugin : CliPlugin {
 
     @Subscribe
     fun onDestroy(event: DestroyPluginEvent) {
-        StopCommand().apply { checkStated = false }.execute()
+        StopCommand().apply { checkState = false }.execute()
+        GradleConnector().runTask("--stop")
     }
 
 }

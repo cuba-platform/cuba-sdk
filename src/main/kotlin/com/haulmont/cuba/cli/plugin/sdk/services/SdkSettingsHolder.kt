@@ -28,7 +28,7 @@ interface SdkSettingsHolder {
 
     fun hasProperty(property: String): Boolean
 
-    fun setProperty(property: String, value: String)
+    fun setProperty(property: String, value: String?)
 
     fun flushAppProperties()
 
@@ -41,5 +41,5 @@ interface SdkSettingsHolder {
     fun propertyNames(): Set<String>
 
     operator fun get(property: String): String = getProperty(property)
-    operator fun set(property: String, value: String) = setProperty(property, value)
+    operator fun set(property: String, value: String?) = setProperty(property, value)
 }

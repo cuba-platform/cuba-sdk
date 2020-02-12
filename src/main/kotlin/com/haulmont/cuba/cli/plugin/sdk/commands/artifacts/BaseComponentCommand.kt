@@ -52,8 +52,8 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
 
     internal var needToFindDependentAddons: Boolean? = null
 
-    @Parameter(names = ["--print-maven"], description = "Print maven output", hidden = true)
-    var printMaven: Boolean = false
+    @Parameter(names = ["--info"], description = "Print output", hidden = true)
+    var info: Boolean = false
         private set
 
     @Parameter(
@@ -94,8 +94,8 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
 
     override fun preExecute() {
         super.preExecute()
-        CommonSdkParameters.printMaven = printMaven
-        CommonSdkParameters.singleThread = printMaven || single
+        CommonSdkParameters.info = info
+        CommonSdkParameters.singleThread = info || single
         CommonSdkParameters.mavenOptions = mavenOpts
     }
 
@@ -205,14 +205,14 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
         if (nameVersion == null) {
             val name = askName(msgPrefix, names)
             val version = askVersion(msgPrefix, versions, name)
-            return "${name}:$version".toLowerCase()
+            return "${name.toLowerCase()}:$version"
         }
         val split = nameVersion.split(":")
         if (split.size == 1) {
             val version = askVersion(msgPrefix, versions, nameVersion)
-            return "${nameVersion}:$version".toLowerCase()
+            return "${nameVersion.toLowerCase()}:$version"
         }
-        return nameVersion.toLowerCase()
+        return nameVersion
     }
 
     private fun askVersion(

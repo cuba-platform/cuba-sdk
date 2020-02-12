@@ -22,7 +22,9 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 import org.apache.maven.model.Model
 import java.nio.file.Path
 
-interface MvnArtifactManager {
+interface ArtifactManager {
+
+    fun init()
 
     fun readPom(artifact: MvnArtifact, classifier: Classifier = Classifier.pom()): Model?
 
@@ -32,12 +34,11 @@ interface MvnArtifactManager {
 
     fun getOrDownloadArtifactFile(artifact: MvnArtifact, classifier: Classifier): Path
 
+    fun getOrDownloadArtifactWithClassifiers(artifact: MvnArtifact, classifiers:Collection<Classifier>)
+
     fun resolve(artifact: MvnArtifact, classifier: Classifier = Classifier.default()): List<MvnArtifact>
 
     fun checkClassifiers(artifact: MvnArtifact)
 
     fun remove(artifact: MvnArtifact)
-
-    fun searchAdditionalDependencies(artifact: MvnArtifact): List<MvnArtifact>
-
 }

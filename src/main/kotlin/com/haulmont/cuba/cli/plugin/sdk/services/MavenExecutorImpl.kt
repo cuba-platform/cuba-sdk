@@ -88,19 +88,19 @@ class MavenExecutorImpl : MavenExecutor {
         val proc = rt.exec(cliCommands)
 
         val commandOutput = StringBuilder()
-        if (CommonSdkParameters.printMaven) {
+        if (CommonSdkParameters.info) {
             printWriter.println()
         }
         proc.inputStream.readMvn {
             if (it != null) {
                 val output = it.mvnFormatOutput()
-                if (CommonSdkParameters.printMaven) {
+                if (CommonSdkParameters.info) {
                     printWriter.print(output)
                 }
                 commandOutput.append(output)
             }
         }
-        if (CommonSdkParameters.printMaven) {
+        if (CommonSdkParameters.info) {
             printWriter.println()
         }
 

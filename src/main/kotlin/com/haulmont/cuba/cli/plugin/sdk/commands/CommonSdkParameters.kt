@@ -17,13 +17,13 @@
 package com.haulmont.cuba.cli.plugin.sdk.commands
 
 object CommonSdkParameters {
-    var printMaven: Boolean = false
+    var info: Boolean = false
     var singleThread: Boolean = false
     var mavenOptions: List<String>? = null
     var measurePerformance: Boolean = false
 
     fun reset() {
-        printMaven = false
+        info = false
         singleThread = false
         mavenOptions = null
     }

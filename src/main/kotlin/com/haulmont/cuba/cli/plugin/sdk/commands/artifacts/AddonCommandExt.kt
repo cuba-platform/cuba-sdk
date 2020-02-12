@@ -16,6 +16,7 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
+import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand.Companion.rootMessages
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.ComponentType
 import com.haulmont.cuba.cli.prompting.Option

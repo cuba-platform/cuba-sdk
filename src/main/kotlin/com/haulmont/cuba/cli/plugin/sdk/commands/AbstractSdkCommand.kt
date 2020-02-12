@@ -32,13 +32,56 @@ import java.nio.file.Path
 
 abstract class AbstractSdkCommand : AbstractCommand() {
 
-    internal val PROGRESS_LINE_LENGHT = 110
+    companion object{
+        internal val PROGRESS_LINE_LENGHT = 110
+        internal val rootMessages = Messages(AbstractSdkCommand::class.java)
+        internal val printWriter: PrintWriter by sdkKodein.instance()
+
+        fun printProgress(message: String, progress: Float) {
+            val progressStr = rootMessages["progress"].format(progress).green()
+            val maxLength = PROGRESS_LINE_LENGHT - progressStr.length
+
+            val trim = if (message.length > maxLength - 1) message.substring(IntRange(0, maxLength - 1)) else message
+            printWriter.print("\r" + trim.padEnd(maxLength) + progressStr)
+            if (progress == 100f) {
+                printWriter.println()
+            }
+        }
+
+        fun calculateProgress(count: Int, total: Int) = calculateProgress(count.toFloat(), total)
+
+        fun calculateProgress(count: Long, total: Long) = calculateProgress(count.toFloat(), total.toFloat())
+
+        fun calculateProgress(count: Float, total: Int) = calculateProgress(count, total.toFloat())
+
+        fun calculateProgress(count: Float, total: Float) = count / total * 100
+
+        internal fun printProgressMessage(msg: String, periodMs: Long = 100, i: Int = 0) {
+            val padLength = 10
+            if (i % padLength == 0) {
+                printWriter.print("\r$msg".padEnd(msg.length + padLength))
+            }
+            waitAndPrintProgress(periodMs, msg.padEnd(msg.length + i % padLength, '.'))
+        }
+
+        internal fun waitAndPrintProgress(period: Long, msg: String) {
+            Thread.sleep(period)
+            printWriter.print("\r$msg")
+        }
+
+        fun waitTask(msg: String, periodMs: Long = 100, waitConditionFun: () -> Boolean) {
+            printProgressMessage(msg)
+            var i = 0
+            while (waitConditionFun()) {
+                printProgressMessage(msg, periodMs, i++)
+            }
+            printWriter.println()
+        }
+    }
 
     internal val messages by localMessages()
-    internal val printWriter: PrintWriter by sdkKodein.instance()
     internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
     internal val workingDirectoryManager: WorkingDirectoryManager by sdkKodein.instance()
-    internal val rootMessages = Messages(AbstractSdkCommand::class.java)
 
     @Parameter(
         names = ["--s", "--settings"],
@@ -94,46 +137,7 @@ abstract class AbstractSdkCommand : AbstractCommand() {
         }
     }
 
-    internal fun calculateProgress(count: Int, total: Int) = calculateProgress(count.toFloat(), total)
 
-    internal fun calculateProgress(count: Long, total: Long) = calculateProgress(count.toFloat(), total.toFloat())
-
-    internal fun calculateProgress(count: Float, total: Int) = calculateProgress(count, total.toFloat())
-
-    internal fun calculateProgress(count: Float, total: Float) = count / total * 100
-
-    internal fun printProgress(message: String, progress: Float) {
-        val progressStr = rootMessages["progress"].format(progress).green()
-        val maxLength = PROGRESS_LINE_LENGHT - progressStr.length
-
-        val trim = if (message.length > maxLength - 1) message.substring(IntRange(0, maxLength - 1)) else message
-        printWriter.print("\r" + trim.padEnd(maxLength) + progressStr)
-        if (progress == 100f) {
-            printWriter.println()
-        }
-    }
-
-    internal fun printProgressMessage(msg: String, periodMs: Long = 100, i: Int = 0) {
-        val padLength = 10
-        if (i % padLength == 0) {
-            printWriter.print("\r$msg".padEnd(msg.length + padLength))
-        }
-        waitAndPrintProgress(periodMs, msg.padEnd(msg.length + i % padLength, '.'))
-    }
-
-    internal fun waitAndPrintProgress(period: Long, msg: String) {
-        Thread.sleep(period)
-        printWriter.print("\r$msg")
-    }
-
-    internal fun waitTask(msg: String, periodMs: Long = 100, waitConditionFun: () -> Boolean) {
-        printProgressMessage(msg)
-        var i = 0
-        while (waitConditionFun()) {
-            printProgressMessage(msg, periodMs, i++)
-        }
-        printWriter.println()
-    }
 
     internal fun password(password: String) = "*****"
 

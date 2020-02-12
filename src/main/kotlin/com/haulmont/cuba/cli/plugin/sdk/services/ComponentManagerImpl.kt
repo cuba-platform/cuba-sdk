@@ -18,6 +18,7 @@ package com.haulmont.cuba.cli.plugin.sdk.services
 
 import com.github.kittinunf.fuel.Fuel
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
+import com.haulmont.cuba.cli.generation.VelocityHelper
 import com.haulmont.cuba.cli.plugin.sdk.commands.CommonSdkParameters
 import com.haulmont.cuba.cli.plugin.sdk.dto.*
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusManager
@@ -39,10 +40,11 @@ class ComponentManagerImpl : ComponentManager {
     private val componentTemplates: ComponentTemplates by sdkKodein.instance()
     private val metadataHolder: MetadataHolder by sdkKodein.instance()
     private val repositoryManager: RepositoryManager by sdkKodein.instance()
-    private val mvnArtifactManager: MvnArtifactManager by sdkKodein.instance()
+    private val artifactManager: ArtifactManager by sdkKodein.instance()
     private val nexusManager: NexusManager by sdkKodein.instance()
     private val nexusScriptManager: NexusScriptManager by sdkKodein.instance()
     private val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
+    private val velocityHelper = VelocityHelper()
 
     private fun localProgress(component: Component) =
         1f / (3 + getClassifiersToResolve(component).size)
@@ -148,7 +150,7 @@ class ComponentManagerImpl : ComponentManager {
     private fun readFrameworkVersion(component: Component) {
         if (listOf(ComponentType.FRAMEWORK, ComponentType.ADDON).contains(component.type)) {
             component.components.globalModule()?.let {
-                val model = mvnArtifactManager.readPom(
+                val model = artifactManager.readPom(
                     MvnArtifact(
                         it.packageName,
                         it.name!!,
@@ -169,7 +171,7 @@ class ComponentManagerImpl : ComponentManager {
         val additionalComponentList = mutableSetOf<Component>()
         if (listOf(ComponentType.FRAMEWORK, ComponentType.ADDON).contains(component.type)) {
             component.components.globalModule()?.let {
-                val model = mvnArtifactManager.readPom(
+                val model = artifactManager.readPom(
                     MvnArtifact(
                         it.packageName,
                         it.name!!,
@@ -230,7 +232,7 @@ class ComponentManagerImpl : ComponentManager {
     }
 
     private fun resolveSdkBom(component: Component) {
-        val model = mvnArtifactManager.readPom(
+        val model = artifactManager.readPom(
             MvnArtifact("com.haulmont.gradle", "cuba-plugin", component.version),
             Classifier.sdk()
         )
@@ -270,7 +272,7 @@ class ComponentManagerImpl : ComponentManager {
 
         artifactsStream(artifacts).forEach { artifact ->
             repositories.forEach {
-                mvnArtifactManager.upload(it, artifact)
+                artifactManager.upload(it, artifact)
             }
             progress?.let { it(artifact, uploaded.incrementAndGet(), total) }
         }
@@ -304,7 +306,7 @@ class ComponentManagerImpl : ComponentManager {
     }
 
     private fun removeArtifact(artifact: MvnArtifact, removeFromRepo: Boolean) {
-        mvnArtifactManager.remove(artifact)
+        artifactManager.remove(artifact)
         if (removeFromRepo && nexusManager.isLocal()) {
             nexusScriptManager.run(
                 sdkSettings["repository.login"], sdkSettings["repository.password"], "sdk.drop-component", JSONObject()
@@ -362,7 +364,7 @@ class ComponentManagerImpl : ComponentManager {
                 component.version
             )
 
-            if (mvnArtifactManager.readPom(artifact) == null) {
+            if (artifactManager.readPom(artifact) == null) {
                 log.info("Component not found: ${component}")
                 progress?.let { it(component, 1f, 1) }
                 return null
@@ -371,14 +373,14 @@ class ComponentManagerImpl : ComponentManager {
             performance("Read all classifiers") {
                 for (classifier in component.classifiers) {
                     performance("Read classifier $classifier") {
-                        mvnArtifactManager.getOrDownloadArtifactFile(artifact, classifier)
+                        artifactManager.getOrDownloadArtifactWithClassifiers(artifact, component.classifiers)
                     }
-                    artifact.classifiers.add(classifier)
                 }
+                artifact.classifiers.addAll(component.classifiers)
             }
 
             val dependencies: List<MvnArtifact> = performance("Resolve") {
-                mvnArtifactManager.resolve(artifact)
+                artifactManager.resolve(artifact)
             }
 
             log.fine("Component ${component} dependencies: ${dependencies}")
@@ -391,7 +393,7 @@ class ComponentManagerImpl : ComponentManager {
 
             val additionalDependencies = performance("Search additional dependencies") {
                 artifactsStream(component.dependencies)
-                    .flatMap { mvnArtifactManager.searchAdditionalDependencies(it).stream() }
+                    .flatMap { searchAdditionalDependencies(it).stream() }
                     .collect(Collectors.toSet())
             }
 
@@ -400,14 +402,14 @@ class ComponentManagerImpl : ComponentManager {
             performance("Resolve all classifiers") {
                 for (classifier in getClassifiersToResolve(component)) {
                     progress?.let { it(component, localProgressCount(progressCount++, component), 1) }
-                    if (classifier.type != "" || classifier.extension == "sdk") {
-                        if (dependencies.isNotEmpty()) {
-                            log.info("Resolve $component classifier \"$classifier\" dependencies")
-                            performance("Resolve classifier \"$classifier\" dependencies") {
-                                mvnArtifactManager.resolve(artifact, classifier)
-                            }
-                        }
-                    }
+//                    if (classifier.type != "" || classifier.extension == "sdk") {
+//                        if (dependencies.isNotEmpty()) {
+//                            log.info("Resolve $component classifier \"$classifier\" dependencies")
+//                            performance("Resolve classifier \"$classifier\" dependencies") {
+//                                artifactManager.resolve(artifact, classifier)
+//                            }
+//                        }
+//                    }
                     component.dependencies.forEach { it.classifiers.add(classifier.copy()) }
                 }
             }
@@ -416,7 +418,7 @@ class ComponentManagerImpl : ComponentManager {
             log.fine("Resolve ${component.packageName} classifiers")
             performance("Check classifiers resolved") {
                 artifactsStream(component.dependencies).forEach {
-                    mvnArtifactManager.checkClassifiers(it)
+                    artifactManager.checkClassifiers(it)
                 }
             }
             progress?.let { it(component, localProgressCount(progressCount, component), 1) }
@@ -427,6 +429,49 @@ class ComponentManagerImpl : ComponentManager {
             resolveRawComponent(component)?.let { return it }
         }
         return null
+    }
+
+    private fun searchAdditionalDependencies(artifact: MvnArtifact): List<MvnArtifact> {
+        try {
+            val model = artifactManager.readPom(artifact)
+            if (model == null || model.dependencyManagement == null) return ArrayList()
+            return performance("Search additional dependencies") {
+                model.dependencyManagement.dependencies.stream()
+                    .filter { it.type == "pom" }
+                    .flatMap { dependency ->
+                        val version = if (dependency.version.startsWith("\${")) {
+                            val propertiesMap = HashMap<String, String>()
+                            for (entry in (model.properties.toMap() as Map<String, String>).entries) {
+                                propertiesMap.put(entry.key.replace(".", "_"), entry.value)
+                            }
+                            propertiesMap.put("project_version", model.version)
+                            val version = dependency.version.replace(".", "_")
+                            velocityHelper.generate(
+                                version,
+                                dependency.groupId,
+                                propertiesMap
+                            )
+                        } else {
+                            dependency.version
+                        }
+                        val artifactList = ArrayList<MvnArtifact>()
+                        val artifact = MvnArtifact(
+                            dependency.groupId, dependency.artifactId, version,
+                            classifiers = arrayListOf(Classifier("", dependency.type ?: "jar"))
+                        )
+                        artifactList.add(artifact)
+                        artifactList.addAll(searchAdditionalDependencies(artifact))
+                        return@flatMap artifactList.stream()
+                    }.collect(Collectors.toList())
+            }
+        } catch (e: Exception) {
+            log.throwing(
+                MvnArtifactManagerImpl::class.java.name,
+                "Error on reading pom file for ${artifact.mvnCoordinates()}",
+                e
+            )
+            return ArrayList()
+        }
     }
 
     private fun getClassifiersToResolve(component: Component): List<Classifier> {

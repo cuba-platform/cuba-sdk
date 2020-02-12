@@ -18,7 +18,6 @@ package com.haulmont.cuba.cli.plugin.sdk.services
 
 import com.github.kittinunf.fuel.Fuel
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
-import com.haulmont.cuba.cli.generation.VelocityHelper
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
 import com.haulmont.cuba.cli.plugin.sdk.dto.MvnArtifact
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
@@ -35,15 +34,13 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import java.util.logging.Logger
-import java.util.stream.Collectors
 
 
-class MvnArtifactManagerImpl : MvnArtifactManager {
+class MvnArtifactManagerImpl : ArtifactManager {
 
     private val log: Logger = Logger.getLogger(MvnArtifactManagerImpl::class.java.name)
 
     internal val printWriter: PrintWriter by sdkKodein.instance()
-    internal val velocityHelper = VelocityHelper()
     internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
     private val repositoryManager: RepositoryManager by sdkKodein.instance()
     internal val mavenExecutor: MavenExecutor by sdkKodein.instance()
@@ -58,6 +55,10 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
         val name = artifact.artifactId
         val version = artifact.version
         return "$groupUrl/$name/$version/$name-$version.${classifier.extension}"
+    }
+
+    override fun init() {
+
     }
 
     override fun readPom(artifact: MvnArtifact, classifier: Classifier): Model? {
@@ -270,49 +271,6 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
         }
     }
 
-    override fun searchAdditionalDependencies(artifact: MvnArtifact): List<MvnArtifact> {
-        try {
-            val model = readPom(artifact)
-            if (model == null || model.dependencyManagement == null) return ArrayList()
-            return performance("Search additional dependencies") {
-                model.dependencyManagement.dependencies.stream()
-                    .filter { it.type == "pom" }
-                    .flatMap { dependency ->
-                        val version = if (dependency.version.startsWith("\${")) {
-                            val propertiesMap = HashMap<String, String>()
-                            for (entry in (model.properties.toMap() as Map<String, String>).entries) {
-                                propertiesMap.put(entry.key.replace(".", "_"), entry.value)
-                            }
-                            propertiesMap.put("project_version", model.version)
-                            val version = dependency.version.replace(".", "_")
-                            velocityHelper.generate(
-                                version,
-                                dependency.groupId,
-                                propertiesMap
-                            )
-                        } else {
-                            dependency.version
-                        }
-                        val artifactList = ArrayList<MvnArtifact>()
-                        val artifact = MvnArtifact(
-                            dependency.groupId, dependency.artifactId, version,
-                            classifiers = arrayListOf(Classifier("", dependency.type ?: "jar"))
-                        )
-                        artifactList.add(artifact)
-                        artifactList.addAll(searchAdditionalDependencies(artifact))
-                        return@flatMap artifactList.stream()
-                    }.collect(Collectors.toList())
-            }
-        } catch (e: Exception) {
-            log.throwing(
-                MvnArtifactManagerImpl::class.java.name,
-                "Error on reading pom file for ${artifact.mvnCoordinates()}",
-                e
-            )
-            return ArrayList()
-        }
-    }
-
     private fun artifactDownloaded(artifact: MvnArtifact, classifier: Classifier): Boolean {
         return Files.exists(getArtifactFile(artifact, classifier))
     }
@@ -330,6 +288,14 @@ class MvnArtifactManagerImpl : MvnArtifactManager {
             getArtifact(artifact, classifier)
         }
         return file
+    }
+
+    override fun getOrDownloadArtifactWithClassifiers(artifact: MvnArtifact, classifiers:Collection<Classifier>) {
+        for (classifier in classifiers) {
+            performance("Read classifier $classifier") {
+                getOrDownloadArtifactFile(artifact, classifier)
+            }
+        }
     }
 
     private fun readArtifactFromLine(line: String?): MvnArtifact? {

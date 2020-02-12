@@ -30,6 +30,34 @@ configurations {
 
 apply plugin: 'maven'
 
+ext.getCustomExtensionFromCoordinates = { coordinates ->
+    return coordinates.tokenize('@').last()
+}
+
+ext.getClassifierFromCoordinates = { coordinates ->
+    def split = coordinates.tokenize(":")
+    if (split.size > 3) {
+        return split[3].tokenize('@').first()
+    }
+    return null
+}
+
+ext.getPom = { artifact ->
+    // get the pom
+    def split = artifact.tokenize(":")
+    def component = project.dependencies.createArtifactResolutionQuery()
+            .forModule(split[0], split[1], split[2])
+            .withArtifacts(MavenModule, MavenPomArtifact)
+            .execute()
+            .resolvedComponents[0]
+    def artifacts = component?.getArtifacts(MavenPomArtifact)
+    if (artifacts == null) {
+        return null
+    }
+    def pomFile = component?.getArtifacts(MavenPomArtifact)[0]?.file
+    return pomFile
+}
+
 ext.getAllArtifacts = { artifact ->
     // get the pom
     def component = project.dependencies.createArtifactResolutionQuery()
@@ -44,12 +72,55 @@ ext.getAllArtifacts = { artifact ->
             .execute()
             .resolvedComponents[0]
     def sourceFile = component?.getArtifacts(SourcesArtifact)[0]?.file
-    def javadocFile = component?.getArtifacts(JavadocArtifact)[0]?.file
-    return [pomFile, sourceFile, javadocFile]
+    return ["@pom": pomFile, "sources@jar": sourceFile]
+}
+
+ext.resolveArtifact = { art, resolveAll ->
+    try {
+        def component = [:]
+        component[(art.classifier ?: "") + "@" + art.extension] = art.file?.path
+        if (art.classifier == null && resolveAll) {
+            def classifiers = getAllArtifacts(art)
+            classifiers.each {
+                if (it.value != null) {
+                    component[it.key] = it.value?.path
+                }
+            }
+        }
+        return component
+    } catch (e) {
+        logger.error("Error: " + e.getMessage(), e)
+        logger.error("could not find pom for {}", art.file)
+    }
+}
+
+task getArtifact() {
+    doLast {
+        def resolved = [:]
+        project.ext.properties["toResolve"].tokenize(';').each {
+            dependencies.add 'extraLibs', it
+        }
+        configurations.extraLibs.transitive(Boolean.valueOf(project.ext.properties["transitive"] ?: "true"))
+        configurations.extraLibs.resolvedConfiguration.lenientConfiguration.artifacts.each { art ->
+            try {
+                def name = art.id.componentIdentifier.displayName
+                def component = resolved[name]
+                if (component == null) {
+                    resolved[name] = [:]
+                    component = resolved[name]
+                }
+                component.putAll(resolveArtifact(art, Boolean.valueOf(project.ext.properties["withClassifiers"] ?: "true")))
+            } catch (e) {
+                logger.error("Error: " + e.getMessage(), e)
+                logger.error("could not find pom for {}", art.file)
+            }
+        }
+        println "<JSON>${JsonOutput.toJson(resolved)}</JSON>"
+    }
 }
 
 task resolve() {
-    doLast{
+    doLast {
         project.ext.properties["toResolve"].tokenize(';').each {
             dependencies.add 'extraLibs', it
         }
@@ -64,12 +135,7 @@ task resolve() {
                             resolved[name] = [:]
                             component = resolved[name]
                         }
-                        component[art.classifier == null ? "jar" : art.classifier] = art.file?.path
-                        if (art.classifier == null) {
-                            def classifiers = getAllArtifacts(art)
-                            component["pom"] = classifiers[0]?.path
-                            component["sources"] = classifiers[1]?.path
-                        }
+                        component.putAll(resolveArtifact(art, true))
                     } catch (e) {
                         logger.error("Error: " + e.getMessage(), e)
                         logger.error("could not find pom for {}", art.file)
@@ -77,6 +143,6 @@ task resolve() {
                 }
             }
         }
-        println JsonOutput.toJson(resolved)
+        println "<JSON>${JsonOutput.toJson(resolved)}</JSON>"
     }
 }

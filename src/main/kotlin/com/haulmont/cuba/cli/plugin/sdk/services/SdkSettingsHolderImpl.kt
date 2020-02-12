@@ -99,8 +99,10 @@ class SdkSettingsHolderImpl : SdkSettingsHolder {
         return sdkProperties[property] != null
     }
 
-    override fun setProperty(property: String, value: String) {
-        sdkProperties.put(property, value)
+    override fun setProperty(property: String, value: String?) {
+        if (value!=null) {
+            sdkProperties.put(property, value)
+        }
     }
 
     override fun flushAppProperties() {
@@ -112,7 +114,7 @@ class SdkSettingsHolderImpl : SdkSettingsHolder {
     }
 
     override fun sdkConfigured(): Boolean {
-        return Files.exists(SDK_PROPERTIES_PATH) && sdkProperties.getProperty("repository.type") != null
+        return Files.exists(SDK_PROPERTIES_PATH) //&& sdkProperties.getProperty("repository.type") != null
     }
 
     override fun setExternalProperties(file: Path) {

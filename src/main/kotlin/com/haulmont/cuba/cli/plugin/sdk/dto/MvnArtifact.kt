@@ -24,13 +24,25 @@ data class MvnArtifact(
     val groupId: String,
     val artifactId: String,
     val version: String,
-
-    val classifiers: MutableList<Classifier> = ArrayList()
+    val path: String = "",
+    val classifiers: MutableList<Classifier> = mutableListOf()
 ) {
     fun mvnCoordinates(classifier: Classifier? = null): String {
         var coordinates = "${groupId}:${artifactId}:${version}"
         if (classifier != null) {
             coordinates += ":${classifier.extension}:${classifier.type}"
+        }
+        return coordinates
+    }
+
+    fun gradleCoordinates(classifier: Classifier? = null): String {
+        var coordinates = "${groupId}:${artifactId}:${version}"
+        if (classifier != null) {
+            if (classifier.type.isNotEmpty()) {
+                coordinates += ":${classifier.type}"
+            }
+            if (classifier.extension.isNotEmpty() && classifier.extension != "jar")
+                coordinates += "@${classifier.extension}"
         }
         return coordinates
     }
