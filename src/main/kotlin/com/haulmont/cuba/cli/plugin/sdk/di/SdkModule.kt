@@ -75,6 +75,10 @@ private val sdkModule = Kodein.Module {
     bind<ImportExportService>() with singleton {
         ImportExportServiceImpl()
     }
+
+    bind<DbProvider>() with singleton {
+        DbProviderImpl()
+    }
 }
 
 internal val sdkKodein = Kodein {

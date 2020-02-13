@@ -35,10 +35,11 @@ module com.haulmont.cuba.cli.plugin.sdk {
     requires result;
     requires org.json;
     requires java.logging;
-    requires kotlin.xml.builder;
+//    requires kotlin.xml.builder;
     requires gradle.tooling.api;
     requires java.management;
     requires java.desktop;
+    requires mapdb;
 
     opens com.haulmont.cuba.cli.plugin.sdk;
     opens com.haulmont.cuba.cli.plugin.sdk.dto;

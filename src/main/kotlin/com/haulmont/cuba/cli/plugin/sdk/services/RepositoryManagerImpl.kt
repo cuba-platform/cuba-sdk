@@ -28,8 +28,8 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryType
 import com.haulmont.cuba.cli.plugin.sdk.utils.authorizeIfRequired
 import com.haulmont.cuba.cli.prompting.ValidationException
 import org.kodein.di.generic.instance
-import org.redundent.kotlin.xml.Node
-import org.redundent.kotlin.xml.xml
+//import org.redundent.kotlin.xml.Node
+//import org.redundent.kotlin.xml.xml
 import java.io.FileInputStream
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
@@ -174,47 +174,47 @@ class RepositoryManagerImpl : RepositoryManager {
     }
 
     override fun buildMavenSettingsFile() {
-        val settings = xml("settings") {
-            "localRepository" {
-                -sdkSettings["maven.local.repo"]
-            }
-            "profiles" {
-                "profile" {
-                    "id" { -RepositoryTarget.SOURCE.getId() }
-                    "activation" {
-                        "activeByDefault" { -"true" }
-                    }
-                    this.addNode(addRepositories("repositories", "repository", RepositoryTarget.SOURCE))
-                    this.addNode(addRepositories("pluginRepositories", "pluginRepository", RepositoryTarget.SOURCE))
-                }
-                "profile" {
-                    "id" { -RepositoryTarget.TARGET.getId() }
-                    "activation" {
-                        "activeByDefault" { -"false" }
-                    }
-                    "properties" {
-                        "downloadSources" { -"true" }
-                        "downloadJavadocs" { -"true" }
-                    }
-                    this.addNode(addRepositories("repositories", "repository", RepositoryTarget.TARGET))
-                }
-            }
-            "servers" {
-                listOf(RepositoryTarget.SOURCE, RepositoryTarget.TARGET).forEach { target ->
-                    getRepositories(target)
-                        .filter { it.authentication != null }
-                        .forEach {
-                            "server" {
-                                "id" { -getRepositoryId(target, it.name) }
-                                "username" { -it.authentication!!.login }
-                                "password" { -it.authentication!!.password }
-                            }
-                        }
-                }
-            }
-        }
+//        val settings = xml("settings") {
+//            "localRepository" {
+//                -sdkSettings["maven.local.repo"]
+//            }
+//            "profiles" {
+//                "profile" {
+//                    "id" { -RepositoryTarget.SOURCE.getId() }
+//                    "activation" {
+//                        "activeByDefault" { -"true" }
+//                    }
+//                    this.addNode(addRepositories("repositories", "repository", RepositoryTarget.SOURCE))
+//                    this.addNode(addRepositories("pluginRepositories", "pluginRepository", RepositoryTarget.SOURCE))
+//                }
+//                "profile" {
+//                    "id" { -RepositoryTarget.TARGET.getId() }
+//                    "activation" {
+//                        "activeByDefault" { -"false" }
+//                    }
+//                    "properties" {
+//                        "downloadSources" { -"true" }
+//                        "downloadJavadocs" { -"true" }
+//                    }
+//                    this.addNode(addRepositories("repositories", "repository", RepositoryTarget.TARGET))
+//                }
+//            }
+//            "servers" {
+//                listOf(RepositoryTarget.SOURCE, RepositoryTarget.TARGET).forEach { target ->
+//                    getRepositories(target)
+//                        .filter { it.authentication != null }
+//                        .forEach {
+//                            "server" {
+//                                "id" { -getRepositoryId(target, it.name) }
+//                                "username" { -it.authentication!!.login }
+//                                "password" { -it.authentication!!.password }
+//                            }
+//                        }
+//                }
+//            }
+//        }
 
-        writeToFile(mvnSettingsPath(), settings.toString(true))
+//        writeToFile(mvnSettingsPath(), settings.toString(true))
     }
 
     override fun mvnSettingFile(): Path {
@@ -225,14 +225,14 @@ class RepositoryManagerImpl : RepositoryManager {
         }
     }
 
-    private fun addRepositories(rootEl: String, elementName: String, target: RepositoryTarget): Node =
-        xml(rootEl) {
-            getRepositories(target).forEach {
-                elementName {
-                    "id" { -getRepositoryId(target, it.name) }
-                    "name" { -it.name }
-                    "url" { -it.url }
-                }
-            }
-        }
+//    private fun addRepositories(rootEl: String, elementName: String, target: RepositoryTarget): Node =
+//        xml(rootEl) {
+//            getRepositories(target).forEach {
+//                elementName {
+//                    "id" { -getRepositoryId(target, it.name) }
+//                    "name" { -it.name }
+//                    "url" { -it.url }
+//                }
+//            }
+//        }
 }

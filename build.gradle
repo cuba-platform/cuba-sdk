@@ -5,7 +5,7 @@ buildscript {
             velocity            : "1.7",
             jCommander          : "1.72",
             jansi               : "1.17",
-            guava               : "26.0-jre",
+            guava               : "28.2-jre",
             jline               : "3.6.2",
             kodein              : "5.0.0",
             practicalxml        : "1.1.0",
@@ -156,6 +156,14 @@ dependencies {
         exclude(group: 'com.google.code.gson', module: 'gson')
     }
 
+    extraLibs("org.mapdb:mapdb:3.0.8") {
+        exclude(group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib')
+        exclude(group: 'com.google.errorprone', module: 'error_prone_annotations')
+        exclude(group: 'com.google.guava', module: 'guava')
+    }
+
+
+
     extraLibs "org.gradle:gradle-tooling-api:$versions.toolingApi"
     // The tooling API need an SLF4J implementation available at runtime, replace this with any other implementation
     extraLibs 'org.slf4j:slf4j-simple:1.7.10'
@@ -174,7 +182,7 @@ dependencies {
 
     extraLibs("org.apache.maven:maven-model:$versions.maven")
 
-    extraLibs("org.redundent:kotlin-xml-builder:$versions.kotlinXmlBuilder")
+//    extraLibs("org.redundent:kotlin-xml-builder:$versions.kotlinXmlBuilder")
 
     testImplementation group: 'junit', name: 'junit', version: versions.jUnit
 

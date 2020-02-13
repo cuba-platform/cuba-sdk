@@ -47,8 +47,7 @@ class GradleArtifactManagerImpl : ArtifactManager {
     internal val printWriter: PrintWriter by sdkKodein.instance()
     internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
     internal val repositoryManager: RepositoryManager by sdkKodein.instance()
-
-    internal val coordinatesCache = mutableMapOf<String, String>()
+    internal val dbProvider: DbProvider by sdkKodein.instance()
 
     override fun init() {
         val gradleBuild = Path.of(sdkSettings["gradle.home"]).resolve("build.gradle").also {
@@ -60,6 +59,7 @@ class GradleArtifactManagerImpl : ArtifactManager {
             Files.createFile(it)
         }
         gradleBuild.toFile().copyInputStreamToFile(SdkPlugin::class.java.getResourceAsStream("gradle/build.gradle"))
+        dbProvider["gradle"]["init"] = "true"
     }
 
     override fun readPom(artifact: MvnArtifact, classifier: Classifier): Model? {
@@ -102,25 +102,10 @@ class GradleArtifactManagerImpl : ArtifactManager {
     }
 
     private fun readFromCache(artifact: MvnArtifact, classifier: Classifier = Classifier.default()): Path? {
-        coordinatesCache[artifact.gradleCoordinates(classifier)].also {
+        dbProvider["gradle"][artifact.gradleCoordinates(classifier)].also {
             if (it != null) {
                 return Path.of(sdkSettings["gradle.cache"], it)
             }
-        }
-
-        val cachePath = cachePath(artifact)
-        if (!Files.exists(cachePath)) {
-            return null
-        }
-        val properties = readProperties(cachePath)
-        val gradleCachePath = properties["${classifier.type}.${classifier.extension}"] as String?
-        if (gradleCachePath == null) {
-            return null
-        }
-        val pathInCache =
-            Path.of(sdkSettings["gradle.cache"], gradleCachePath)
-        if (Files.exists(pathInCache)) {
-            return pathInCache
         }
         return null
     }
@@ -161,7 +146,8 @@ class GradleArtifactManagerImpl : ArtifactManager {
                 if (!filePath.isJsonNull) {
                     val relativePath = Path.of(sdkSettings["gradle.cache"]).relativize(Path.of(filePath.asString))
                     val split = classifierEntry.key.split("@")
-                    coordinatesCache.put(mvnArtifact.gradleCoordinates(Classifier(split[0],split[1])),relativePath.toString())
+                    dbProvider["gradle"][mvnArtifact.gradleCoordinates(Classifier(split[0],split[1]))] =
+                        relativePath.toString()
 //                    properties.put(classifierEntry.key.replace("@", "."), relativePath)
 
                 }
