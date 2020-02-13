@@ -47,7 +47,7 @@ open class AddRepositoryCommand : AbstractSdkCommand() {
         val target = target ?: RepositoryTarget.getTarget(answers["target"] as String)
         val name = answers["name"] as String
         val isLocal = answers["isLocal"] as Boolean
-        val url = if (isLocal) "file:///${answers["path"]}" else answers["url"] as String
+        val url = if (isLocal) "${answers["path"]}" else answers["url"] as String
         val authRequired = answers["auth"] as Boolean?
         val authentication = if (authRequired == true)
             Authentication(

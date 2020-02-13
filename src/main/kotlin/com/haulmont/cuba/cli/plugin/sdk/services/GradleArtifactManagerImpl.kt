@@ -52,14 +52,13 @@ class GradleArtifactManagerImpl : ArtifactManager {
     override fun init() {
         val gradleBuild = Path.of(sdkSettings["gradle.home"]).resolve("build.gradle").also {
             if (!Files.exists(it)) {
-                Files.createDirectories(it)
+                Files.createDirectories(it.parent)
             } else {
                 Files.delete(it)
             }
             Files.createFile(it)
         }
         gradleBuild.toFile().copyInputStreamToFile(SdkPlugin::class.java.getResourceAsStream("gradle/build.gradle"))
-        dbProvider["gradle"]["init"] = "true"
     }
 
     override fun readPom(artifact: MvnArtifact, classifier: Classifier): Model? {
@@ -135,12 +134,7 @@ class GradleArtifactManagerImpl : ArtifactManager {
             val coordinates = entry.key.split(":")
             val version = coordinates[2].substringBeforeLast("@")
             val mvnArtifact = MvnArtifact(coordinates[0], coordinates[1], version)
-            val cachePath = cachePath(mvnArtifact)
-            if (!Files.exists(cachePath)) {
-                Files.createDirectories(cachePath.parent)
-                Files.createFile(cachePath)
-            }
-//            val properties = readProperties(cachePath)
+
             entry.value.asJsonObject.entrySet().forEach { classifierEntry ->
                 val filePath = classifierEntry.value
                 if (!filePath.isJsonNull) {
@@ -148,13 +142,8 @@ class GradleArtifactManagerImpl : ArtifactManager {
                     val split = classifierEntry.key.split("@")
                     dbProvider["gradle"][mvnArtifact.gradleCoordinates(Classifier(split[0],split[1]))] =
                         relativePath.toString()
-//                    properties.put(classifierEntry.key.replace("@", "."), relativePath)
-
                 }
             }
-//            FileOutputStream(cachePath.toFile()).use {
-//                properties.store(it, "")
-//            }
         }
         return result
     }
@@ -240,14 +229,4 @@ class GradleArtifactManagerImpl : ArtifactManager {
         val fromCache = readFromCache(artifact, classifier)
         return fromCache != null && Files.exists(fromCache)
     }
-
-    private fun cachePath(artifact: MvnArtifact): Path {
-        var path: Path = Path.of(sdkSettings["gradle.resolve"])
-        for (groupPart in artifact.groupId.split(".")) {
-            path = path.resolve(groupPart)
-        }
-        path = path.resolve(artifact.artifactId).resolve(artifact.version)
-        return path.resolve("cache.properties")
-    }
-
 }

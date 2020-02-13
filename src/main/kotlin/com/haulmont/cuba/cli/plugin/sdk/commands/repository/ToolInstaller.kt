@@ -47,8 +47,8 @@ open class ToolInstaller(
                 unzip(it)
             }
         }.also {
-            Files.delete(it)
             configure(it)
+            Files.delete(it)
         }
     }
 

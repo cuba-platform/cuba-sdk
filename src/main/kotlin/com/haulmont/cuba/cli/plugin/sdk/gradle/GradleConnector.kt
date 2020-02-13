@@ -20,6 +20,8 @@ import com.google.gson.Gson
 import com.google.gson.JsonElement
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.commands.CommonSdkParameters
+import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
+import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
 import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
 import org.gradle.tooling.GradleConnector
 import org.gradle.tooling.ProgressEvent
@@ -36,6 +38,7 @@ typealias ProgressCallback = (event: ProgressEvent?) -> Unit
 class GradleConnector() {
     private val connector: GradleConnector
     private val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
+    private val repositoryManager: RepositoryManager by sdkKodein.instance()
     private val printWriter: PrintWriter by sdkKodein.instance()
 
     init {
@@ -62,9 +65,11 @@ class GradleConnector() {
             if (CommonSdkParameters.info) {
                 printWriter.println()
             }
+            val repositoriesJson = Gson().toJson(repositoryManager.getRepositories(RepositoryTarget.SOURCE))
             val buildLauncher = connection.newBuild()
                 .withArguments(params.map { "-P${it.key}=${it.value}" }.toList())
                 .addArguments("-g", sdkSettings["gradle.cache"])
+                .addArguments("-PsdkRepositories=${repositoriesJson}")
                 .forTasks(name)
                 .setStandardOutput(outputStream)
 

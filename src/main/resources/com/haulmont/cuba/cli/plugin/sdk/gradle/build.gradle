@@ -1,17 +1,33 @@
 import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 
 buildscript {
 
     repositories {
-        mavenLocal()
-        maven {
-            credentials {
-                username System.getenv('HAULMONT_REPOSITORY_USER') ?: 'cuba'
-                password System.getenv('HAULMONT_REPOSITORY_PASSWORD') ?: 'cuba123'
+        if (project.ext.hasProperty("sdkRepositories")) {
+            def sdkRepos = new JsonSlurper().parseText(project.ext.properties["sdkRepositories"])
+            sdkRepos.each {
+                if (it.type == "LOCAL") {
+                    maven {
+                        url file(it.url)
+                    }
+                } else {
+                    maven {
+                        if (it.authentication != null) {
+                            credentials {
+                                username it.authentication.login
+                                password it.authentication.password
+                            }
+                        }
+                        url it.url
+                    }
+                }
             }
-            url System.getenv('HAULMONT_REPOSITORY_URL') ?: 'https://repo.cuba-platform.com/content/groups/work'
+
+        } else {
+            mavenLocal()
+            mavenCentral()
         }
-        mavenCentral()
     }
 }
 

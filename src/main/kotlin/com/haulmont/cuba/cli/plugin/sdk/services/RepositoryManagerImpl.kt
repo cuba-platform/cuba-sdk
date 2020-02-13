@@ -70,7 +70,7 @@ class RepositoryManagerImpl : RepositoryManager {
                 Repository(
                     name = "local",
                     type = RepositoryType.LOCAL,
-                    url = "file:///" + Paths.get(System.getProperty("user.home")).resolve(".m2").resolve("repository").toString()
+                    url = Paths.get(System.getProperty("user.home")).resolve(".m2").resolve("repository").toString()
                 ),
                 Repository(
                     name = "cuba-nexus",
@@ -89,7 +89,7 @@ class RepositoryManagerImpl : RepositoryManager {
                 Repository(
                     name = "local",
                     type = RepositoryType.LOCAL,
-                    url = "file:///" + Paths.get(System.getProperty("user.home")).resolve(".m2").resolve("repository").toString()
+                    url = Paths.get(System.getProperty("user.home")).resolve(".m2").resolve("repository").toString()
                 ),
                 Repository(
                     name = "cuba-bintray",
@@ -130,7 +130,6 @@ class RepositoryManagerImpl : RepositoryManager {
 
     private fun flush() {
         flushMetadata()
-        buildMavenSettingsFile()
     }
 
     override fun getRepositories(target: RepositoryTarget): MutableList<Repository> {
@@ -141,7 +140,7 @@ class RepositoryManagerImpl : RepositoryManager {
     override fun isOnline(repository: Repository): Boolean {
         var url = repository.url
         if (RepositoryType.LOCAL == repository.type) {
-            return Files.exists(Path.of(url.substringAfter("file:///")))
+            return Files.exists(Path.of(url))
         } else {
             if (sdkSettings["repository.name"] == repository.name) {
                 url = sdkSettings["repository.url"]

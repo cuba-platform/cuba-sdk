@@ -33,7 +33,7 @@ class LocalRepositorySearch : RepositorySearch {
     }
 
     override fun search(component: Component): Component? {
-        var baseSearchPath: Path = Path.of(repository.url.substringAfter("file:///"))
+        var baseSearchPath: Path = Path.of(repository.url)
         for (groupPart in component.packageName.split(".")) {
             baseSearchPath = baseSearchPath.resolve(groupPart)
         }

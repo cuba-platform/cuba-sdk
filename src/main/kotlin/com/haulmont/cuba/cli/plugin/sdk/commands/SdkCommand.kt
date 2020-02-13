@@ -36,17 +36,15 @@ class SdkCommand : AbstractSdkCommand() {
         }
         printWriter.println(messages["sdk.title"].doubleUnderline())
         printWriter.println("SDK home: ${sdkSettings["sdk.home"].green()}")
-        printWriter.print("Repository type: ${sdkSettings["repository.type"].green()} ")
         if (nexusManager.isLocal()) {
+            printWriter.print("Repository type: ${sdkSettings["repository.type"].green()} ")
             printWriter.print(if (nexusManager.isStarted()) "running".green() else "stopped".red())
             printWriter.println()
             printWriter.println("Repository URL: ${sdkSettings["repository.url"].green()}")
             printWriter.println("Repository install path: ${sdkSettings["repository.path"].green()}")
-        } else {
-            printWriter.println()
         }
-        printWriter.println("Maven install path: ${sdkSettings["maven.path"].green()}")
-        printWriter.println("Maven local repository: ${sdkSettings["maven.local.repo"].green()}")
+        printWriter.println("Gradle path: ${sdkSettings["gradle.home"].green()}")
+        printWriter.println("Gradle cache: ${sdkSettings["gradle.cache"].green()}")
     }
 
     override fun onlyForConfiguredSdk() = false

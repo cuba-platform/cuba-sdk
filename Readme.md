@@ -38,7 +38,8 @@ To configure SDK please run `sdk setup` command. Before first usage SDK should b
 
 - `sdk` - prints current SDK status
 - `sdk properties` - prints configured SDK properties. Specific properties can be printed with `--n` or `--name` additional parameters, for example `sdk properties --n sdk.export.path`
-- `sdk setup` - run SDK configuration. This command will configure SDK properties and download, install and configure *m2* and nexus repository. For already configured SDK this command will not cleanup current SDK metadata
+- `sdk init` - init SDK. This command will configure SDK properties and download, install and configure *Gradle*. For already configured SDK this command will not cleanup current SDK metadata
+- `sdk setup-nexus` - setup embedded Nexus repository. This command will download, install and configure Nexus repository.
 - `sdk cleanup` - cleanup SDK metadata and remove all artifacts from local *m2* repository and from embedded Nexus repository. If `--local-only` flag provided then only local *m2* repository will be cleaned
 - `sdk set-license` - set license key and configure Premium repositories for *source* repository 
 - `sdk check-updates` - check available minor updates for framework and addons.  Specific target repository can be configured with `--r` or `--repository` additional parameters, example `sdk import --r sdk2`. If `--no-upload` additional parameter presented then SDK archive will be imported to local *m2* repository only.
@@ -134,7 +135,7 @@ Import command will import exported SDK archive to current SDK and upload it to 
 ### Additional parameters which can be applied to components commands:
 - `--f` or `--force` - resolve and upload component with dependencies even if component already resolved or installed
 - `--single` - run command in single thread mode
-- `--print-maven` - print maven output. Please note that in this case command will be executed in single thread mode
+- `--info` - print Gradle output. Please note that in this case command will be executed in single thread mode
 - `--mo` or `--maven-option` - additional maven execution options
 
 # 5. SDK settings <a name="common-settings"></a>
