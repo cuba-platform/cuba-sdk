@@ -333,7 +333,7 @@ class ComponentManagerImpl : ComponentManager {
         if (CommonSdkParameters.singleThread) component.components.stream() else component.components.parallelStream()
 
     private fun artifactsStream(artifacts: Set<MvnArtifact>) =
-        if (CommonSdkParameters.singleThread) artifacts.stream() else artifacts.parallelStream()
+        artifacts.stream()
 
     override fun register(component: Component) {
         removeFromMetadata(component)

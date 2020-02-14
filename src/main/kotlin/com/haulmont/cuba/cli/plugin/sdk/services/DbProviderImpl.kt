@@ -21,26 +21,36 @@ import com.haulmont.cuba.cli.plugin.sdk.db.DbInstance
 import org.kodein.di.generic.instance
 import org.mapdb.DBMaker.fileDB
 import java.nio.file.Path
+import java.util.*
+import java.util.concurrent.locks.ReentrantLock
 
 class DbProviderImpl : DbProvider {
 
     private val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
 
-    internal val dbInstances = mutableMapOf<String, DbInstance>()
+    internal val dbInstances = Collections.synchronizedMap(mutableMapOf<String, DbInstance>())
+
+    internal val lock = ReentrantLock()
 
     override fun get(storage: String): DbInstance {
-        return dbInstances.getOrPut(storage, {
-            DbInstance(
-                fileDB(Path.of(sdkSettings["gradle.home"], "${storage}.db").toFile())
-                    .fileMmapEnable()
-                    .fileMmapEnableIfSupported()
-                    .fileMmapPreclearDisable()
-                    .fileChannelEnable()
-                    .checksumHeaderBypass()
-                    .closeOnJvmShutdown()
-                    .executorEnable()
-                    .make()
-            )
-        })
+        if (dbInstances.containsKey(storage)) {
+            return dbInstances[storage]!!
+        } else {
+            synchronized(lock) {
+                return dbInstances.getOrPut(storage, {
+                    DbInstance(
+                        fileDB(Path.of(sdkSettings["gradle.home"], "${storage}.db").toFile())
+                            .fileMmapEnable()
+                            .fileMmapEnableIfSupported()
+                            .fileMmapPreclearDisable()
+                            .fileChannelEnable()
+                            .checksumHeaderBypass()
+                            .closeOnJvmShutdown()
+                            .executorEnable()
+                            .make()
+                    )
+                })
+            }
+        }
     }
 }

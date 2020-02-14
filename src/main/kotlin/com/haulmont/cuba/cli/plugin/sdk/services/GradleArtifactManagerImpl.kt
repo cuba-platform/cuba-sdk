@@ -16,12 +16,14 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.services
 
+import com.google.gson.Gson
 import com.google.gson.JsonElement
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.SdkPlugin
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
 import com.haulmont.cuba.cli.plugin.sdk.dto.MvnArtifact
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
+import com.haulmont.cuba.cli.plugin.sdk.dto.UploadDescriptor
 import com.haulmont.cuba.cli.plugin.sdk.gradle.GradleConnector
 import com.haulmont.cuba.cli.plugin.sdk.utils.FileUtils
 import com.haulmont.cuba.cli.plugin.sdk.utils.copyInputStreamToFile
@@ -110,7 +112,24 @@ class GradleArtifactManagerImpl : ArtifactManager {
     }
 
     override fun upload(repository: Repository, artifact: MvnArtifact) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val descriptors = artifact.classifiers.distinct()
+            .filter { it != Classifier.pom() }
+            .map { UploadDescriptor(artifact, it, getOrDownloadArtifactFile(artifact, it).toString()) }
+            .toList()
+
+        val pomDescriptor = getOrDownloadArtifactFile(artifact, Classifier.pom()).toString()
+        try {
+            GradleConnector().runTask(
+                "publish", mapOf(
+                    "toUpload" to Gson().toJson(artifact),
+                    "descriptors" to Gson().toJson(descriptors),
+                    "pomFile" to pomDescriptor,
+                    "targetRepository" to Gson().toJson(repository)
+                )
+            )
+        } catch (e: Exception) {
+            throw RuntimeException("Unable to upload ${artifact}. Error: ${e.message}", e)
+        }
     }
 
     override fun getArtifact(artifact: MvnArtifact, classifier: Classifier) {
@@ -140,7 +159,7 @@ class GradleArtifactManagerImpl : ArtifactManager {
                 if (!filePath.isJsonNull) {
                     val relativePath = Path.of(sdkSettings["gradle.cache"]).relativize(Path.of(filePath.asString))
                     val split = classifierEntry.key.split("@")
-                    dbProvider["gradle"][mvnArtifact.gradleCoordinates(Classifier(split[0],split[1]))] =
+                    dbProvider["gradle"][mvnArtifact.gradleCoordinates(Classifier(split[0], split[1]))] =
                         relativePath.toString()
                 }
             }

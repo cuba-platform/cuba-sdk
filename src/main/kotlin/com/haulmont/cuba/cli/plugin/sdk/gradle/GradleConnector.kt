@@ -70,6 +70,8 @@ class GradleConnector() {
                 .withArguments(params.map { "-P${it.key}=${it.value}" }.toList())
                 .addArguments("-g", sdkSettings["gradle.cache"])
                 .addArguments("-PsdkRepositories=${repositoriesJson}")
+                .addArguments("-Dorg.gradle.daemon=true")
+                .addArguments("-Dorg.gradle.parallel=true")
                 .forTasks(name)
                 .setStandardOutput(outputStream)
 

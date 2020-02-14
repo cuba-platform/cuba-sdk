@@ -54,7 +54,9 @@ class ComponentVersionManagerImpl : ComponentVersionManager {
                 },
                 failure = { error ->
                     log.severe("error: ${error}")
-                    throw IllegalStateException("Unable to load components from CUBA marketplace. Error ${error}")
+                    return readAddons(
+                        readAddonsFile()
+                    )
                 }
             )
         }

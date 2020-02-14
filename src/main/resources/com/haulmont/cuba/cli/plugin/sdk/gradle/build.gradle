@@ -4,22 +4,22 @@ import groovy.json.JsonSlurper
 buildscript {
 
     repositories {
-        if (project.ext.hasProperty("sdkRepositories")) {
-            def sdkRepos = new JsonSlurper().parseText(project.ext.properties["sdkRepositories"])
-            sdkRepos.each {
-                if (it.type == "LOCAL") {
+        if (project.hasProperty("sdkRepositories")) {
+            def sdkRepos = new JsonSlurper().parseText(project.properties["sdkRepositories"])
+            sdkRepos.each { repo ->
+                if (repo.type == "LOCAL") {
                     maven {
-                        url file(it.url)
+                        url file(repo.url)
                     }
                 } else {
                     maven {
-                        if (it.authentication != null) {
+                        if (repo.authentication != null) {
                             credentials {
-                                username it.authentication.login
-                                password it.authentication.password
+                                username repo.authentication.login
+                                password repo.authentication.password
                             }
                         }
-                        url it.url
+                        url repo.url
                     }
                 }
             }
@@ -45,6 +45,7 @@ configurations {
 }
 
 apply plugin: 'maven'
+apply plugin: "maven-publish"
 
 ext.getCustomExtensionFromCoordinates = { coordinates ->
     return coordinates.tokenize('@').last()
@@ -160,5 +161,81 @@ task resolve() {
             }
         }
         println "<JSON>${JsonOutput.toJson(resolved)}</JSON>"
+    }
+}
+
+task publishArtifact(type: PublishToMavenRepository) {
+    doLast {
+        if (project.ext.hasProperty("toUpload")) {
+            def toUpload = new JsonSlurper().parseText(project.ext.properties["toUpload"])
+            println project.ext.properties["toUpload"]
+            def descriptors = new JsonSlurper().parseText(project.ext.properties["descriptors"])
+            println project.ext.properties["descriptors"]
+
+            artifactId toUpload.artifactId
+            groupId toUpload.groupId
+            version toUpload.version
+            descriptors.each { descriptor ->
+                artifact(descriptor.filePath) {
+                    classifier descriptor.classifier.type
+                    extension descriptor.classifier.extenstion
+                }
+            }
+        }
+    }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            if (project.hasProperty("descriptors")) {
+                def toUpload = new JsonSlurper().parseText(project.properties["toUpload"])
+                def descriptors = new JsonSlurper().parseText(project.properties["descriptors"])
+                def pomFile = project.properties["pomFile"]
+
+                artifactId toUpload.artifactId
+                groupId toUpload.groupId
+                version toUpload.version
+
+                descriptors.each { descriptor ->
+                    artifact(descriptor.filePath) {
+                        artifactId descriptor.artifact.artifactId
+                        groupId descriptor.artifact.groupId
+                        version descriptor.artifact.version
+                        classifier descriptor.classifier.type
+                        extension descriptor.classifier.extension
+                    }
+                }
+
+                if (pomFile != null) {
+                    pom.withXml {
+                        def sb = asString()
+                        sb.setLength 0
+                        sb.append file(pomFile).text
+                    }
+                }
+
+            }
+        }
+    }
+    repositories {
+        if (project.hasProperty("targetRepository")) {
+            def targetRepository = new JsonSlurper().parseText(project.properties["targetRepository"])
+            if (targetRepository.type == "LOCAL") {
+                maven {
+                    url file(targetRepository.url)
+                }
+            } else {
+                maven {
+                    if (it.authentication != null) {
+                        credentials {
+                            username targetRepository.authentication.login
+                            password targetRepository.authentication.password
+                        }
+                    }
+                    url targetRepository.url
+                }
+            }
+        }
     }
 }

@@ -27,11 +27,11 @@ class InitCommand : AbstractSdkCommand() {
         createSdkDir()
         createSdkRepoSettingsFile()
         downloadAndConfigureGradle()
-        artifactManager.init()
         printWriter.println(messages["setup.sdkConfigured"].green())
     }
 
     private fun downloadAndConfigureGradle() {
+        artifactManager.init()
         val thread = thread {
             GradleConnector().runTask("wrapper")
         }
