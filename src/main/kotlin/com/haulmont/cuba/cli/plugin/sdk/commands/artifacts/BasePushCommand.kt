@@ -45,8 +45,6 @@ abstract class BasePushCommand : BaseComponentCommand() {
                 val component = searchInMetadata(it)
                 if (component != null) {
                     upload(component, repositories)
-                    printWriter.println()
-                    printWriter.println(messages["install.finished"].green())
                 } else {
                     printWriter.println(messages["resolve.failed"].red())
                 }
