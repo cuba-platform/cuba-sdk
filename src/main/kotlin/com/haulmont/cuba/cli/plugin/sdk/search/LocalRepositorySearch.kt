@@ -16,20 +16,16 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.search
 
+import com.google.gson.JsonElement
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 import java.nio.file.Files
 import java.nio.file.Path
-import java.util.logging.Logger
 
-class LocalRepositorySearch : RepositorySearch {
-
-    internal val log: Logger = Logger.getLogger(BintraySearch::class.java.name)
-    internal val repository: Repository
-
-    constructor(repository: Repository) {
-        this.repository = repository
+class LocalRepositorySearch(repository: Repository) : AbstractRepositorySearch(repository) {
+    override fun searchParameters(component: Component): List<Pair<String, String>> {
+        return emptyList()
     }
 
     override fun search(component: Component): Component? {
@@ -42,6 +38,7 @@ class LocalRepositorySearch : RepositorySearch {
         }
         val baseDir = baseSearchPath.toFile()
         val componentsList = mutableListOf<Component>()
+        val copy = component.copy()
         if (baseDir.listFiles() != null) {
             baseDir.listFiles()
                 .filter { it.isDirectory }
@@ -51,7 +48,7 @@ class LocalRepositorySearch : RepositorySearch {
                     componentDir.listFiles()
                         .filter { it.isDirectory && it.name == component.version }
                         .forEach {
-                            componentsList.add(Component(packageName = component.packageName,
+                            val componentToResolve = Component(packageName = component.packageName,
                                 name = componentName,
                                 version = component.version,
                                 classifiers = it.listFiles()
@@ -60,18 +57,22 @@ class LocalRepositorySearch : RepositorySearch {
                                         val split = artifactFile.name.substringAfter(componentPrefix).split(".")
                                         Classifier(split.get(0).substringAfter("-"), split.get(1))
                                     }
-                                    .toMutableList()))
+                                    .toMutableList())
+                            if (componentAlreadyExists(copy.components, componentToResolve) == null) {
+                                copy.components.add(componentToResolve)
+                            }
                         }
 
                 }
         }
 
         if (componentsList.isNotEmpty()) {
-            val copy = component.copy()
-            copy.components.clear()
-            copy.components.addAll(componentsList)
             return copy
         }
+        return null
+    }
+
+    override fun handleResultJson(it: JsonElement, component: Component): Component? {
         return null
     }
 }

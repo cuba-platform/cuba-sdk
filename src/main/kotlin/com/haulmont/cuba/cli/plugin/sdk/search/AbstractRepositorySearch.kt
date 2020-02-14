@@ -30,7 +30,7 @@ import java.util.logging.Logger
 abstract class AbstractRepositorySearch : RepositorySearch {
 
     internal val log: Logger = Logger.getLogger(BintraySearch::class.java.name)
-    internal val repository: Repository
+    internal var repository: Repository
 
     constructor(repository: Repository) {
         this.repository = repository
@@ -73,4 +73,12 @@ abstract class AbstractRepositorySearch : RepositorySearch {
             .header(Headers.ACCEPT, "application/json")
             .header(Headers.CACHE_CONTROL, "no-cache")
     }
+
+    internal fun componentAlreadyExists(componentsList: Collection<Component>, toAdd: Component): Component? =
+        componentsList.filter {
+            it.packageName == toAdd.packageName
+                    && it.name == toAdd.name
+                    && it.version == toAdd.version
+                    && it.type == toAdd.type
+        }.firstOrNull()
 }

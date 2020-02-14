@@ -42,7 +42,7 @@ class BintraySearch(repository: Repository) : AbstractRepositorySearch(repositor
             log.info("Unknown version: ${component.version}")
             return null
         }
-
+        val copy = component.copy()
         val systemIds = json.getAsJsonArray("system_ids")
         val components = mutableListOf<Component>()
         systemIds.toList().stream()
@@ -61,31 +61,16 @@ class BintraySearch(repository: Repository) : AbstractRepositorySearch(repositor
             .filter { it != null }
             .map { it as Component }
             .forEach {
-                componentAlreadyExists(component.components, it)?.let { existComponent ->
-                    for (classifier in existComponent.classifiers) {
-                        if (!it.classifiers.contains(classifier)) {
-                            it.classifiers.add(classifier)
-                        }
-
-                    }
+                if (componentAlreadyExists(copy.components, it) == null) {
+                    copy.components.add(it)
                 }
-                components.add(it)
             }
-        val copy = component.copy()
-        copy.components.clear()
-        copy.components.addAll(components)
 
         log.info("Component found in ${repository}: ${copy}")
         return copy
     }
 
-    private fun componentAlreadyExists(componentsList: Collection<Component>, toAdd: Component): Component? =
-        componentsList.filter {
-            it.packageName == toAdd.packageName
-                    && it.name == toAdd.name
-                    && it.version == toAdd.version
-                    && it.type == toAdd.type
-        }.firstOrNull()
+
 
 
 }

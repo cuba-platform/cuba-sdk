@@ -48,6 +48,7 @@ class Nexus3Search(repository: Repository) : AbstractRepositorySearch(repository
             return null
         }
         val components = mutableListOf<Component>()
+        val copy = component.copy()
         itemsArray.map { it as JsonObject }
             .map { dataObj ->
                 val groupId = dataObj.get("group").asString
@@ -75,11 +76,10 @@ class Nexus3Search(repository: Repository) : AbstractRepositorySearch(repository
             .filter { it != null }
             .map { it as Component }
             .forEach {
-                components.add(it)
+                if (componentAlreadyExists(copy.components, it) == null) {
+                    copy.components.add(it)
+                }
             }
-        val copy = component.copy()
-        copy.components.clear()
-        copy.components.addAll(components)
         log.info("Component found in ${repository}: ${copy}")
         return copy
     }
