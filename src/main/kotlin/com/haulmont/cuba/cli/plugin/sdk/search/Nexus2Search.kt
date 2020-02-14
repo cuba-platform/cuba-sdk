@@ -26,20 +26,20 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 class Nexus2Search(repository: Repository) : AbstractRepositorySearch(repository) {
     override fun searchParameters(component: Component): List<Pair<String, String>> = listOf(
         "g" to component.packageName,
-        "a" to "",
+        "a" to if (component.globalModule() != null) component.globalModule()!!.name!!.substringBefore("-global") else "",
         "v" to component.version
     )
 
     override fun handleResultJson(it: JsonElement, component: Component): Component? {
         if (!it.isJsonArray) return null
         val array = it as JsonArray
-        if (array.size()==0) {
+        if (array.size() == 0) {
             log.info("Unknown ${component.type}: ${component.packageName}")
             return null
         }
         val json = array.get(0) as JsonObject
         val dataArray = json.get("data") as JsonArray
-        if (dataArray.size()==0) {
+        if (dataArray.size() == 0) {
             log.info("Unknown version: ${component.version}")
             return null
         }
@@ -49,6 +49,12 @@ class Nexus2Search(repository: Repository) : AbstractRepositorySearch(repository
             .map { dataObj ->
                 val groupId = dataObj.get("groupId").asString
                 val artifactId = dataObj.get("artifactId").asString
+                if (component.globalModule() != null) {
+                    val prefix = component.globalModule()!!.name!!.substringBefore("-global")
+                    if (!artifactId.startsWith(prefix)) {
+                        return@map null
+                    }
+                }
                 val version = dataObj.get("latestRelease").asString
                 val classifiers = dataObj.getAsJsonArray("artifactHits")
                     .map { it as JsonObject }
@@ -65,6 +71,8 @@ class Nexus2Search(repository: Repository) : AbstractRepositorySearch(repository
                     .toMutableList()
                 return@map Component(groupId, artifactId, version, classifiers = classifiers)
             }
+            .filter { it != null }
+            .map { it as Component }
             .forEach {
                 components.add(it)
             }

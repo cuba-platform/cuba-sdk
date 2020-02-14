@@ -25,14 +25,14 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 class BintraySearch(repository: Repository) : AbstractRepositorySearch(repository) {
     override fun searchParameters(component: Component): List<Pair<String, String>> = listOf(
         "g" to component.packageName,
-        "a" to "*",
+        "a" to if (component.globalModule() != null) component.globalModule()!!.name!!.substringBefore("-global") + "*" else "*",
         "subject" to repository.repositoryName
     )
 
     override fun handleResultJson(it: JsonElement, component: Component): Component? {
         if (!it.isJsonArray) return null
         val array = it as JsonArray
-        if (array.size()==0) {
+        if (array.size() == 0) {
             log.info("Unknown ${component.type}: ${component.packageName}")
             return null
         }
@@ -49,8 +49,18 @@ class BintraySearch(repository: Repository) : AbstractRepositorySearch(repositor
             .map { it.asString }
             .map {
                 val split = it.split(":")
+                val name = split[1]
+                if (component.globalModule() != null) {
+                    val prefix = component.globalModule()!!.name!!.substringBefore("-global")
+                    if (!name.startsWith(prefix)) {
+                        return@map null
+                    }
+                }
                 return@map Component(split[0], split[1], component.version)
-            }.forEach {
+            }
+            .filter { it != null }
+            .map { it as Component }
+            .forEach {
                 componentAlreadyExists(component.components, it)?.let { existComponent ->
                     for (classifier in existComponent.classifiers) {
                         if (!it.classifiers.contains(classifier)) {

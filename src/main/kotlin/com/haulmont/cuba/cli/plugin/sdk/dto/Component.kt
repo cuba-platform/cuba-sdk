@@ -43,4 +43,7 @@ data class Component(
         }
         return list
     }
+
+    fun globalModule() =
+        components.filter { it.name != null && it.name.endsWith("-global") }.firstOrNull()
 }

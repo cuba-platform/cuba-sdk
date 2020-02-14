@@ -28,7 +28,7 @@ class Nexus3Search(repository: Repository) : AbstractRepositorySearch(repository
     override fun searchParameters(component: Component): List<Pair<String, String>> {
         return listOf(
             "group" to component.packageName,
-            "name" to "*",
+            "name" to if (component.globalModule() != null) component.globalModule()!!.name!!.substringBefore("-global") + "*" else "*",
             "version" to component.version,
             "repository" to repository.repositoryName
         )
@@ -52,6 +52,12 @@ class Nexus3Search(repository: Repository) : AbstractRepositorySearch(repository
             .map { dataObj ->
                 val groupId = dataObj.get("group").asString
                 val artifactId = dataObj.get("name").asString
+                if (component.globalModule() != null) {
+                    val prefix = component.globalModule()!!.name!!.substringBefore("-global")
+                    if (!artifactId.startsWith(prefix)) {
+                        return@map null
+                    }
+                }
                 val version = dataObj.get("version").asString
                 val classifiers = dataObj.getAsJsonArray("assets")
                     .map { it as JsonObject }
@@ -66,6 +72,8 @@ class Nexus3Search(repository: Repository) : AbstractRepositorySearch(repository
                     .toMutableList()
                 return@map Component(groupId, artifactId, version, classifiers = classifiers)
             }
+            .filter { it != null }
+            .map { it as Component }
             .forEach {
                 components.add(it)
             }

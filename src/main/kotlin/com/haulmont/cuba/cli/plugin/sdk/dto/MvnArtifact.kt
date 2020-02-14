@@ -24,7 +24,6 @@ data class MvnArtifact(
     val groupId: String,
     val artifactId: String,
     val version: String,
-    val path: String = "",
     val classifiers: MutableList<Classifier> = mutableListOf()
 ) {
     fun mvnCoordinates(classifier: Classifier? = null): String {

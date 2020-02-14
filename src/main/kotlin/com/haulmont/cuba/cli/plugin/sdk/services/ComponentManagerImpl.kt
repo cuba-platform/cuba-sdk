@@ -144,12 +144,9 @@ class ComponentManagerImpl : ComponentManager {
         return component
     }
 
-    private fun MutableSet<Component>.globalModule() =
-        filter { it.name != null && it.name.endsWith("-global") }.firstOrNull()
-
     private fun readFrameworkVersion(component: Component) {
         if (listOf(ComponentType.FRAMEWORK, ComponentType.ADDON).contains(component.type)) {
-            component.components.globalModule()?.let {
+            component.globalModule()?.let {
                 val model = artifactManager.readPom(
                     MvnArtifact(
                         it.packageName,
@@ -170,7 +167,7 @@ class ComponentManagerImpl : ComponentManager {
     override fun searchForAdditionalComponents(component: Component): Set<Component> {
         val additionalComponentList = mutableSetOf<Component>()
         if (listOf(ComponentType.FRAMEWORK, ComponentType.ADDON).contains(component.type)) {
-            component.components.globalModule()?.let {
+            component.globalModule()?.let {
                 val model = artifactManager.readPom(
                     MvnArtifact(
                         it.packageName,
