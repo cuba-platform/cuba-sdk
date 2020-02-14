@@ -219,21 +219,23 @@ publishing {
         }
     }
     repositories {
-        if (project.hasProperty("targetRepository")) {
-            def targetRepository = new JsonSlurper().parseText(project.properties["targetRepository"])
-            if (targetRepository.type == "LOCAL") {
-                maven {
-                    url file(targetRepository.url)
-                }
-            } else {
-                maven {
-                    if (it.authentication != null) {
-                        credentials {
-                            username targetRepository.authentication.login
-                            password targetRepository.authentication.password
-                        }
+        if (project.hasProperty("targetRepositories")) {
+            def sdkRepos = new JsonSlurper().parseText(project.properties["targetRepositories"])
+            sdkRepos.each { repo ->
+                if (repo.type == "LOCAL") {
+                    maven {
+                        url file(repo.url)
                     }
-                    url targetRepository.url
+                } else {
+                    maven {
+                        if (repo.authentication != null) {
+                            credentials {
+                                username repo.authentication.login
+                                password repo.authentication.password
+                            }
+                        }
+                        url repo.url
+                    }
                 }
             }
         }

@@ -28,7 +28,7 @@ interface ArtifactManager {
 
     fun readPom(artifact: MvnArtifact, classifier: Classifier = Classifier.pom()): Model?
 
-    fun upload(repository: Repository, artifact: MvnArtifact)
+    fun upload(repositories: List<Repository>, artifact: MvnArtifact)
 
     fun getArtifact(artifact: MvnArtifact, classifier: Classifier)
 

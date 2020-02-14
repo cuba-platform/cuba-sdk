@@ -82,7 +82,7 @@ open class AddRepositoryCommand : AbstractSdkCommand() {
             askIf { !isLocal(it) }
         }
         question("path", messages["repository.path"]) {
-            default(Paths.get(System.getProperty("user.home")).resolve(".m2").toString())
+            default(Paths.get(System.getProperty("user.home")).resolve(".m2").resolve("repository").toString())
             askIf { isLocal(it) }
         }
         confirmation("auth", messages["repository.authRequired"]) {

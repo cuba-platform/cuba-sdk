@@ -271,9 +271,7 @@ class ComponentManagerImpl : ComponentManager {
         val uploaded = AtomicInteger(0)
 
         artifactsStream(artifacts).forEach { artifact ->
-            repositories.forEach {
-                artifactManager.upload(it, artifact)
-            }
+            artifactManager.upload(repositories, artifact)
             progress?.let { it(artifact, uploaded.incrementAndGet(), total) }
         }
 

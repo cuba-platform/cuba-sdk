@@ -111,7 +111,7 @@ class GradleArtifactManagerImpl : ArtifactManager {
         return null
     }
 
-    override fun upload(repository: Repository, artifact: MvnArtifact) {
+    override fun upload(repositories: List<Repository>, artifact: MvnArtifact) {
         val descriptors = artifact.classifiers.distinct()
             .filter { it != Classifier.pom() }
             .map { UploadDescriptor(artifact, it, getOrDownloadArtifactFile(artifact, it).toString()) }
@@ -124,7 +124,7 @@ class GradleArtifactManagerImpl : ArtifactManager {
                     "toUpload" to Gson().toJson(artifact),
                     "descriptors" to Gson().toJson(descriptors),
                     "pomFile" to pomDescriptor,
-                    "targetRepository" to Gson().toJson(repository)
+                    "targetRepositories" to Gson().toJson(repositories)
                 )
             )
         } catch (e: Exception) {

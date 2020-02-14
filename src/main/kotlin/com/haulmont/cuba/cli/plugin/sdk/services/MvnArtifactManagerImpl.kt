@@ -91,8 +91,10 @@ class MvnArtifactManagerImpl : ArtifactManager {
         return artifact.localPath(Path.of(sdkSettings["maven.local.repo"]), classifier)
     }
 
-    override fun upload(repository: Repository, artifact: MvnArtifact) {
-        uploadToRepository(repository, artifact)
+    override fun upload(repositories: List<Repository>, artifact: MvnArtifact) {
+        repositories.forEach {
+            uploadToRepository(it, artifact)
+        }
     }
 
     private fun uploadToRepository(repository: Repository, artifact: MvnArtifact) {
@@ -290,7 +292,7 @@ class MvnArtifactManagerImpl : ArtifactManager {
         return file
     }
 
-    override fun getOrDownloadArtifactWithClassifiers(artifact: MvnArtifact, classifiers:Collection<Classifier>) {
+    override fun getOrDownloadArtifactWithClassifiers(artifact: MvnArtifact, classifiers: Collection<Classifier>) {
         for (classifier in classifiers) {
             performance("Read classifier $classifier") {
                 getOrDownloadArtifactFile(artifact, classifier)

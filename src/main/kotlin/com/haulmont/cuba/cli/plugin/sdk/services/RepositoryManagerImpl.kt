@@ -115,7 +115,10 @@ class RepositoryManagerImpl : RepositoryManager {
         if (getRepository(repository.name, target) != null) {
             throw IllegalStateException("Repository with name ${repository.name} already exist")
         }
-        (sdkRepositories.get(target)
+        if (RepositoryType.LOCAL == repository.type && !Files.exists(Path.of(repository.url))) {
+            Files.createDirectories(Path.of(repository.url))
+        }
+        (sdkRepositories[target]
             ?: throw IllegalStateException("Unknown repository target $target")).add(repository)
         flush()
     }
