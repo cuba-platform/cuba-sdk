@@ -16,14 +16,12 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.services
 
-import com.github.kittinunf.fuel.Fuel
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
 import com.haulmont.cuba.cli.plugin.sdk.dto.MvnArtifact
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
 import com.haulmont.cuba.cli.plugin.sdk.utils.FileUtils
-import com.haulmont.cuba.cli.plugin.sdk.utils.authorizeIfRequired
 import com.haulmont.cuba.cli.plugin.sdk.utils.performance
 import org.apache.maven.model.Model
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
@@ -44,18 +42,6 @@ class MvnArtifactManagerImpl : ArtifactManager {
     internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
     private val repositoryManager: RepositoryManager by sdkKodein.instance()
     internal val mavenExecutor: MavenExecutor by sdkKodein.instance()
-
-    private fun repoUrl(repository: Repository, endpoint: String) = repository.url + endpoint
-
-    private fun componentUrl(
-        artifact: MvnArtifact,
-        classifier: Classifier
-    ): String {
-        val groupUrl = artifact.groupId.replace(".", "/")
-        val name = artifact.artifactId
-        val version = artifact.version
-        return "$groupUrl/$name/$version/$name-$version.${classifier.extension}"
-    }
 
     override fun init() {
 
@@ -100,11 +86,6 @@ class MvnArtifactManagerImpl : ArtifactManager {
     private fun uploadToRepository(repository: Repository, artifact: MvnArtifact) {
         val mainClassifier = artifact.mainClassifier()
         log.info("Uploading: ${artifact.mvnCoordinates(mainClassifier)}")
-
-        if (alreadyUploaded(repository, artifact)) {
-            log.info("${artifact.mvnCoordinates(mainClassifier)} already uploaded")
-            return
-        }
 
         val files = ArrayList<String>()
         val classifiers = ArrayList<String>()
@@ -176,27 +157,6 @@ class MvnArtifactManagerImpl : ArtifactManager {
         } else {
             throw IllegalStateException("File ${artifactFile} not found")
         }
-    }
-
-    private fun alreadyUploaded(repository: Repository, artifact: MvnArtifact): Boolean {
-        for (classifier in artifact.classifiers) {
-            if (!alreadyUploaded(repository, artifact, classifier)) {
-                return false
-            }
-        }
-        return true
-    }
-
-    private fun alreadyUploaded(
-        repository: Repository,
-        artifact: MvnArtifact,
-        classifier: Classifier
-    ): Boolean {
-        val (_, response, _) =
-            Fuel.head(repoUrl(repository, componentUrl(artifact, classifier)))
-                .authorizeIfRequired(repository)
-                .response()
-        return response.statusCode == 200
     }
 
     override fun resolve(artifact: MvnArtifact, classifier: Classifier): List<MvnArtifact> {

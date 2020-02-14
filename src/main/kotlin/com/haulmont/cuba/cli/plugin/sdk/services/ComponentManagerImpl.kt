@@ -24,6 +24,7 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.*
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusManager
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusScriptManager
 import com.haulmont.cuba.cli.plugin.sdk.search.*
+import com.haulmont.cuba.cli.plugin.sdk.utils.authorizeIfRequired
 import com.haulmont.cuba.cli.plugin.sdk.utils.performance
 import org.json.JSONObject
 import org.kodein.di.generic.instance
@@ -48,6 +49,18 @@ class ComponentManagerImpl : ComponentManager {
 
     private fun localProgress(component: Component) =
         1f / (3 + getClassifiersToResolve(component).size)
+
+    private fun repoUrl(repository: Repository, endpoint: String) = repository.url + endpoint
+
+    private fun componentUrl(
+        artifact: MvnArtifact,
+        classifier: Classifier
+    ): String {
+        val groupUrl = artifact.groupId.replace(".", "/")
+        val name = artifact.artifactId
+        val version = artifact.version
+        return "$groupUrl/$name/$version/$name-$version.${classifier.extension}"
+    }
 
     override fun search(component: Component): Component? {
         val template = componentTemplates.findTemplate(component)
@@ -261,6 +274,28 @@ class ComponentManagerImpl : ComponentManager {
         }
     }
 
+    private fun alreadyUploaded(repository: Repository, artifact: MvnArtifact): Boolean {
+        for (classifier in artifact.classifiers) {
+            if (!alreadyUploaded(repository, artifact, classifier)) {
+                return false
+            }
+        }
+        return true
+    }
+
+    private fun alreadyUploaded(
+        repository: Repository,
+        artifact: MvnArtifact,
+        classifier: Classifier
+    ): Boolean {
+        val (_, response, _) =
+            Fuel.head(repoUrl(repository, componentUrl(artifact, classifier)))
+                .authorizeIfRequired(repository)
+                .response()
+        return response.statusCode == 200
+    }
+
+
     override fun upload(component: Component, repositories: List<Repository>, progress: UploadProcessCallback?) {
         val artifacts = component.collectAllDependencies()
 
@@ -268,7 +303,12 @@ class ComponentManagerImpl : ComponentManager {
         val uploaded = AtomicInteger(0)
 
         artifactsStream(artifacts).forEach { artifact ->
-            artifactManager.upload(repositories, artifact)
+            val repositoriesToUpload = repositories.filter {
+                !alreadyUploaded(it, artifact)
+            }
+            if (repositoriesToUpload.isNotEmpty()) {
+                artifactManager.upload(repositories, artifact)
+            }
             progress?.let { it(artifact, uploaded.incrementAndGet(), total) }
         }
 
