@@ -80,12 +80,12 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
         private set
 
     @Parameter(
-        names = ["--mo", "--maven-option"],
+        names = ["--go", "--gradle-option"],
         description = "Maven option",
         hidden = true,
         variableArity = true
     )
-    internal var mavenOpts: List<String>? = null
+    internal var gradleOpts: List<String>? = null
 
     override fun postExecute() {
         super.postExecute()
@@ -96,7 +96,7 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
         super.preExecute()
         CommonSdkParameters.info = info
         CommonSdkParameters.singleThread = info || single
-        CommonSdkParameters.mavenOptions = mavenOpts
+        CommonSdkParameters.gradleOptions = gradleOpts
     }
 
     abstract fun createSearchContext(): Component?

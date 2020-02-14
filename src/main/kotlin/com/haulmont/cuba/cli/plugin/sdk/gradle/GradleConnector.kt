@@ -75,10 +75,17 @@ class GradleConnector() {
                 .forTasks(name)
                 .setStandardOutput(outputStream)
 
+            CommonSdkParameters.gradleOptions?.let { list ->
+                list.forEach {
+                    buildLauncher.addArguments(it)
+                }
+            }
+
             if (progressFun != null) {
                 buildLauncher.addProgressListener(progressFun)
             }
             if (CommonSdkParameters.info) {
+                buildLauncher.addArguments("--info")
                 buildLauncher.addProgressListener { event: ProgressEvent? ->
                     printWriter.println(event?.description)
                 }

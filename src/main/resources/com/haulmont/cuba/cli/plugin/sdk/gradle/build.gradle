@@ -32,11 +32,29 @@ buildscript {
 }
 
 repositories {
-    jcenter()
-    mavenLocal()
+    if (project.hasProperty("sdkRepositories")) {
+        def sdkRepos = new JsonSlurper().parseText(project.properties["sdkRepositories"])
+        sdkRepos.each { repo ->
+            if (repo.type == "LOCAL") {
+                maven {
+                    url file(repo.url)
+                }
+            } else {
+                maven {
+                    if (repo.authentication != null) {
+                        credentials {
+                            username repo.authentication.login
+                            password repo.authentication.password
+                        }
+                    }
+                    url repo.url
+                }
+            }
+        }
 
-    maven {
-        url "https://dl.bintray.com/cuba-platform/main"
+    } else {
+        mavenLocal()
+        mavenCentral()
     }
 }
 

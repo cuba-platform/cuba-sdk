@@ -136,7 +136,7 @@ Import command will import exported SDK archive to current SDK and upload it to 
 - `--f` or `--force` - resolve and upload component with dependencies even if component already resolved or installed
 - `--single` - run command in single thread mode
 - `--info` - print Gradle output. Please note that in this case command will be executed in single thread mode
-- `--mo` or `--maven-option` - additional maven execution options
+- `--go` or `--gradle-option` - additional Gradle execution options
 
 # 5. SDK settings <a name="common-settings"></a>
 

@@ -19,12 +19,12 @@ package com.haulmont.cuba.cli.plugin.sdk.commands
 object CommonSdkParameters {
     var info: Boolean = false
     var singleThread: Boolean = false
-    var mavenOptions: List<String>? = null
+    var gradleOptions: List<String>? = null
     var measurePerformance: Boolean = false
 
     fun reset() {
         info = false
         singleThread = false
-        mavenOptions = null
+        gradleOptions = null
     }
 }
