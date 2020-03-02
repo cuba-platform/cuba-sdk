@@ -30,7 +30,6 @@ import com.haulmont.cuba.cli.plugin.sdk.services.ComponentManager
 import com.haulmont.cuba.cli.plugin.sdk.services.ComponentVersionManager
 import com.haulmont.cuba.cli.plugin.sdk.services.MetadataHolder
 import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
-import com.haulmont.cuba.cli.plugin.sdk.utils.doubleUnderline
 import com.haulmont.cuba.cli.prompting.Option
 import com.haulmont.cuba.cli.prompting.Prompts
 import com.haulmont.cuba.cli.prompting.ValidationException
@@ -142,10 +141,11 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
             printWriter.println(messages["search.searchAdditionalComponents"])
             componentManager.searchForAdditionalComponents(component).let {
                 if (it.isNotEmpty()) {
-                    printWriter.println(messages["search.foundAdditionalComponents"].doubleUnderline())
+                    printWriter.println(messages["search.foundAdditionalComponents"])
                     it.sortedBy { it.toString() }.forEach { component ->
-                        printWriter.println(component)
+                        printWriter.println("   $component")
                     }
+                    printWriter.println()
                     if (needToFindDependentAddons == null) {
                         val answer = Prompts.create {
                             confirmation("resolve", messages["base.resolveAddonsCaption"])

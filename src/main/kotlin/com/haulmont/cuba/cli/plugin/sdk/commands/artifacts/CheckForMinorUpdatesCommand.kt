@@ -132,7 +132,7 @@ class CheckForMinorUpdatesCommand : BaseComponentCommand() {
             thread.isAlive
         }
 
-        val addons = metadataHolder.getMetadata().components
+        val addons = metadataHolder.getResolved()
             .filter { ComponentType.ADDON == it.type }
         val availableUpdates = mutableListOf<Component>()
         addons.forEach { addon ->
@@ -171,7 +171,7 @@ class CheckForMinorUpdatesCommand : BaseComponentCommand() {
             thread.isAlive
         }
 
-        val frameworks = metadataHolder.getMetadata().components
+        val frameworks = metadataHolder.getResolved()
             .filter { ComponentType.FRAMEWORK == it.type }
         val availableUpdates = mutableListOf<Component>()
         frameworks.forEach { framework ->

@@ -25,8 +25,12 @@ class DbInstance(val db: DB) {
     internal val lock = ReentrantLock()
 
     operator fun set(key: String, value: String) {
+        set("map", key, value)
+    }
+
+    fun set(storage: String, key: String, value: String) {
         db.hashMap(
-            "map", Serializer.STRING, Serializer.STRING
+            storage, Serializer.STRING, Serializer.STRING
         ).createOrOpen().set(key, value)
     }
 
@@ -40,11 +44,30 @@ class DbInstance(val db: DB) {
         }
     }
 
-    operator fun get(key: String): String? {
+    fun remove(key: String) {
+        remove(key)
+    }
+
+    fun remove(storage: String, key: String) {
         val map = db.hashMap(
-            "map", Serializer.STRING, Serializer.STRING
+            storage, Serializer.STRING, Serializer.STRING
+        ).createOrOpen()
+            .remove(key)
+    }
+
+    operator fun get(key: String): String? {
+        return get("map", key)
+    }
+
+    fun get(storage: String, key: String): String? {
+        val map = db.hashMap(
+            storage, Serializer.STRING, Serializer.STRING
         ).createOrOpen()
         return map[key]
     }
+
+    fun map(storage: String = "map"): Map<String, String?> = db.hashMap(
+        storage, Serializer.STRING, Serializer.STRING
+    ).createOrOpen()
 
 }

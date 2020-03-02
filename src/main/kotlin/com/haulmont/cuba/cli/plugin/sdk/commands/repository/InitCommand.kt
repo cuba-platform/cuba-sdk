@@ -43,8 +43,7 @@ class InitCommand : AbstractSdkCommand() {
     private fun createSdkRepoSettingsFile() {
         sdkSettings["sdk.home"] = sdkSettings.sdkHome().toString()
         sdkSettings["sdk.export.path"] = sdkSettings.sdkHome().resolve("export").toString()
-        sdkSettings["sdk.metadata"] = sdkSettings.sdkHome().resolve("sdk.metadata").toString()
-        sdkSettings["sdk.repositories"] = sdkSettings.sdkHome().resolve("sdk.repositories").toString()
+        sdkSettings["sdk.files"] = sdkSettings.sdkHome().resolve("files").toString()
         sdkSettings["gradle.home"] = sdkSettings.sdkHome().resolve("gradle").toString()
         sdkSettings["gradle.cache"] = sdkSettings.sdkHome().resolve(Path.of("gradle", "cache")).toString()
         sdkSettings.flushAppProperties()

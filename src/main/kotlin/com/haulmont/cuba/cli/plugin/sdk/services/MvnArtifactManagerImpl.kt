@@ -17,10 +17,7 @@
 package com.haulmont.cuba.cli.plugin.sdk.services
 
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
-import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
-import com.haulmont.cuba.cli.plugin.sdk.dto.MvnArtifact
-import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
-import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
+import com.haulmont.cuba.cli.plugin.sdk.dto.*
 import com.haulmont.cuba.cli.plugin.sdk.utils.FileUtils
 import com.haulmont.cuba.cli.plugin.sdk.utils.performance
 import org.apache.maven.model.Model
@@ -45,6 +42,35 @@ class MvnArtifactManagerImpl : ArtifactManager {
 
     override fun init() {
 
+    }
+
+    override fun uploadComponentToLocalCache(component: Component): List<MvnArtifact> {
+        val dependencies = mutableListOf<MvnArtifact>()
+        for (classifier in component.classifiers) {
+            val componentPath = Path.of(sdkSettings["maven.local.repo"])
+                .resolve(component.packageName)
+                .resolve(component.name)
+                .resolve(component.version)
+                .resolve("${component.name}-${component.version}.${classifier.extension}")
+            Files.createDirectories(componentPath.parent)
+            if (component.url != null) {
+                val (_, response, _) = FileUtils.downloadFile(
+                    component.url,
+                    componentPath
+                )
+                if (response.statusCode == 200) {
+                    dependencies.add(
+                        MvnArtifact(
+                            component.packageName,
+                            component.name!!,
+                            component.version,
+                            classifiers = component.classifiers
+                        )
+                    )
+                }
+            }
+        }
+        return dependencies
     }
 
     override fun readPom(artifact: MvnArtifact, classifier: Classifier): Model? {

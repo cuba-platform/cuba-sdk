@@ -16,11 +16,20 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.services
 
-import com.haulmont.cuba.cli.plugin.sdk.dto.SdkMetadata
+import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 
 interface MetadataHolder {
 
-    fun getMetadata(): SdkMetadata
+    fun getResolved(): Set<Component>
 
-    fun flushMetadata()
+    fun getInstalled(): Set<Component>
+
+    fun addResolved(component:Component)
+
+    fun addInstalled(component: Component)
+
+    fun removeResolved(component:Component)
+
+    fun removeInstalled(component: Component)
+
 }

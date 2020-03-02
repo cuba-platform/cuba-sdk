@@ -25,7 +25,6 @@ import com.haulmont.cuba.cli.plugin.sdk.commands.PrintPropertiesCommand
 import com.haulmont.cuba.cli.plugin.sdk.commands.SdkCommand
 import com.haulmont.cuba.cli.plugin.sdk.commands.artifacts.*
 import com.haulmont.cuba.cli.plugin.sdk.commands.repository.*
-import com.haulmont.cuba.cli.plugin.sdk.gradle.GradleConnector
 import com.haulmont.cuba.cli.plugin.sdk.services.ComponentVersionManager
 import org.kodein.di.generic.instance
 
@@ -107,12 +106,19 @@ class SdkPlugin : CliPlugin {
                 }
             }
         }
+
+        Runtime.getRuntime().addShutdownHook(object : Thread() {
+            override fun run() {
+                StopCommand().apply { checkState = false }.execute()
+            }
+        })
     }
 
     @Subscribe
     fun onDestroy(event: DestroyPluginEvent) {
         StopCommand().apply { checkState = false }.execute()
-        GradleConnector().runTask("--stop")
     }
+
+
 
 }

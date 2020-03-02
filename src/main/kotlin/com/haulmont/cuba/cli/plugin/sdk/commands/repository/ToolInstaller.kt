@@ -16,12 +16,18 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.commands.repository
 
+import com.github.kittinunf.fuel.Fuel
+import com.github.kittinunf.fuel.core.FuelError
+import com.github.kittinunf.fuel.core.Request
+import com.github.kittinunf.fuel.core.Response
+import com.github.kittinunf.result.Result
 import com.haulmont.cuba.cli.Messages
+import com.haulmont.cuba.cli.PrintHelper
+import com.haulmont.cuba.cli.commands.CommonParameters
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
 import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand.Companion.calculateProgress
 import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand.Companion.printProgress
-import com.haulmont.cuba.cli.plugin.sdk.services.FileDownloadService
 import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
 import com.haulmont.cuba.cli.plugin.sdk.utils.FileUtils
 import org.kodein.di.generic.instance
@@ -35,20 +41,26 @@ open class ToolInstaller(
     val installPath: Path,
     val skipFirstZipEntry: Boolean = false
 ) {
-    internal val fileDownloadService: FileDownloadService by sdkKodein.instance()
     internal val printWriter: PrintWriter by sdkKodein.instance()
     internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
     internal val rootMessages = Messages(AbstractSdkCommand::class.java)
 
-    fun downloadAndConfigure(configure: (Path) -> Unit) {
-        download().also {
-            if (pathIsEmpty()) {
-                Files.createDirectory(installPath)
+    fun downloadAndConfigure(configure: (Path) -> Unit, onFail: (Exception) -> Unit) {
+        try {
+            download().also {
+                if (pathIsEmpty()) {
+                    Files.createDirectory(installPath)
+                }
                 unzip(it)
+            }.also {
+                configure(it)
+                Files.delete(it)
             }
-        }.also {
-            configure(it)
-            Files.delete(it)
+        } catch (e: Exception) {
+            onFail(e)
+            if (CommonParameters.stacktrace) {
+                PrintHelper().handleCommandException(e)
+            }
         }
     }
 
@@ -78,18 +90,46 @@ open class ToolInstaller(
     private fun download(): Path {
         val archive = sdkSettings.sdkHome().resolve("${name.toLowerCase()}.zip")
         if (!Files.exists(archive)) {
-            val file = Files.createFile(archive)
-            fileDownloadService.downloadFile(
-                downloadLink,
-                file
-            ) { bytesRead: Long, contentLength: Long, isDone: Boolean ->
+            printProgress(
+                rootMessages["setup.download"].format(name),
+                calculateProgress(0, 1)
+            )
+
+            var (_, _, result) = FileUtils.downloadFile(downloadLink, archive) { readBytes, totalBytes ->
                 printProgress(
                     rootMessages["setup.download"].format(name),
-                    calculateProgress(bytesRead, contentLength)
+                    calculateProgress(readBytes, totalBytes)
                 )
             }
+
+            result.fold(
+                success = {
+                    if (it.isEmpty()) {
+                        printWriter.println()
+                        throw IllegalStateException("Unable to download file from %s".format(downloadLink))
+                    }
+                    return archive
+                },
+                failure = {
+                    printWriter.println()
+                    throw IllegalStateException(it.message)
+                })
         }
         return archive
+    }
+
+    private fun downloadArchive(
+        downloadPath: String,
+        archive: Path
+    ): Triple<Request, Response, Result<ByteArray, FuelError>> {
+        return Fuel.download(downloadPath).destination { response, Url ->
+            archive.toFile()
+        }.progress { readBytes, totalBytes ->
+            printProgress(
+                rootMessages["setup.download"].format(name),
+                calculateProgress(readBytes, totalBytes)
+            )
+        }.response()
     }
 
 }

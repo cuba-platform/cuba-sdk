@@ -20,5 +20,7 @@ import com.haulmont.cuba.cli.plugin.sdk.db.DbInstance
 
 interface DbProvider {
 
-    operator fun get(storage:String): DbInstance
+    operator fun get(storage: String): DbInstance
+
+    fun dbExists(storage: String): Boolean
 }

@@ -22,7 +22,7 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.ComponentType
 import com.haulmont.cuba.cli.prompting.Option
 
 fun BaseComponentCommand.askResolvedAddonNameVersion(nameVersion: NameVersion?): NameVersion {
-    val addons = metadataHolder.getMetadata().components
+    val addons = metadataHolder.getResolved()
         .filter { ComponentType.ADDON == it.type }
     return askNameVersion(
         nameVersion,

@@ -25,7 +25,7 @@ import java.time.format.DateTimeFormatter
 class ExportCommand : AbstractExportCommand() {
 
     override fun componentsToExport(): Collection<Component> {
-        return metadataHolder.getMetadata().components
+        return metadataHolder.getResolved()
     }
 
     override fun exportName() = "sdk-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH:mm"))

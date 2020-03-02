@@ -29,12 +29,12 @@ abstract class AbstractListCommand : AbstractSdkCommand() {
 
     override fun run() {
         printWriter.println(messages["list.resolved.${getComponentType()}"].doubleUnderline())
-        for (component in metadataHolder.getMetadata().components.filter { it.type == getComponentType() }) {
+        for (component in metadataHolder.getResolved().filter { it.type == getComponentType() }) {
             printWriter.println("$component")
         }
         printWriter.println()
         printWriter.println(messages["list.installed.${getComponentType()}"].doubleUnderline())
-        for (component in metadataHolder.getMetadata().installedComponents.filter { it.type == getComponentType() }) {
+        for (component in metadataHolder.getInstalled().filter { it.type == getComponentType() }) {
             printWriter.println("$component")
         }
         printWriter.println()

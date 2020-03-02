@@ -24,6 +24,7 @@ import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
 import com.haulmont.cuba.cli.plugin.sdk.commands.repository.StartCommand
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusManager
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusScriptManager
+import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
 import com.haulmont.cuba.cli.plugin.sdk.utils.FileUtils
 import com.haulmont.cuba.cli.prompting.Answers
 import com.haulmont.cuba.cli.prompting.Prompts
@@ -37,6 +38,7 @@ import java.nio.file.Path
 class CleanCommand : AbstractSdkCommand() {
 
     internal val nexusManager: NexusManager by sdkKodein.instance()
+    internal val repositoryManager: RepositoryManager by sdkKodein.instance()
     internal val nexusScriptManager: NexusScriptManager by sdkKodein.instance()
 
     @Parameter(names = ["--local-only"], description = "Do not remove from local repository", hidden = true)
@@ -54,7 +56,7 @@ class CleanCommand : AbstractSdkCommand() {
             StartCommand().execute()
         }
         if (answers["confirmed"] as Boolean) {
-            Path.of(sdkSettings["maven.local.repo"]).also {
+            Path.of(sdkSettings["gradle.cache"]).also {
                 FileUtils.deleteDirectory(it)
                 Files.createDirectories(it)
             }
@@ -62,7 +64,7 @@ class CleanCommand : AbstractSdkCommand() {
             if (nexusManager.isLocal() && nexusManager.isStarted() && !localOnly) {
                 nexusScriptManager.run(
                     sdkSettings["repository.login"],
-                    sdkSettings["repository.password"],
+                    repositoryManager.getLocalRepositoryPassword() ?: "",
                     "sdk.cleanup",
                     JSONObject().put("repoName", sdkSettings["repository.name"])
                 )

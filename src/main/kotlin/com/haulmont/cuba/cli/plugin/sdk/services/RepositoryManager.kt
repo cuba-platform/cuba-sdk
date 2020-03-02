@@ -18,7 +18,6 @@ package com.haulmont.cuba.cli.plugin.sdk.services
 
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
-import java.nio.file.Path
 
 interface RepositoryManager {
 
@@ -34,7 +33,5 @@ interface RepositoryManager {
 
     fun isOnline(repository: Repository): Boolean
 
-    fun buildMavenSettingsFile()
-
-    fun mvnSettingFile(): Path
+    fun getLocalRepositoryPassword(): String?
 }

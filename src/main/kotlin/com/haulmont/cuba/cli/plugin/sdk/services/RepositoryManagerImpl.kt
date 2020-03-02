@@ -18,7 +18,6 @@ package com.haulmont.cuba.cli.plugin.sdk.services
 
 import com.github.kittinunf.fuel.Fuel
 import com.google.gson.Gson
-import com.google.gson.internal.LinkedTreeMap
 import com.google.gson.reflect.TypeToken
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.dto.Authentication
@@ -28,39 +27,45 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryType
 import com.haulmont.cuba.cli.plugin.sdk.utils.authorizeIfRequired
 import com.haulmont.cuba.cli.prompting.ValidationException
 import org.kodein.di.generic.instance
-//import org.redundent.kotlin.xml.Node
-//import org.redundent.kotlin.xml.xml
-import java.io.FileInputStream
-import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
-import java.nio.file.StandardOpenOption
 
 class RepositoryManagerImpl : RepositoryManager {
 
     internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
+    internal val dbProvider: DbProvider by sdkKodein.instance()
 
     inline fun <reified T> fromJson(json: String): T {
         return Gson().fromJson(json, object : TypeToken<T>() {}.type)
     }
-
-    private fun sdkRepositoriesPath() = Path.of(sdkSettings["sdk.repositories"])
-    private fun mvnSettingsPath() = Path.of(sdkSettings["maven.settings"])
 
     override fun getRepositoryId(target: RepositoryTarget, name: String): String {
         return target.getId() + "." + name.replace("\\s{2,}", " ").toLowerCase()
     }
 
     private val sdkRepositories by lazy {
-        if (Files.exists(sdkRepositoriesPath())) {
-            FileInputStream(sdkRepositoriesPath().toString())
-                .bufferedReader(StandardCharsets.UTF_8)
-                .use {
-                    return@lazy fromJson(it.readText()) as LinkedTreeMap<RepositoryTarget, MutableList<Repository>>
+        if (dbProvider.dbExists("repository")) {
+            val repos = HashMap<RepositoryTarget, MutableList<Repository>>()
+            for (target in RepositoryTarget.values()) {
+                dbInstance().map(target.toString()).forEach {
+                    repos.putIfAbsent(target, mutableListOf())
+                    val json = it.value
+                    if (json != null) {
+                        val repository = fromJson(json) as Repository
+                        repos.get(target)?.add(repository)
+                    }
                 }
+            }
+            return@lazy repos
         } else {
-            return@lazy defaultRepositories()
+            val repos = defaultRepositories()
+            for (target in RepositoryTarget.values()) {
+                repos[target]?.forEach {
+                    dbInstance().set(target.toString(), it.name, Gson().toJson(it))
+                }
+            }
+            return@lazy repos
         }
     }
 
@@ -118,9 +123,9 @@ class RepositoryManagerImpl : RepositoryManager {
         if (RepositoryType.LOCAL == repository.type && !Files.exists(Path.of(repository.url))) {
             Files.createDirectories(Path.of(repository.url))
         }
+        dbInstance().set(target.toString(), repository.name, Gson().toJson(repository))
         (sdkRepositories[target]
             ?: throw IllegalStateException("Unknown repository target $target")).add(repository)
-        flush()
     }
 
     override fun removeRepository(name: String, target: RepositoryTarget, force: Boolean) {
@@ -128,12 +133,10 @@ class RepositoryManagerImpl : RepositoryManager {
             throw ValidationException("Unable to delete configured local SDK repository")
         }
         getInternalRepositories(target).remove(getRepository(name, target))
-        flush()
+        dbInstance().remove(target.toString(), name)
     }
 
-    private fun flush() {
-        flushMetadata()
-    }
+    private fun dbInstance() = dbProvider.get("repository")
 
     override fun getRepositories(target: RepositoryTarget): MutableList<Repository> {
         return getInternalRepositories(target)
@@ -159,82 +162,12 @@ class RepositoryManagerImpl : RepositoryManager {
     private fun getInternalRepositories(target: RepositoryTarget) =
         (sdkRepositories.get(target) ?: throw IllegalStateException("Unknown repository target $target"))
 
-    fun flushMetadata() {
-        writeToFile(sdkRepositoriesPath(), Gson().toJson(sdkRepositories))
-    }
 
-    fun writeToFile(file: Path, text: String) {
-        if (!Files.exists(file)) {
-            Files.createFile(file)
+    override fun getLocalRepositoryPassword(): String? {
+        val repo = getRepository(sdkSettings["repository.name"], RepositoryTarget.TARGET)
+        if (repo?.authentication != null) {
+            return repo.authentication.password
         }
-        Files.writeString(
-            file,
-            text,
-            StandardOpenOption.WRITE,
-            StandardOpenOption.TRUNCATE_EXISTING
-        )
+        return null
     }
-
-    override fun buildMavenSettingsFile() {
-//        val settings = xml("settings") {
-//            "localRepository" {
-//                -sdkSettings["maven.local.repo"]
-//            }
-//            "profiles" {
-//                "profile" {
-//                    "id" { -RepositoryTarget.SOURCE.getId() }
-//                    "activation" {
-//                        "activeByDefault" { -"true" }
-//                    }
-//                    this.addNode(addRepositories("repositories", "repository", RepositoryTarget.SOURCE))
-//                    this.addNode(addRepositories("pluginRepositories", "pluginRepository", RepositoryTarget.SOURCE))
-//                }
-//                "profile" {
-//                    "id" { -RepositoryTarget.TARGET.getId() }
-//                    "activation" {
-//                        "activeByDefault" { -"false" }
-//                    }
-//                    "properties" {
-//                        "downloadSources" { -"true" }
-//                        "downloadJavadocs" { -"true" }
-//                    }
-//                    this.addNode(addRepositories("repositories", "repository", RepositoryTarget.TARGET))
-//                }
-//            }
-//            "servers" {
-//                listOf(RepositoryTarget.SOURCE, RepositoryTarget.TARGET).forEach { target ->
-//                    getRepositories(target)
-//                        .filter { it.authentication != null }
-//                        .forEach {
-//                            "server" {
-//                                "id" { -getRepositoryId(target, it.name) }
-//                                "username" { -it.authentication!!.login }
-//                                "password" { -it.authentication!!.password }
-//                            }
-//                        }
-//                }
-//            }
-//        }
-
-//        writeToFile(mvnSettingsPath(), settings.toString(true))
-    }
-
-    override fun mvnSettingFile(): Path {
-        return mvnSettingsPath().also {
-            if (!Files.exists(it)) {
-                buildMavenSettingsFile()
-            }
-        }
-    }
-
-//    private fun addRepositories(rootEl: String, elementName: String, target: RepositoryTarget): Node =
-//        xml(rootEl) {
-//            getRepositories(target).forEach {
-//                elementName {
-//                    "id" { -getRepositoryId(target, it.name) }
-//                    "name" { -it.name }
-//                    "url" { -it.url }
-//                }
-//            }
-//        }
 }

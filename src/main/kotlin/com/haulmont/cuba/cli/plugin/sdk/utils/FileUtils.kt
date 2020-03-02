@@ -16,6 +16,11 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.utils
 
+import com.github.kittinunf.fuel.Fuel
+import com.github.kittinunf.fuel.core.FuelError
+import com.github.kittinunf.fuel.core.Request
+import com.github.kittinunf.fuel.core.Response
+import com.github.kittinunf.result.Result
 import java.io.*
 import java.nio.file.Files
 import java.nio.file.Path
@@ -101,6 +106,32 @@ class FileUtils {
                     }
                 }
             }
+        }
+
+        fun downloadFile(
+            url: String,
+            path: Path,
+            progress: ((readBytes: Long, totalBytes: Long) -> Unit)? = null
+        ): Triple<Request, Response, Result<ByteArray, FuelError>> {
+            var triple = downloadInternal(url, path, progress)
+
+            val bytes = triple.third.component1()
+            if (bytes != null && bytes.isEmpty()) {
+                val triple = downloadInternal(triple.second.url.toString(), path, progress)
+            }
+            return triple
+        }
+
+        private fun downloadInternal(
+            downloadPath: String,
+            archive: Path,
+            progress: ((readBytes: Long, totalBytes: Long) -> Unit)? = null
+        ): Triple<Request, Response, Result<ByteArray, FuelError>> {
+            return Fuel.download(downloadPath).destination { response, Url ->
+                archive.toFile()
+            }.progress { readBytes, totalBytes ->
+                if (progress != null) progress(readBytes, totalBytes)
+            }.response()
         }
     }
 }

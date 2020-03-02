@@ -17,6 +17,7 @@
 package com.haulmont.cuba.cli.plugin.sdk.services
 
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
+import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.MvnArtifact
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 import org.apache.maven.model.Model
@@ -25,6 +26,8 @@ import java.nio.file.Path
 interface ArtifactManager {
 
     fun init()
+
+    fun uploadComponentToLocalCache(component: Component): List<MvnArtifact>
 
     fun readPom(artifact: MvnArtifact, classifier: Classifier = Classifier.pom()): Model?
 

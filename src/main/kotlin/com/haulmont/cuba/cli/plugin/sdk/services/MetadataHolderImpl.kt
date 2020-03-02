@@ -18,62 +18,73 @@ package com.haulmont.cuba.cli.plugin.sdk.services
 
 import com.google.gson.Gson
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
-import com.haulmont.cuba.cli.plugin.sdk.dto.SdkMetadata
+import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import org.kodein.di.generic.instance
-import java.io.FileInputStream
-import java.nio.charset.StandardCharsets
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.StandardOpenOption
 
 class MetadataHolderImpl : MetadataHolder {
 
     private val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
+    private val dbProvider: DbProvider by sdkKodein.instance()
 
-    private val sdkMetadata by lazy {
-        if (Files.exists(metadataPath())) {
-            FileInputStream(metadataPath().toString())
-                .bufferedReader(StandardCharsets.UTF_8)
-                .use {
-                    return@lazy Gson().fromJson(it.readText(), SdkMetadata::class.java)
+    private fun dbInstance() = dbProvider.get("metadata")
+
+    private val resolvedComponents by lazy {
+        if (dbProvider.dbExists("metadata")) {
+            val resolved = mutableSetOf<Component>()
+            dbInstance().map("resolved").forEach {
+                val json = it.value
+                if (json != null) {
+                    val component = Gson().fromJson(json, Component::class.java)
+                    resolved.add(component)
                 }
+            }
+            return@lazy resolved
         } else {
-            return@lazy initMetadata()
+            return@lazy mutableSetOf<Component>()
         }
     }
 
-    private fun initMetadata(): SdkMetadata {
-        return SdkMetadata().also {
-            //            it.repositories.add(
-//                Repository(
-//                    type = "bintray",
-//                    url = "https://api.bintray.com/search/packages/maven?",
-//                    repositoryName = "cuba-platform"
-//                )
-//            )
+    private val installedComponents by lazy {
+        if (dbProvider.dbExists("metadata")) {
+            val resolved = mutableSetOf<Component>()
+            dbInstance().map("installed").forEach {
+                val json = it.value
+                if (json != null) {
+                    val component = Gson().fromJson(json, Component::class.java)
+                    resolved.add(component)
+                }
+            }
+            return@lazy resolved
+        } else {
+            return@lazy mutableSetOf<Component>()
         }
     }
 
-    override fun getMetadata(): SdkMetadata {
-        return sdkMetadata
+    override fun getResolved(): Set<Component> {
+        return resolvedComponents
     }
 
-    override fun flushMetadata() {
-        createFileIfNotExists()
-        Files.writeString(
-            metadataPath(),
-            Gson().toJson(sdkMetadata),
-            StandardOpenOption.WRITE,
-            StandardOpenOption.TRUNCATE_EXISTING
-        )
+    override fun getInstalled(): Set<Component> {
+        return installedComponents
     }
 
-    private fun createFileIfNotExists() {
-        if (!Files.exists(metadataPath())) {
-            Files.createFile(metadataPath())
-        }
+    override fun addResolved(component: Component) {
+        resolvedComponents.add(component)
+        dbInstance().set("resolved", component.toString(), Gson().toJson(component))
     }
 
-    private fun metadataPath() = Path.of(sdkSettings["sdk.metadata"])
+    override fun addInstalled(component: Component) {
+        installedComponents.add(component)
+        dbInstance().set("installed", component.toString(), Gson().toJson(component))
+    }
 
+    override fun removeResolved(component: Component) {
+        resolvedComponents.remove(component)
+        dbInstance().remove("resolved", component.toString())
+    }
+
+    override fun removeInstalled(component: Component) {
+        installedComponents.remove(component)
+        dbInstance().remove("installed", component.toString())
+    }
 }

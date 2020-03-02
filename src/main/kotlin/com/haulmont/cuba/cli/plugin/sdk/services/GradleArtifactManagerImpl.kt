@@ -20,10 +20,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonElement
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.SdkPlugin
-import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
-import com.haulmont.cuba.cli.plugin.sdk.dto.MvnArtifact
-import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
-import com.haulmont.cuba.cli.plugin.sdk.dto.UploadDescriptor
+import com.haulmont.cuba.cli.plugin.sdk.dto.*
 import com.haulmont.cuba.cli.plugin.sdk.gradle.GradleConnector
 import com.haulmont.cuba.cli.plugin.sdk.utils.FileUtils
 import com.haulmont.cuba.cli.plugin.sdk.utils.copyInputStreamToFile
@@ -61,6 +58,38 @@ class GradleArtifactManagerImpl : ArtifactManager {
             Files.createFile(it)
         }
         gradleBuild.toFile().copyInputStreamToFile(SdkPlugin::class.java.getResourceAsStream("gradle/build.gradle"))
+    }
+
+    override fun uploadComponentToLocalCache(component: Component): List<MvnArtifact> {
+        val dependencies = mutableListOf<MvnArtifact>()
+        for (classifier in component.classifiers) {
+            val componentPath = Path.of("raw")
+                .resolve(component.packageName)
+                .resolve(component.name)
+                .resolve(component.version)
+                .resolve("${component.name}-${component.version}.${classifier.extension}")
+            Files.createDirectories(Path.of(sdkSettings["gradle.cache"]).resolve(componentPath).parent)
+            if (component.url != null) {
+                val (_, response, _) = FileUtils.downloadFile(
+                    component.url,
+                    Path.of(sdkSettings["gradle.cache"]).resolve(componentPath)
+                )
+                if (response.statusCode == 200) {
+
+                    val mvnArtifact = MvnArtifact(
+                        component.packageName,
+                        component.name!!,
+                        component.version,
+                        classifiers = component.classifiers
+                    )
+                    dependencies.add(
+                        mvnArtifact
+                    )
+                    dbProvider["gradle"][mvnArtifact.gradleCoordinates(classifier)] = componentPath.toString()
+                }
+            }
+        }
+        return dependencies
     }
 
     override fun readPom(artifact: MvnArtifact, classifier: Classifier): Model? {
@@ -117,7 +146,10 @@ class GradleArtifactManagerImpl : ArtifactManager {
             .map { UploadDescriptor(artifact, it, getOrDownloadArtifactFile(artifact, it).toString()) }
             .toList()
 
-        val pomDescriptor = getOrDownloadArtifactFile(artifact, Classifier.pom()).toString()
+        var pomDescriptor: String? = null
+        if (artifact.classifiers.contains(Classifier.pom())) {
+            pomDescriptor = getOrDownloadArtifactFile(artifact, Classifier.pom()).toString()
+        }
         try {
             GradleConnector().runTask(
                 "publish", mapOf(

@@ -20,6 +20,7 @@ import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.db.DbInstance
 import org.kodein.di.generic.instance
 import org.mapdb.DBMaker.fileDB
+import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
 import java.util.concurrent.locks.ReentrantLock
@@ -39,7 +40,7 @@ class DbProviderImpl : DbProvider {
             synchronized(lock) {
                 return dbInstances.getOrPut(storage, {
                     DbInstance(
-                        fileDB(Path.of(sdkSettings["gradle.home"], "${storage}.db").toFile())
+                        fileDB(sdkSettings.sdkHome().resolve(Path.of("${storage}.db")).toFile())
                             .fileMmapEnable()
                             .fileMmapEnableIfSupported()
                             .fileMmapPreclearDisable()
@@ -53,4 +54,6 @@ class DbProviderImpl : DbProvider {
             }
         }
     }
+
+    override fun dbExists(storage: String) = Files.exists(sdkSettings.sdkHome().resolve(Path.of("${storage}.db")))
 }

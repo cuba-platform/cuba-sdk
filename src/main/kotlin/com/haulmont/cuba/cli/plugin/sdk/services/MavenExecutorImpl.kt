@@ -25,12 +25,15 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
 import com.haulmont.cuba.cli.plugin.sdk.utils.copyInputStreamToFile
 import com.haulmont.cuba.cli.plugin.sdk.utils.currentOsType
 import org.kodein.di.generic.instance
+import org.redundent.kotlin.xml.Node
+import org.redundent.kotlin.xml.xml
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
 import java.io.PrintWriter
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardOpenOption
 import java.util.logging.Logger
 
 class MavenExecutorImpl : MavenExecutor {
@@ -39,6 +42,8 @@ class MavenExecutorImpl : MavenExecutor {
     private val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
     private val repositoryManager: RepositoryManager by sdkKodein.instance()
     private val printWriter: PrintWriter by sdkKodein.instance()
+
+    private fun mvnSettingsPath() = Path.of(sdkSettings["maven.settings"])
 
     override fun init() {
         val emptyPomFile = Files.createTempFile("empty-pom", "xml").toFile()
@@ -56,7 +61,7 @@ class MavenExecutorImpl : MavenExecutor {
 
     override fun mvn(profile: String, command: String, commands: List<String>, ignoreErrors: Boolean): String {
         val rt = Runtime.getRuntime()
-        val settingsFile = repositoryManager.mvnSettingFile()
+        val settingsFile = mvnSettingFile()
         val cliCommandsList = ArrayList(
             arrayOf(
                 Path.of(
@@ -134,5 +139,80 @@ class MavenExecutorImpl : MavenExecutor {
         Logger.getLogger(MavenExecutorImpl::class.java.name).fine("mvn:$s")
         return s
     }
+
+    private fun mvnSettingFile(): Path {
+        return mvnSettingsPath().also {
+            if (!Files.exists(it)) {
+                buildMavenSettingsFile()
+            }
+        }
+    }
+
+    private fun buildMavenSettingsFile() {
+        val settings = xml("settings") {
+            "localRepository" {
+                -sdkSettings["maven.local.repo"]
+            }
+            "profiles" {
+                "profile" {
+                    "id" { -RepositoryTarget.SOURCE.getId() }
+                    "activation" {
+                        "activeByDefault" { -"true" }
+                    }
+                    this.addNode(addRepositories("repositories", "repository", RepositoryTarget.SOURCE))
+                    this.addNode(addRepositories("pluginRepositories", "pluginRepository", RepositoryTarget.SOURCE))
+                }
+                "profile" {
+                    "id" { -RepositoryTarget.TARGET.getId() }
+                    "activation" {
+                        "activeByDefault" { -"false" }
+                    }
+                    "properties" {
+                        "downloadSources" { -"true" }
+                        "downloadJavadocs" { -"true" }
+                    }
+                    this.addNode(addRepositories("repositories", "repository", RepositoryTarget.TARGET))
+                }
+            }
+            "servers" {
+                listOf(RepositoryTarget.SOURCE, RepositoryTarget.TARGET).forEach { target ->
+                    repositoryManager.getRepositories(target)
+                        .filter { it.authentication != null }
+                        .forEach {
+                            "server" {
+                                "id" { -repositoryManager.getRepositoryId(target, it.name) }
+                                "username" { -it.authentication!!.login }
+                                "password" { -it.authentication!!.password }
+                            }
+                        }
+                }
+            }
+        }
+
+        writeToFile(mvnSettingsPath(), settings.toString(true))
+    }
+
+    private fun writeToFile(file: Path, text: String) {
+        if (!Files.exists(file)) {
+            Files.createFile(file)
+        }
+        Files.writeString(
+            file,
+            text,
+            StandardOpenOption.WRITE,
+            StandardOpenOption.TRUNCATE_EXISTING
+        )
+    }
+
+    private fun addRepositories(rootEl: String, elementName: String, target: RepositoryTarget): Node =
+        xml(rootEl) {
+            repositoryManager.getRepositories(target).forEach {
+                elementName {
+                    "id" { -repositoryManager.getRepositoryId(target, it.name) }
+                    "name" { -it.name }
+                    "url" { -it.url }
+                }
+            }
+        }
 
 }

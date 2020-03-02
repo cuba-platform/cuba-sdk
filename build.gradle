@@ -13,7 +13,7 @@ buildscript {
             fuel                : "1.15.1",
             maven               : "3.6.2",
             json                : "20180813",
-            nxrm3               : "3.20.1-01",
+            nxrm3               : "3.21.1-01",
             commonsLang         : "2.4-cuba.0",
             commonsConfiguration: "1.10",
             commonsLogging      : "1.1.1",
@@ -182,7 +182,7 @@ dependencies {
 
     extraLibs("org.apache.maven:maven-model:$versions.maven")
 
-//    extraLibs("org.redundent:kotlin-xml-builder:$versions.kotlinXmlBuilder")
+    extraLibs("org.redundent:kotlin-xml-builder:$versions.kotlinXmlBuilder")
 
     testImplementation group: 'junit', name: 'junit', version: versions.jUnit
 

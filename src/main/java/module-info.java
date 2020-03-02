@@ -40,6 +40,7 @@ module com.haulmont.cuba.cli.plugin.sdk {
     requires java.management;
     requires java.desktop;
     requires mapdb;
+    requires kotlin.xml.builder;
 
     opens com.haulmont.cuba.cli.plugin.sdk;
     opens com.haulmont.cuba.cli.plugin.sdk.dto;

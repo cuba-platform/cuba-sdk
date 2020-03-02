@@ -56,8 +56,6 @@ SDK tool has three repository scopes:
 - **source** - source repository for maven commands. Dependencies will be downloaded from these repositories  
 - **sdk** - target repository to upload components with dependencies
 
-All configured SDK repositories are stored as JSON in `sdkproperties[sdk.home]/sdk.repositories` file. 
-
 By default following repositories are configured:
 - **search scope:**
   - local m2 repository
@@ -154,8 +152,6 @@ Configured SDK settings by default are located in `<User.home>/cli/sdk/sdk.prope
 
 *SDK metadata*
 - `sdk.home` - default SDK home directory
-- `sdk.repositories` - path to repositories metadata file
-- `sdk.metadata` - path to SDK metadata file with resolved and installed components
 - `sdk.export` - path to directory to save exported SDK archives
 
 *Maven settings*

@@ -67,12 +67,15 @@ class SetupNexusCommand : AbstractSdkCommand() {
     }
 
     private fun setupRepository(answers: Answers) {
-        downloadAndConfigureNexus(answers)
-        addTargetSdkRepository(answers)
-        printWriter.println(messages["setup.sdkConfigured"].green())
+        if (repositoryPathIsEmpty(answers) || answers["rewrite-install-path"] as Boolean) {
+            if (downloadAndConfigureNexus(answers)) {
+                addTargetSdkRepository(answers)
+                printWriter.println(messages["setup.sdkConfigured"].green())
+            }
+        }
     }
 
-    private fun downloadAndConfigureNexus(answers: Answers) {
+    private fun downloadAndConfigureNexus(answers: Answers): Boolean {
         val installer =
             object : ToolInstaller("Nexus", nexusDownloadLink(), Path.of(answers["repository-path"] as String)) {
                 override fun beforeUnzip() {
@@ -87,13 +90,23 @@ class SetupNexusCommand : AbstractSdkCommand() {
                 }
             }
 
-        installer.downloadAndConfigure {
-            configureNexusProperties(answers)
-            StopCommand().apply { checkState = false }.execute()
-            StartCommand().execute()
-            configureNexus(answers)
-            printWriter.println(messages["setup.nexusConfigured"].green())
-        }
+        var result = true
+
+        installer.downloadAndConfigure(
+            configure = {
+                configureNexusProperties(answers)
+                StopCommand().apply { checkState = false }.execute()
+                StartCommand().execute()
+                configureNexus(answers)
+                printWriter.println(messages["setup.nexusConfigured"].green())
+            },
+            onFail = {
+                printWriter.println(messages["setup.nexus.configurationFailed"].format(it.message).red())
+                printWriter.println(messages["setup.nexus.configurationManual"].format(Path.of(answers["repository-path"] as String)))
+                result = false;
+            }
+        )
+        return result
     }
 
     private fun addTargetSdkRepository(answers: Answers) {
@@ -135,7 +148,7 @@ class SetupNexusCommand : AbstractSdkCommand() {
             runNexusConfigurationScript(answers, "admin", adminPassword.toFile().readText(StandardCharsets.UTF_8))
             Files.delete(adminPassword)
         } else {
-            runNexusConfigurationScript(answers, sdkSettings["repository.login"], sdkSettings["repository.password"])
+            runNexusConfigurationScript(answers, sdkSettings["repository.login"], answers["repository.password"] as String)
         }
         persistSdkCredentials(answers)
         if (Files.exists(adminPassword)) {
@@ -214,7 +227,7 @@ class SetupNexusCommand : AbstractSdkCommand() {
 
     private fun persistSdkCredentials(answers: Answers) {
         sdkSettings["repository.login"] = answers["login"] as String
-        sdkSettings["repository.password"] = answers["password"] as String
+        sdkSettings["repository.name"] = answers["repository-name"] as String
         sdkSettings.flushAppProperties()
     }
 
@@ -254,7 +267,7 @@ class SetupNexusCommand : AbstractSdkCommand() {
             OsType.MAC -> sdkSettings["nexus.downloadLink.mac"]
         }
         val nexusVersion = sdkSettings["nexus.version"]
-        return downloadLink.format(nexusVersion)
+        return downloadLink.replace("<version>", nexusVersion)
     }
 }
 

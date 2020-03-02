@@ -32,10 +32,6 @@ private val sdkModule = Kodein.Module {
         SdkSettingsHolderImpl()
     }
 
-    bind<FileDownloadService>() with singleton {
-        FileDownloadServiceImpl()
-    }
-
     bind<ArtifactManager>() with singleton {
         GradleArtifactManagerImpl()
     }

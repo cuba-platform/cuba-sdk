@@ -28,8 +28,6 @@ import com.haulmont.cuba.cli.plugin.sdk.utils.authorizeIfRequired
 import com.haulmont.cuba.cli.plugin.sdk.utils.performance
 import org.json.JSONObject
 import org.kodein.di.generic.instance
-import java.nio.file.Files
-import java.nio.file.Path
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.logging.Logger
 import java.util.stream.Collectors
@@ -76,7 +74,7 @@ class ComponentManagerImpl : ComponentManager {
 
     override fun isAlreadyInstalled(component: Component): Boolean {
         val componentTemplate = componentTemplates.findTemplate(component) ?: component
-        return metadataHolder.getMetadata().installedComponents.stream()
+        return metadataHolder.getInstalled().stream()
             .filter {
                 it.type == componentTemplate.type &&
                         it.name == componentTemplate.name &&
@@ -90,7 +88,7 @@ class ComponentManagerImpl : ComponentManager {
     override fun searchInMetadata(component: Component): Component? =
         searchComponent(
             componentTemplates.findTemplate(component) ?: component,
-            metadataHolder.getMetadata().components
+            metadataHolder.getResolved()
         )
 
     private fun searchComponent(component: Component, components: Collection<Component>): Component? =
@@ -212,33 +210,13 @@ class ComponentManagerImpl : ComponentManager {
     }
 
     private fun resolveRawComponent(component: Component): Component? {
-        for (classifier in component.classifiers) {
-            val componentPath = Path.of(sdkSettings["maven.local.repo"])
-                .resolve(component.packageName)
-                .resolve(component.name)
-                .resolve(component.version)
-                .resolve("${component.name}-${component.version}.${classifier.extension}")
-            Files.createDirectories(componentPath.parent)
-            if (component.url != null) {
-                val (_, response, _) = Fuel.download(component.url)
-                    .destination { response, Url ->
-                        componentPath.toFile()
-                    }
-                    .response()
-                if (response.statusCode == 200) {
-                    component.dependencies.add(
-                        MvnArtifact(
-                            component.packageName,
-                            component.name!!,
-                            component.version,
-                            classifiers = component.classifiers
-                        )
-                    )
-                    return component
-                }
-            }
+        val dependencies = artifactManager.uploadComponentToLocalCache(component)
+        if (dependencies.isNotEmpty()) {
+            component.dependencies.addAll(dependencies)
+            return component
+        } else {
+            return null
         }
-        return null
     }
 
     private fun resolveSdkBom(component: Component) {
@@ -312,18 +290,17 @@ class ComponentManagerImpl : ComponentManager {
             progress?.let { it(artifact, uploaded.incrementAndGet(), total) }
         }
 
-        metadataHolder.getMetadata().installedComponents.add(
+        metadataHolder.addInstalled(
             component.copy(
                 dependencies = HashSet(),
                 components = HashSet()
             )
         )
-        metadataHolder.flushMetadata()
     }
 
     override fun remove(componentToRemove: Component, removeFromRepo: Boolean, progress: RemoveProcessCallback?) {
-        searchComponent(componentToRemove, metadataHolder.getMetadata().components)?.let { component ->
-            val allOtherDependencies = metadataHolder.getMetadata().components
+        searchComponent(componentToRemove, metadataHolder.getResolved())?.let { component ->
+            val allOtherDependencies = metadataHolder.getResolved()
                 .filter { it != component }
                 .flatMap { it.collectAllDependencies() }
             val dependencies = component.collectAllDependencies()
@@ -336,7 +313,6 @@ class ComponentManagerImpl : ComponentManager {
                 progress?.let { it(artifact, removed.incrementAndGet(), total) }
             }
             removeFromMetadata(component)
-            metadataHolder.flushMetadata()
         }
     }
 
@@ -344,7 +320,10 @@ class ComponentManagerImpl : ComponentManager {
         artifactManager.remove(artifact)
         if (removeFromRepo && nexusManager.isLocal()) {
             nexusScriptManager.run(
-                sdkSettings["repository.login"], sdkSettings["repository.password"], "sdk.drop-component", JSONObject()
+                sdkSettings["repository.login"],
+                repositoryManager.getLocalRepositoryPassword() ?: "",
+                "sdk.drop-component",
+                JSONObject()
                     .put("repoName", sdkSettings["repository.name"])
                     .put("artifact", artifact.mvnCoordinates())
             )
@@ -373,20 +352,15 @@ class ComponentManagerImpl : ComponentManager {
     override fun register(component: Component) {
         removeFromMetadata(component)
         addToMetadata(component)
-        metadataHolder.flushMetadata()
     }
 
     private fun addToMetadata(component: Component) {
-        metadataHolder.getMetadata().components.add(component)
+        metadataHolder.addResolved(component)
     }
 
     private fun removeFromMetadata(component: Component) {
-        searchComponent(component, metadataHolder.getMetadata().components)?.let {
-            metadataHolder.getMetadata().components.remove(it)
-        }
-        searchComponent(component, metadataHolder.getMetadata().installedComponents)?.let {
-            metadataHolder.getMetadata().installedComponents.remove(it)
-        }
+        metadataHolder.removeResolved(component)
+        metadataHolder.removeInstalled(component)
     }
 
     private fun resolveDependencies(component: Component, progress: ResolveProgressCallback? = null): Component? {

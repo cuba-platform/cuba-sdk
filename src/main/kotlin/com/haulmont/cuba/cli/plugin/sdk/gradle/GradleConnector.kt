@@ -55,7 +55,7 @@ class GradleConnector() {
     }
 
     fun runTask(
-        name: String, params: Map<String, Any> = mapOf(),
+        name: String, params: Map<String, Any?> = mapOf(),
         progressFun: ProgressCallback? = null
     ): JsonElement? {
         val connection = connector.connect()
@@ -67,10 +67,9 @@ class GradleConnector() {
             }
             val repositoriesJson = Gson().toJson(repositoryManager.getRepositories(RepositoryTarget.SOURCE))
             val buildLauncher = connection.newBuild()
-                .withArguments(params.map { "-P${it.key}=${it.value}" }.toList())
+                .withArguments(params.filter { it.value != null }.map { "-P${it.key}=${it.value}" }.toList())
                 .addArguments("-g", sdkSettings["gradle.cache"])
                 .addArguments("-PsdkRepositories=${repositoriesJson}")
-                .addArguments("-Dorg.gradle.daemon=true")
                 .addArguments("-Dorg.gradle.parallel=true")
                 .forTasks(name)
                 .setStandardOutput(outputStream)

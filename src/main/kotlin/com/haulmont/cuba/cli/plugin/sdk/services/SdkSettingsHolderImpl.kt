@@ -42,17 +42,24 @@ class SdkSettingsHolderImpl : SdkSettingsHolder {
     }
 
     private var sdkProperties: Properties
+    private var userProperties = Properties()
 
     init {
         sdkProperties = readDefaultProperties()
     }
 
     private fun readDefaultProperties(): Properties {
-        createSdkPropertiesFileIfNotExists()
-        return readProperties(
-            FileInputStream(SDK_PROPERTIES_PATH.toString()),
-            readApplicationProperties()
-        )
+        if (Files.exists(SDK_PROPERTIES_PATH)) {
+            userProperties = readProperties(
+                FileInputStream(SDK_PROPERTIES_PATH.toString())
+            )
+            return readProperties(
+                FileInputStream(SDK_PROPERTIES_PATH.toString()),
+                readApplicationProperties()
+            )
+        } else {
+            return readApplicationProperties()
+        }
     }
 
     private fun readApplicationProperties() =
@@ -100,8 +107,9 @@ class SdkSettingsHolderImpl : SdkSettingsHolder {
     }
 
     override fun setProperty(property: String, value: String?) {
-        if (value!=null) {
+        if (value != null) {
             sdkProperties.put(property, value)
+            userProperties.put(property,value)
         }
     }
 
@@ -109,7 +117,7 @@ class SdkSettingsHolderImpl : SdkSettingsHolder {
         createSdkPropertiesFileIfNotExists()
 
         FileWriter(SDK_PROPERTIES_PATH.toString()).use {
-            sdkProperties.store(it, "SDK properties")
+            userProperties.store(it, "SDK properties")
         }
     }
 
