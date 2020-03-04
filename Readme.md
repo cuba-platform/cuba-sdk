@@ -30,7 +30,7 @@ If SDK plugin was loaded successfully then following message will be displayed i
 
 # 3. Configuration <a name="configuration"></a>
 
-To configure SDK please run `sdk setup` command. Before first usage SDK should be configured. 
+To configure SDK please run `sdk init` command. Before first usage SDK should be configured. 
 
 # 4. Commands reference <a name="command-reference"></a>
 
@@ -42,7 +42,7 @@ To configure SDK please run `sdk setup` command. Before first usage SDK should b
 - `sdk setup-nexus` - setup embedded Nexus repository. This command will download, install and configure Nexus repository.
 - `sdk cleanup` - cleanup SDK metadata and remove all artifacts from local *m2* repository and from embedded Nexus repository. If `--local-only` flag provided then only local *m2* repository will be cleaned
 - `sdk set-license` - set license key and configure Premium repositories for *source* repository 
-- `sdk check-updates` - check available minor updates for framework and addons.  Specific target repository can be configured with `--r` or `--repository` additional parameters, example `sdk import --r sdk2`. If `--no-upload` additional parameter presented then SDK archive will be imported to local *m2* repository only.
+- `sdk check-updates` - check available minor updates for framework and add-ons.  Specific target repository can be configured with `--r` or `--repository` additional parameters, example `sdk import --r sdk2`. If `--no-upload` additional parameter presented then SDK archive will be imported to local *m2* repository only.
 
 ## 4.2. Embedded nexus repository commands <a name="common-commands-sdk"></a>
 
