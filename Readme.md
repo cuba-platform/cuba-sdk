@@ -15,7 +15,7 @@ CUBA CLI and SDK compatibility
 
 | CUBA CLI Version | SDK Version    |
 |------------------|----------------|
-| 2.1.0            | 0.1-SNAPSHOT   |  
+| 2.1.1            | 0.1-SNAPSHOT   |  
 
 ## Manual installation from sources
 

@@ -1,7 +1,7 @@
 buildscript {
     ext.versions = [
             kotlin              : "1.2.71",
-            cubaCli             : "2.1.0",
+            cubaCli             : "2.1.1",
             velocity            : "1.7",
             jCommander          : "1.72",
             jansi               : "1.17",
