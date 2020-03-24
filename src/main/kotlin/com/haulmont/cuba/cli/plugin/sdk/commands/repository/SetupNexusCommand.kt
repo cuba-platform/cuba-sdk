@@ -45,7 +45,7 @@ class SetupNexusCommand : AbstractSdkCommand() {
             askIf { !repositoryPathIsEmpty(it) }
         }
         question("port", messages["setup.localRepositoryPortCaption"]) {
-            default("8081")
+            default("80810")
         }
         question("login", messages["setup.repositoryLoginCaption"]) {
             default("admin")

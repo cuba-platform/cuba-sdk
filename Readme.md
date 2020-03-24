@@ -101,17 +101,20 @@ Component coordinates for framework ad add-on component commands can be configur
 
 Example: `sdk push framework cuba:7.1.3`
  
-Resolve command will find and download all component dependencies to local *m2* repository. If add-on depends on other add-ons then SDK will ask to resolve additional add-ons too, this feature can be disabled with `--nra` or `--not-resolve-addons` additional parameters 
+Resolve command will find and download all component dependencies to local Gradle cache. If add-on depends on other add-ons then SDK will ask to resolve additional add-ons too, this feature can be disabled with `--nra` or `--not-resolve-addons` additional parameters 
+- `sdk resolve` - bulk command for list of frameworks, addons and libs
 - `sdk resolve framework`
 - `sdk resolve addon`
 - `sdk resolve lib`
 
-Push command will upload resolved components with dependencies to all *target* repositories. Specific target repository can be configured with `--r` or `--repository` additional parameters, example `sdk push addon dashboard --r sdk2`.  
+Push command will upload resolved components with dependencies to all *target* repositories. Specific target repository can be configured with `--r` or `--repository` additional parameters, example `sdk push addon dashboard --r sdk2`.
+- `sdk push` - bulk command for list of frameworks, addons and libs  
 - `sdk push framework`
 - `sdk push addon <name>`
 - `sdk push lib`
 
-Install command will resolve and push components. Specific target repository can be configured with `--r` or `--repository` additional parameters, example `sdk push addon dashboard --r sdk2`.  
+Install command will resolve and push components. Specific target repository can be configured with `--r` or `--repository` additional parameters, example `sdk push addon dashboard --r sdk2`.
+- `sdk install` - bulk command for list of frameworks, addons and libs  
 - `sdk install framework`
 - `sdk install addon`
 - `sdk install lib`
@@ -120,6 +123,8 @@ Remove command will remove component with dependencies from local *m2* repositor
 - `sdk remove framework`
 - `sdk remove addon`
 - `sdk remove lib`
+
+For bulk commands coordinates for components can be passed with ','. Example: `sdk install -c framework-cuba:7.2.1,addon-dashboard:3.2.1`
 
 Export command will export component with dependencies as archive to `sdkproperties[sdk.export.home]` directory. If component is not resolved yet then SDK will ask to resolve component  
 - `sdk export` - export all resolved SDK components

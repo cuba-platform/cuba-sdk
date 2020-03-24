@@ -33,7 +33,9 @@ import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
 import com.haulmont.cuba.cli.prompting.Option
 import com.haulmont.cuba.cli.prompting.Prompts
 import com.haulmont.cuba.cli.prompting.ValidationException
+import com.haulmont.cuba.cli.red
 import org.kodein.di.generic.instance
+import kotlin.concurrent.thread
 
 typealias NameVersion = String
 
@@ -196,6 +198,135 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
 
     fun fail(cause: String): Nothing = throw ValidationException(cause)
 
+    fun parseComponents(nameVersions: String): Set<Component> {
+        val components = mutableSetOf<Component>()
+        val searchThread = thread {
+            nameVersions.split(",").map { coordinate ->
+                coordinate.split("-").let {
+                    val component = when (it[0]) {
+                        "framework" -> it[1].resolveFrameworkCoordinates() ?: fail(
+                            messages["framework.unknown"].format(
+                                it[1]
+                            )
+                        )
+                        "addon" -> it[1].resolveAddonCoordinates() ?: fail(
+                            messages["addon.unknown"].format(
+                                it[1]
+                            )
+                        )
+                        "lib" -> it[1].resolveLibraryCoordinates()
+                            ?: fail(messages["lib.unknown"].format(it[1]))
+                        else -> null
+                    }
+                    if (component != null) {
+                        search(component)?.let {
+                            components.add(it)
+                        }
+                    }
+                }
+            }
+        }
+        waitTask(messages["search.searchComponents"]) {
+            searchThread.isAlive
+        }
+        return components
+    }
+
+    fun askComponentsWithDependencies(): Set<Component> {
+        val componentCoordinates = askComponentsList()
+        val components = mutableSetOf<Component>()
+        val searchThread = thread {
+            componentCoordinates.forEach {
+                search(it)?.let {
+                    components.add(it)
+                }
+            }
+        }
+        waitTask(messages["search.searchComponents"]) {
+            searchThread.isAlive
+        }
+
+        if (components.isNotEmpty()) {
+            val additionalComponents = mutableSetOf<Component>()
+            val searchAdditionalThread = thread {
+                components.forEach { component ->
+                    componentManager.searchForAdditionalComponents(component).let {
+                        if (it.isNotEmpty()) {
+                            it.forEach {
+                                if (!components.contains(it) && !additionalComponents.contains(it)) {
+                                    additionalComponents.add(it)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            waitTask(messages["search.searchAdditionalComponents"]) {
+                searchAdditionalThread.isAlive
+            }
+
+            if (additionalComponents.isNotEmpty()) {
+                printWriter.println(messages["search.foundAdditionalComponents"])
+                additionalComponents.sortedBy { it.toString() }.forEach { component ->
+                    printWriter.println("   $component")
+                }
+                printWriter.println()
+                if (needToFindDependentAddons == null) {
+                    val answer = Prompts.create {
+                        confirmation("resolve", messages["base.resolveAddonsCaption"])
+                    }.ask()
+
+                    needToFindDependentAddons = answer["resolve"] as Boolean
+                }
+
+                if (needToFindDependentAddons == true) {
+                    components.addAll(additionalComponents)
+                }
+            }
+
+        }
+        return components
+    }
+
+    fun askComponentsList(): List<Component> {
+        val components = mutableListOf<Component>()
+        var installNext = true
+        while (installNext) {
+            val nameVersionAnswer = Prompts.create {
+                question("nameVersion", messages["base.askComponentCoordinates"])
+            }.ask()
+            val componentCoordinates = nameVersionAnswer["nameVersion"] as String
+            componentCoordinates.split(" ").let {
+                val nameVersion = if (it.size > 1) it[1] else null
+                val component = when (it[0]) {
+                    "framework" -> askAllFrameworkNameVersion(nameVersion).resolveFrameworkCoordinates() ?: fail(
+                        messages["framework.unknown"].format(
+                            nameVersion
+                        )
+                    )
+                    "addon" -> askAllAddonsNameVersion(nameVersion).resolveAddonCoordinates() ?: fail(
+                        messages["addon.unknown"].format(
+                            nameVersion
+                        )
+                    )
+                    "lib" -> nameVersion?.resolveLibraryCoordinates()
+                        ?: fail(messages["lib.unknown"].format(nameVersion))
+                    else -> null
+                }
+                if (component != null) {
+                    components.add(component)
+                } else {
+                    printWriter.println(messages["base.error.unsupportedComponentType"].format(it[0]).red())
+                }
+            }
+            val installNextAnswer = Prompts.create {
+                confirmation("installNext", messages["base.askInstallNext"])
+            }.ask()
+            installNext = installNextAnswer["installNext"] as Boolean
+        }
+        return components
+    }
+
     fun askNameVersion(
         nameVersion: NameVersion?,
         msgPrefix: String,
@@ -220,16 +351,23 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
         versions: (name: String) -> List<Option<String>>,
         name: String
     ): String {
-        val versionAnswers = Prompts.create {
-            options(
-                "version",
-                messages["$msgPrefix.version"],
-                versions(name)
-            )
-        }.ask()
-
-        val version = versionAnswers["version"] as String
-        return version
+        val versionsList = versions(name)
+        if (versionsList.isEmpty()) {
+            return Prompts.create {
+                question(
+                    "version",
+                    messages["$msgPrefix.question.version"]
+                )
+            }.ask()["version"] as String
+        } else {
+            return Prompts.create {
+                options(
+                    "version",
+                    messages["$msgPrefix.version"],
+                    versionsList
+                )
+            }.ask()["version"] as String
+        }
     }
 
     private fun askName(msgPrefix: String, addons: List<String>): String {
@@ -239,6 +377,16 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
 
         val name = nameAnswers["name"] as String
         return name
+    }
+
+    internal fun checkRepositories(repositoryNames: List<String>?): List<Repository>? {
+        val repositories: List<Repository>? =
+            repositories(repositoryNames ?: repositoryManager.getRepositories(RepositoryTarget.TARGET).map { it.name })
+
+        if (repositories == null) {
+            printWriter.println(messages["repository.noTargetRepositories"].red())
+        }
+        return repositories
     }
 
     internal fun force(component: Component): Boolean =

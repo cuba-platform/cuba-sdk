@@ -16,13 +16,45 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
+import com.beust.jcommander.Parameter
 import com.beust.jcommander.Parameters
-import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
+import com.haulmont.cuba.cli.green
+import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 
 @Parameters(commandDescription = "Upload artifact to SDK target repository")
-class PushCommand : AbstractSdkCommand() {
+class PushCommand : BasePushCommand() {
+
+    @Parameter(
+        names = ["--c", "--components"],
+        description = "List of framework, addon or lib components via ',' in <name>:<version> or in full coordinates format <group>:<name>:<version>. Example: framework-cuba:7.2.1,addon-dashboard:3.2.1",
+        hidden = true
+    )
+    private var nameVersions: String? = null
 
     override fun run() {
-        printWriter.println("Use 'framework', 'addon' or 'lib' subcommands.")
+        checkRepositories(repositoryNames)?.let { repositories ->
+
+            val components = nameVersions?.let { parseComponents(it) } ?: askComponentsWithDependencies()
+            val componentsToResolve = mutableListOf<Component>()
+            components.forEach {
+                if (force(it) || !componentManager.isAlreadyInstalled(it)) {
+                    val component = searchInMetadata(it)
+                    if (component != null) {
+                        if (!componentsToResolve.contains(it)) {
+                            componentsToResolve.add(it)
+                        }
+                    }
+                }
+            }
+
+            if (componentsToResolve.isNotEmpty()) {
+                upload(componentsToResolve, repositories)
+                printWriter.println(messages["install.finished"].green())
+            } else {
+                printWriter.println(messages["install.alreadyInstalled"].green())
+            }
+        }
     }
+
+    override fun createSearchContext(): Component? = null
 }

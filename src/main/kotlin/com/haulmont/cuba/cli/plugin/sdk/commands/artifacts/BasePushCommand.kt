@@ -18,8 +18,6 @@ package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
 import com.beust.jcommander.Parameter
 import com.haulmont.cuba.cli.green
-import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
-import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
 import com.haulmont.cuba.cli.red
 
 abstract class BasePushCommand : BaseComponentCommand() {
@@ -30,26 +28,21 @@ abstract class BasePushCommand : BaseComponentCommand() {
         hidden = true,
         variableArity = true
     )
-    private var repositoryNames: List<String>? = null
+    internal var repositoryNames: List<String>? = null
 
     override fun run() {
-        val repositories: List<Repository>? =
-            repositories(repositoryNames ?: repositoryManager.getRepositories(RepositoryTarget.TARGET).map { it.name })
-
-        if (repositories == null) {
-            printWriter.println(messages["repository.noTargetRepositories"].red())
-            return
-        }
-        createSearchContext()?.let {
-            if (force(it) || !componentManager.isAlreadyInstalled(it)) {
-                val component = searchInMetadata(it)
-                if (component != null) {
-                    upload(component, repositories)
+        checkRepositories(repositoryNames)?.let { repositories ->
+            createSearchContext()?.let {
+                if (force(it) || !componentManager.isAlreadyInstalled(it)) {
+                    val component = searchInMetadata(it)
+                    if (component != null) {
+                        upload(component, repositories)
+                    } else {
+                        printWriter.println(messages["resolve.failed"].red())
+                    }
                 } else {
-                    printWriter.println(messages["resolve.failed"].red())
+                    printWriter.println(messages["install.alreadyInstalled"].green())
                 }
-            } else {
-                printWriter.println(messages["install.alreadyInstalled"].green())
             }
         }
     }
