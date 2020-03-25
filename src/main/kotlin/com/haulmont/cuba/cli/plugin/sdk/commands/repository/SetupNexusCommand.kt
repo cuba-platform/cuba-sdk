@@ -7,6 +7,7 @@ import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
 import com.haulmont.cuba.cli.plugin.sdk.dto.*
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusScriptManager
 import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
+import com.haulmont.cuba.cli.plugin.sdk.utils.FileUtils
 import com.haulmont.cuba.cli.plugin.sdk.utils.currentOsType
 import com.haulmont.cuba.cli.prompting.Answer
 import com.haulmont.cuba.cli.prompting.Answers
@@ -21,6 +22,7 @@ import java.io.InputStreamReader
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardCopyOption
 import java.util.*
 
 
@@ -45,7 +47,7 @@ class SetupNexusCommand : AbstractSdkCommand() {
             askIf { !repositoryPathIsEmpty(it) }
         }
         question("port", messages["setup.localRepositoryPortCaption"]) {
-            default("80810")
+            default("8085")
         }
         question("login", messages["setup.repositoryLoginCaption"]) {
             default("admin")
@@ -83,9 +85,16 @@ class SetupNexusCommand : AbstractSdkCommand() {
                 }
 
                 override fun onUnzipFinished() {
+                    installPath.resolve("nexus3").let { path ->
+                        if (Files.exists(path)) {
+                            FileUtils.deleteDirectory(path)
+                        }
+                    }
+
                     Files.move(
                         installPath.resolve("nexus-" + sdkSettings["nexus.version"]),
-                        installPath.resolve("nexus3")
+                        installPath.resolve("nexus3"),
+                        StandardCopyOption.REPLACE_EXISTING
                     )
                 }
             }
@@ -148,7 +157,17 @@ class SetupNexusCommand : AbstractSdkCommand() {
             runNexusConfigurationScript(answers, "admin", adminPassword.toFile().readText(StandardCharsets.UTF_8))
             Files.delete(adminPassword)
         } else {
-            runNexusConfigurationScript(answers, sdkSettings["repository.login"], answers["repository.password"] as String)
+
+            var login = answers["login"] as String
+            var password = answers["password"] as String
+            repositoryManager.getRepository(answers["repository-name"] as String, RepositoryTarget.TARGET)?.let {
+                val authentication = it.authentication
+                if (authentication != null) {
+                    login = authentication.login
+                    password = authentication.password
+                }
+            }
+            runNexusConfigurationScript(answers, login, password)
         }
         persistSdkCredentials(answers)
         if (Files.exists(adminPassword)) {
@@ -173,24 +192,26 @@ class SetupNexusCommand : AbstractSdkCommand() {
             password,
             "sdk.cleanup",
             nexusScriptManager.loadScript("cleanupRepository.groovy")
-        )
-            .also {
-                if (it.statusCode != 204) {
-                    printWriter.println(messages["setup.repositoryCanNotBeConfiguredAutomatically"].format(it.responseMessage).red())
-                }
+        ).also {
+            if (it.statusCode != 204) {
+                printWriter.println(
+                    messages["setup.repositoryCanNotBeConfiguredAutomatically"].format(it.responseMessage).red()
+                )
             }
+        }
         nexusScriptManager.drop(login, password, "sdk.drop-component")
         nexusScriptManager.create(
             login,
             password,
             "sdk.drop-component",
             nexusScriptManager.loadScript("dropComponent.groovy")
-        )
-            .also {
-                if (it.statusCode != 204) {
-                    printWriter.println(messages["setup.repositoryCanNotBeConfiguredAutomatically"].format(it.responseMessage).red())
-                }
+        ).also {
+            if (it.statusCode != 204) {
+                printWriter.println(
+                    messages["setup.repositoryCanNotBeConfiguredAutomatically"].format(it.responseMessage).red()
+                )
             }
+        }
     }
 
     private fun dropNexusScript(answers: Map<String, Answer>) {
@@ -201,7 +222,9 @@ class SetupNexusCommand : AbstractSdkCommand() {
         nexusScriptManager.create(login, password, "sdk.init", script)
             .also {
                 if (it.statusCode != 204) {
-                    printWriter.println(messages["setup.repositoryCanNotBeConfiguredAutomatically"].format(it.responseMessage).red())
+                    printWriter.println(
+                        messages["setup.repositoryCanNotBeConfiguredAutomatically"].format(it.responseMessage).red()
+                    )
                     return false
                 }
                 return true
@@ -217,7 +240,9 @@ class SetupNexusCommand : AbstractSdkCommand() {
                 .put("repoName", "${answers["repository-name"]}")
         ).also {
             if (it.statusCode != 200) {
-                printWriter.println(messages["setup.repositoryCanNotBeConfiguredAutomatically"].format(it.responseMessage).red())
+                printWriter.println(
+                    messages["setup.repositoryCanNotBeConfiguredAutomatically"].format(it.responseMessage).red()
+                )
                 return false
             }
             return true

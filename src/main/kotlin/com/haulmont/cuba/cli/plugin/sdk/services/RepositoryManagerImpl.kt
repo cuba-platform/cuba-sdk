@@ -48,8 +48,8 @@ class RepositoryManagerImpl : RepositoryManager {
         if (dbProvider.dbExists("repository")) {
             val repos = HashMap<RepositoryTarget, MutableList<Repository>>()
             for (target in RepositoryTarget.values()) {
+                repos.putIfAbsent(target, mutableListOf())
                 dbInstance().map(target.toString()).forEach {
-                    repos.putIfAbsent(target, mutableListOf())
                     val json = it.value
                     if (json != null) {
                         val repository = fromJson(json) as Repository

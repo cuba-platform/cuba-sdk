@@ -19,7 +19,7 @@ buildscript {
             commonsLogging      : "1.1.1",
             kotlinXmlBuilder    : "1.6.0",
             jUnit               : "4.12",
-            toolingApi          : "6.1.1"
+            toolingApi          : "6.2.2"
     ]
 
     repositories {
