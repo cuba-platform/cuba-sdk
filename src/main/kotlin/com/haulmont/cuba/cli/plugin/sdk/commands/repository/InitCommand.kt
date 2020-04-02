@@ -46,6 +46,7 @@ class InitCommand : AbstractSdkCommand() {
         sdkSettings["sdk.files"] = sdkSettings.sdkHome().resolve("files").toString()
         sdkSettings["gradle.home"] = sdkSettings.sdkHome().resolve("gradle").toString()
         sdkSettings["gradle.cache"] = sdkSettings.sdkHome().resolve(Path.of("gradle", "cache")).toString()
+        sdkSettings["repository.type"]="none"
         sdkSettings.flushAppProperties()
     }
 

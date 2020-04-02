@@ -37,7 +37,7 @@ class SdkCommand : AbstractSdkCommand() {
         printWriter.println(messages["sdk.title"].doubleUnderline())
         printWriter.println("SDK home: ${sdkSettings["sdk.home"].green()}")
         if (nexusManager.isLocal()) {
-            printWriter.print("Repository type: ${sdkSettings["repository.type"].green()} ")
+            printWriter.print("Repository type: ${"local".green()} ")
             printWriter.print(if (nexusManager.isStarted()) "running".green() else "stopped".red())
             printWriter.println()
             printWriter.println("Repository URL: ${sdkSettings["repository.url"].green()}")
