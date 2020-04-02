@@ -21,8 +21,10 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.haulmont.cuba.cli.commands.LaunchOptions
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
+import com.haulmont.cuba.cli.cubaplugin.model.PlatformVersionsManager
 import com.haulmont.cuba.cli.plugin.sdk.SdkPlugin
 import com.haulmont.cuba.cli.plugin.sdk.dto.MarketplaceAddon
+import com.haulmont.cuba.cli.plugin.sdk.dto.MarketplaceAddonCompatibility
 import org.kodein.di.generic.instance
 import java.nio.charset.StandardCharsets
 import java.nio.file.Path
@@ -36,6 +38,8 @@ class ComponentVersionManagerImpl : ComponentVersionManager {
 
     private val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
 
+    private val platformVersionsManager: PlatformVersionsManager by sdkKodein.instance()
+
     var addons: List<MarketplaceAddon>? = null
 
     private fun loadSync(): List<MarketplaceAddon> {
@@ -45,10 +49,11 @@ class ComponentVersionManagerImpl : ComponentVersionManager {
                 readAddonsFile()
             )
         } else {
-            val result = Fuel.get(sdkSettings["addon.marketplaceUrl"])
-                .responseString().third
+            platformVersionsManager.load()
+            var triple = Fuel.get(sdkSettings["addon.marketplaceUrl"])
+                .responseString()
 
-            result.fold(
+            triple.third.fold(
                 success = {
                     return readAddons(it)
                 },
@@ -76,7 +81,22 @@ class ComponentVersionManagerImpl : ComponentVersionManager {
         return array.getAsJsonArray("appComponents")
             .map { it as JsonObject }
             .map { Gson().fromJson(it, MarketplaceAddon::class.java) }
+            .filter { it.artifactId.isNotEmpty() }
+            .map {
+                if (it != null) {
+                    if (isStandardCubaAddon(it)) {
+                        it.compatibilityList = platformVersionsManager.versions.map { version ->
+                            MarketplaceAddonCompatibility(version, listOf(version))
+                        }
+                    }
+                }
+                return@map it
+            }
             .toList()
+    }
+
+    private fun isStandardCubaAddon(addon: MarketplaceAddon): Boolean {
+        return addon.compatibilityList.first().artifactVersions.joinToString().contains("\$cubaVersion")
     }
 
     override fun addons(): List<MarketplaceAddon> =

@@ -117,7 +117,7 @@ class FileUtils {
 
             val bytes = triple.third.component1()
             if (bytes != null && bytes.isEmpty()) {
-                val triple = downloadInternal(triple.second.url.toString(), path, progress)
+                triple = downloadInternal(triple.second.url.toString(), path, progress)
             }
             return triple
         }

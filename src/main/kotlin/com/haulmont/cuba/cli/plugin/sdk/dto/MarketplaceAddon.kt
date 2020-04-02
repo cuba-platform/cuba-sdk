@@ -27,6 +27,6 @@ data class MarketplaceAddon(
     val updateDateTime: Long,
     val groupId: String,
     val artifactId: String,
-    val compatibilityList: List<MarketplaceAddonCompatibility>,
+    var compatibilityList: List<MarketplaceAddonCompatibility>,
     val commercial: Boolean
 )

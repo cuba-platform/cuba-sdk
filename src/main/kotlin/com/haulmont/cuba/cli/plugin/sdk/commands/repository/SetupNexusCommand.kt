@@ -14,6 +14,7 @@ import com.haulmont.cuba.cli.prompting.Answers
 import com.haulmont.cuba.cli.prompting.Prompts
 import com.haulmont.cuba.cli.prompting.QuestionsList
 import com.haulmont.cuba.cli.red
+import org.gradle.internal.impldep.org.apache.commons.lang.BooleanUtils
 import org.json.JSONObject
 import org.kodein.di.generic.instance
 import java.io.FileInputStream
@@ -43,22 +44,29 @@ class SetupNexusCommand : AbstractSdkCommand() {
             default(sdkSettings.sdkHome().resolve("repository").toString())
         }
         confirmation("rewrite-install-path", messages["setup.localRepositoryRewriteInstallPathCaption"]) {
-            default(false)
+            default(true)
             askIf { !repositoryPathIsEmpty(it) }
         }
         question("port", messages["setup.localRepositoryPortCaption"]) {
             default("8085")
+            askIf { nexusConfigurationRequired(it) }
         }
         question("login", messages["setup.repositoryLoginCaption"]) {
             default("admin")
+            askIf { nexusConfigurationRequired(it) }
         }
         question("password", messages["setup.repositoryPasswordCaption"]) {
             default("admin")
+            askIf {  nexusConfigurationRequired(it)}
         }
         question("repository-name", messages["setup.repositoryName"]) {
             default("cuba-sdk")
+            askIf {  nexusConfigurationRequired(it) }
         }
     }
+
+    private fun nexusConfigurationRequired(it: Answers) =
+        repositoryPathIsEmpty(it) || BooleanUtils.isTrue(it["rewrite-install-path"] as Boolean?)
 
     private fun repositoryPathIsEmpty(answers: Map<String, Answer>): Boolean {
         return answers["repository-path"] != null && !Files.exists(
