@@ -82,7 +82,7 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
 
     @Parameter(
         names = ["--go", "--gradle-option"],
-        description = "Maven option",
+        description = "Gradle option",
         hidden = true,
         variableArity = true
     )

@@ -25,6 +25,7 @@ import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
 import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
 import org.gradle.tooling.GradleConnector
 import org.gradle.tooling.ProgressEvent
+import org.gradle.tooling.internal.consumer.ConnectorServices
 import org.gradle.tooling.model.GradleProject
 import org.kodein.di.generic.instance
 import java.io.ByteArrayOutputStream
@@ -103,6 +104,7 @@ class GradleConnector() {
 
         } finally {
             connection.close()
+            ConnectorServices.reset()
         }
     }
 

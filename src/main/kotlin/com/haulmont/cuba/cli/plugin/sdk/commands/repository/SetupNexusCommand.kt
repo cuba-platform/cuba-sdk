@@ -57,11 +57,11 @@ class SetupNexusCommand : AbstractSdkCommand() {
         }
         question("password", messages["setup.repositoryPasswordCaption"]) {
             default("admin")
-            askIf {  nexusConfigurationRequired(it)}
+            askIf { nexusConfigurationRequired(it) }
         }
         question("repository-name", messages["setup.repositoryName"]) {
             default("cuba-sdk")
-            askIf {  nexusConfigurationRequired(it) }
+            askIf { nexusConfigurationRequired(it) }
         }
     }
 
@@ -77,10 +77,10 @@ class SetupNexusCommand : AbstractSdkCommand() {
     }
 
     private fun setupRepository(answers: Answers) {
+        StopCommand().apply { checkState = false }.execute()
         if (repositoryPathIsEmpty(answers) || answers["rewrite-install-path"] as Boolean) {
             if (downloadAndConfigureNexus(answers)) {
                 addTargetSdkRepository(answers)
-                printWriter.println(messages["setup.sdkConfigured"].green())
             }
         }
     }
@@ -112,10 +112,8 @@ class SetupNexusCommand : AbstractSdkCommand() {
         installer.downloadAndConfigure(
             configure = {
                 configureNexusProperties(answers)
-                StopCommand().apply { checkState = false }.execute()
                 StartCommand().execute()
                 configureNexus(answers)
-                printWriter.println(messages["setup.nexusConfigured"].green())
             },
             onFail = {
                 printWriter.println(messages["setup.nexus.configurationFailed"].format(it.message).red())
@@ -158,37 +156,48 @@ class SetupNexusCommand : AbstractSdkCommand() {
     }
 
     private fun configureNexus(answers: Answers) {
+
         printWriter.println(messages["setup.applyRepositoryCredentials"])
         val adminPassword =
             Path.of(answers["repository-path"] as String, "sonatype-work", "nexus3", "admin.password")
         if (Files.exists(adminPassword)) {
-            runNexusConfigurationScript(answers, "admin", adminPassword.toFile().readText(StandardCharsets.UTF_8))
-            Files.delete(adminPassword)
+            if (runNexusConfigurationScript(
+                    answers,
+                    "admin",
+                    adminPassword.toFile().readText(StandardCharsets.UTF_8)
+                )
+            ) {
+                Files.delete(adminPassword)
+                persistSdkCredentials(answers)
+                printWriter.println(messages["setup.nexusConfigured"].green())
+            }
         } else {
-
             var login = answers["login"] as String
             var password = answers["password"] as String
-            repositoryManager.getRepository(answers["repository-name"] as String, RepositoryTarget.TARGET)?.let {
+            repositoryManager.getRepository(sdkSettings["repository.name"], RepositoryTarget.TARGET)?.let {
                 val authentication = it.authentication
                 if (authentication != null) {
                     login = authentication.login
                     password = authentication.password
                 }
             }
-            runNexusConfigurationScript(answers, login, password)
-        }
-        persistSdkCredentials(answers)
-        if (Files.exists(adminPassword)) {
-            Files.delete(adminPassword)
+            if (runNexusConfigurationScript(answers, login, password)) {
+                persistSdkCredentials(answers)
+                printWriter.println(messages["setup.nexusConfigured"].green())
+            }
         }
     }
 
-    private fun runNexusConfigurationScript(answers: Answers, login: String, password: String) {
+    private fun runNexusConfigurationScript(answers: Answers, login: String, password: String): Boolean {
         if (createNexusScript(login, password, nexusScriptManager.loadScript("createRepository.groovy"))) {
-            runNexusScript(answers, login, password)
+            if (!runNexusScript(answers, login, password)) {
+                return false
+            }
             dropNexusScript(answers)
             addAdditionalScripts(answers)
+            return true
         }
+        return false
     }
 
     private fun addAdditionalScripts(answers: Map<String, Answer>) {
@@ -283,6 +292,7 @@ class SetupNexusCommand : AbstractSdkCommand() {
         }
 
         properties["application-port"] = answers["port"]
+        properties["nexus.scripts.allowCreation"] = "true"
         FileWriter(nexusConfig.toString()).use {
             properties.store(it, "Nexus properties")
         }

@@ -54,7 +54,6 @@ open class ToolInstaller(
                 unzip(it)
             }.also {
                 configure(it)
-                Files.delete(it)
             }
         } catch (e: Exception) {
             onFail(e)

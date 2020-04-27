@@ -23,9 +23,7 @@ import com.haulmont.cuba.cli.green
 import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
 import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
-import com.haulmont.cuba.cli.prompting.Answers
 import com.haulmont.cuba.cli.prompting.Prompts
-import com.haulmont.cuba.cli.prompting.QuestionsList
 import org.kodein.di.generic.instance
 
 @Parameters(commandDescription = "Remove repository from SDK")
@@ -38,24 +36,25 @@ open class RemoveRepositoryCommand : AbstractSdkCommand() {
     private var name: String? = null
 
     override fun run() {
-        if (name == null) {
-            printWriter.println(messages["repository.nameRequired"])
-            return
-        }
-        Prompts.create(kodein) { askRepositorySettings() }
-            .let(Prompts::ask)
-            .let(this::removeRepository)
-    }
-
-    private fun removeRepository(answers: Answers) {
-        val target = target ?: RepositoryTarget.getTarget(answers["target"] as String)
-        name?.let { repositoryManager.removeRepository(it, target) }
-        printWriter.println(messages["repository.removed"].green())
-    }
-
-    private fun QuestionsList.askRepositorySettings() {
         if (target == null) {
-            textOptions("target", messages["repository.target"], listOf("source", "sdk", "search"))
+            val targetAnswers = Prompts.create {
+                textOptions("target", messages["repository.target"], listOf("source", "sdk", "search"))
+            }.ask()
+            target = RepositoryTarget.getTarget(targetAnswers["target"] as String)
         }
+        if (name == null) {
+            val repositories = repositoryManager.getRepositories(target!!)
+                .map { it.name }.sorted()
+            val nameAnswers = Prompts.create {
+                textOptions("name", messages["repository.name"], repositories)
+            }.ask()
+            name = nameAnswers["name"] as String
+        }
+        removeRepository(target!!, name!!)
+    }
+
+    private fun removeRepository(target: RepositoryTarget, name: String) {
+        repositoryManager.removeRepository(name, target)
+        printWriter.println(messages["repository.removed"].green())
     }
 }

@@ -16,6 +16,7 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.commands.repository
 
+import com.beust.jcommander.Parameter
 import com.beust.jcommander.Parameters
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.green
@@ -28,11 +29,18 @@ import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
 import com.haulmont.cuba.cli.prompting.Answers
 import com.haulmont.cuba.cli.prompting.Prompts
 import com.haulmont.cuba.cli.prompting.QuestionsList
+import com.haulmont.cuba.cli.prompting.ValidationException
 import org.kodein.di.generic.instance
 import java.nio.file.Paths
 
 @Parameters(commandDescription = "Add repository for SDK")
 open class AddRepositoryCommand : AbstractSdkCommand() {
+
+    @Parameter(
+        description = "Repository name",
+        hidden = true
+    )
+    var repositoryName: String? = null
 
     internal val repositoryManager: RepositoryManager by sdkKodein.instance()
     internal var target: RepositoryTarget? = null
@@ -45,7 +53,7 @@ open class AddRepositoryCommand : AbstractSdkCommand() {
 
     private fun addRepository(answers: Answers) {
         val target = target ?: RepositoryTarget.getTarget(answers["target"] as String)
-        val name = answers["name"] as String
+        val name = repositoryName ?: answers["name"] as String
         val isLocal = answers["isLocal"] as Boolean
         val url = if (isLocal) "${answers["path"]}" else answers["url"] as String
         val authRequired = answers["auth"] as Boolean?
@@ -54,7 +62,7 @@ open class AddRepositoryCommand : AbstractSdkCommand() {
                 answers["login"] as String, answers["password"] as String
             ) else null
         val type = if (isLocal) RepositoryType.LOCAL else (answers["type"] as String?)?.let {
-             getRepositoryType(it)
+            getRepositoryType(it)
         }
         val repositoryName = answers["searchName"] as String?
         val repository = Repository(
@@ -69,11 +77,19 @@ open class AddRepositoryCommand : AbstractSdkCommand() {
     }
 
     private fun QuestionsList.askRepositorySettings() {
-        textOptions("target", messages["repository.target"], listOf("source", "sdk", "search")) {
-            askIf { target == null }
+        if (target == null) {
+            textOptions("target", messages["repository.target"], listOf("source", "sdk", "search"))
         }
-        question("name", messages["repository.name"]) {
-            validate { repositoryManager.getRepository(value, RepositoryTarget.getTarget(answers["target"] as String)) }
+        if (repositoryName == null) {
+            question("name", messages["repository.name"]) {
+                validate {
+                    validateRepositoryName(target ?: RepositoryTarget.getTarget(answers["target"] as String), value)
+                }
+            }
+        } else {
+            if (target != null) {
+                validateRepositoryName(target!!, repositoryName!!)
+            }
         }
         confirmation("isLocal", messages["repository.isLocal"]) {
             default(false)
@@ -103,6 +119,12 @@ open class AddRepositoryCommand : AbstractSdkCommand() {
         }
         question("searchName", messages["repository.searchRepositoryName"]) {
             askIf { isSearchRepository(it) }
+        }
+    }
+
+    private fun validateRepositoryName(target: RepositoryTarget, repositoryName: String) {
+        if (repositoryManager.getRepository(repositoryName, target) != null) {
+            throw ValidationException("Repository with name ${repositoryName} already exist")
         }
     }
 
