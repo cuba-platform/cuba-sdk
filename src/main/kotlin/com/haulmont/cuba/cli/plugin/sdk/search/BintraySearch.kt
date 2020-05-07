@@ -24,8 +24,8 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 
 class BintraySearch(repository: Repository) : AbstractRepositorySearch(repository) {
     override fun searchParameters(component: Component): List<Pair<String, String>> = listOf(
-        "g" to component.packageName,
-        "a" to if (component.globalModule() != null) component.globalModule()!!.name!!.substringBefore("-global") + "*" else "*",
+        "g" to component.groupId,
+        "a" to if (component.globalModule() != null) component.globalModule()!!.artifactId.substringBefore("-global") + "*" else "*",
         "subject" to repository.repositoryName
     )
 
@@ -33,7 +33,7 @@ class BintraySearch(repository: Repository) : AbstractRepositorySearch(repositor
         if (!it.isJsonArray) return null
         val array = it as JsonArray
         if (array.size() == 0) {
-            log.info("Unknown ${component.type}: ${component.packageName}")
+            log.info("Unknown ${component.type}: ${component.groupId}")
             return null
         }
         val json = array.get(0) as JsonObject
@@ -51,7 +51,7 @@ class BintraySearch(repository: Repository) : AbstractRepositorySearch(repositor
                 val split = it.split(":")
                 val name = split[1]
                 if (component.globalModule() != null) {
-                    val prefix = component.globalModule()!!.name!!.substringBefore("-global")
+                    val prefix = component.globalModule()!!.artifactId.substringBefore("-global")
                     if (!name.startsWith(prefix)) {
                         return@map null
                     }

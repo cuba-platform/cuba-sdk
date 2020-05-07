@@ -42,7 +42,7 @@ open class AddRepositoryCommand : AbstractSdkCommand() {
     )
     var repositoryName: String? = null
 
-    internal val repositoryManager: RepositoryManager by sdkKodein.instance()
+    internal val repositoryManager: RepositoryManager by sdkKodein.instance<RepositoryManager>()
     internal var target: RepositoryTarget? = null
 
     override fun run() {
@@ -78,7 +78,7 @@ open class AddRepositoryCommand : AbstractSdkCommand() {
 
     private fun QuestionsList.askRepositorySettings() {
         if (target == null) {
-            textOptions("target", messages["repository.target"], listOf("source", "sdk", "search"))
+            textOptions("target", messages["repository.target"], listOf("source", "target", "search"))
         }
         if (repositoryName == null) {
             question("name", messages["repository.name"]) {

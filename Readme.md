@@ -65,7 +65,7 @@ SDK should be configured before the first usage. To configure SDK run the `sdk i
 SDK tool has three repository scopes:
 - **search** - repository to search components for frameworks and add-ons. 
 - **source** - source repository for maven commands. Dependencies will be downloaded from these repositories.  
-- **sdk** - target repository to upload components with dependencies.
+- **target** - target repository to upload components with dependencies.
 
 By default the following repositories are configured:
 - **search scope:**
@@ -81,17 +81,17 @@ By default the following repositories are configured:
     
 **Commands:**
 - `sdk repository list` - prints list of configured repositories.
-- `sdk repository list sdk` - prints list of configured SDK repositories.
+- `sdk repository list target` - prints list of configured target repositories.
 - `sdk repository list source` - prints list of configured source repositories.
 - `sdk repository list search` - prints list of configured search repositories.
 
 - `sdk repository add` - configures new repository.
-- `sdk repository add sdk` - configures new SDK repository.
+- `sdk repository add target` - configures new target repository.
 - `sdk repository add source` - configures new source repository.
 - `sdk repository add search` - configures new search repository.
 
 - `sdk repository remove` - removes repository.
-- `sdk repository remove sdk` - removes SDK repository.
+- `sdk repository remove target` - removes target repository.
 - `sdk repository remove source` - removes source repository.
 - `sdk repository remove search` - removes search repository.
 
@@ -100,7 +100,7 @@ By default the following repositories are configured:
 ### Component Commands 
 
 List command prints a list of resolved and installed components:
-- `sdk list framework`
+- `sdk list cuba`
 - `sdk list addon`
 - `sdk list lib`
 
@@ -110,28 +110,28 @@ Component coordinates for framework and add-on component commands can be configu
 - `<name>:<version>` - searches component by *name* and runs command for the component for the configured version.
 - `<group>:<name>:<version>` - runs command for the component by full component coordinates.
 
-Example: `sdk push framework cuba:7.1.3`
+Example: `sdk push cuba 7.1.3`
  
 Resolve command finds and downloads all component dependencies to local Gradle cache. If an add-on depends on other add-ons, then SDK will ask to resolve additional add-ons too. This feature can be disabled with `--nra` or `--not-resolve-addons` additional parameters. 
 - `sdk resolve` - bulk command for the list of frameworks, add-ons, and libs.
-- `sdk resolve framework`
+- `sdk resolve cuba`
 - `sdk resolve addon`
 - `sdk resolve lib`
 
 Push command uploads resolved components with dependencies to all *target* repositories. Specific target repository can be configured with `--r` or `--repository` additional parameters, for example, `sdk push addon dashboard --r sdk2`.
 - `sdk push` - bulk command for the list of frameworks, add-ons, and libs.  
-- `sdk push framework`
+- `sdk push cuba`
 - `sdk push addon <name>`
 - `sdk push lib`
 
 Install command resolves and pushes components. Specific target repository can be configured with `--r` or `--repository` additional parameters, for example, `sdk push addon dashboard --r sdk2`.
 - `sdk install` - bulk command for the list of frameworks, add-ons, and libs. 
-- `sdk install framework`
+- `sdk install cuba`
 - `sdk install addon`
 - `sdk install lib`
 
 Remove command removes the component with dependencies from the local *m2* repository and the embedded Nexus repository. If `--local-only` flag is provided, then the component will be removed only from the local *m2* repository.  
-- `sdk remove framework`
+- `sdk remove cuba`
 - `sdk remove addon`
 - `sdk remove lib`
 
@@ -139,7 +139,7 @@ Component coordinates for bulk commands can be passed with ','. For example: `sd
 
 Export command exports the component with dependencies as an archive to the `sdkproperties[sdk.export.home]` directory. If the component is not resolved yet, then SDK will ask to resolve the component.  
 - `sdk export` - exports all resolved SDK components.
-- `sdk export framework`
+- `sdk export cuba`
 - `sdk export addon`
 - `sdk export lib`
     

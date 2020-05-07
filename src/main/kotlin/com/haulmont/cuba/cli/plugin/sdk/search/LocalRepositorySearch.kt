@@ -30,7 +30,7 @@ class LocalRepositorySearch(repository: Repository) : AbstractRepositorySearch(r
 
     override fun search(component: Component): Component? {
         var baseSearchPath: Path = Path.of(repository.url)
-        for (groupPart in component.packageName.split(".")) {
+        for (groupPart in component.groupId.split(".")) {
             baseSearchPath = baseSearchPath.resolve(groupPart)
         }
         if (!Files.exists(baseSearchPath)) {
@@ -48,8 +48,9 @@ class LocalRepositorySearch(repository: Repository) : AbstractRepositorySearch(r
                     componentDir.listFiles()
                         .filter { it.isDirectory && it.name == component.version }
                         .forEach {
-                            val componentToResolve = Component(packageName = component.packageName,
-                                name = componentName,
+                            val componentToResolve = Component(
+                                groupId = component.groupId,
+                                artifactId = componentName,
                                 version = component.version,
                                 classifiers = it.listFiles()
                                     .filter { it.name.startsWith(componentPrefix) }

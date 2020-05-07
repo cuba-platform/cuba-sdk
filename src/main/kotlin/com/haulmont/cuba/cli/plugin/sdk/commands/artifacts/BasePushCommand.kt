@@ -33,6 +33,7 @@ abstract class BasePushCommand : BaseComponentCommand() {
     override fun run() {
         checkRepositories(repositoryNames)?.let { repositories ->
             createSearchContext()?.let {
+                printWriter.println(messages["push.start"].format(it))
                 if (force(it) || !componentManager.isAlreadyInstalled(it)) {
                     val component = searchInMetadata(it)
                     if (component != null) {

@@ -19,6 +19,7 @@ package com.haulmont.cuba.cli.plugin.sdk.services
 import com.google.gson.Gson
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
+import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
 import com.haulmont.cuba.cli.plugin.sdk.dto.SdkMetadata
 import com.haulmont.cuba.cli.plugin.sdk.utils.UnzipProcessCallback
 import org.kodein.di.generic.instance
@@ -34,8 +35,10 @@ import java.util.zip.ZipOutputStream
 class ImportExportServiceImpl : ImportExportService {
 
     private val log: Logger = Logger.getLogger(MavenExecutorImpl::class.java.name)
-    private val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
-    private val componentManager: ComponentManager by sdkKodein.instance()
+    private val sdkSettings: SdkSettingsHolder by sdkKodein.instance<SdkSettingsHolder>()
+    private val componentManager: ComponentManager by sdkKodein.instance<ComponentManager>()
+    private val artifactManager: ArtifactManager by sdkKodein.instance<ArtifactManager>()
+    private val repositoryManager: RepositoryManager by sdkKodein.instance<RepositoryManager>()
 
     override fun export(fileName: String, components: Collection<Component>, progress: ExportProcessCallback?): Path {
         val exportDir = Path.of(sdkSettings["sdk.export.path"]).also {
@@ -56,22 +59,24 @@ class ImportExportServiceImpl : ImportExportService {
             out.write(Gson().toJson(metadata).toByteArray())
             for (artifact in allDependencies) {
                 val zipPath = artifact.localPath(Path.of("m2")).parent
-                artifact.localPath(Path.of(sdkSettings["maven.local.repo"]))
-                    .parent.toFile().listFiles().forEach { file ->
-                    FileInputStream(file).use { fi ->
-                        BufferedInputStream(fi).use { origin ->
-                            val path = zipPath.resolve(file.name)
-                            if (!paths.contains(path)) {
-                                val entry = ZipEntry(path.toString())
-                                out.putNextEntry(entry)
-                                while (true) {
-                                    val readBytes = origin.read(data)
-                                    if (readBytes == -1) {
-                                        break
+                for (classifier in artifact.classifiers) {
+                    artifactManager.getOrDownloadArtifactFile(artifact, classifier).let {
+                        val file = it.toFile()
+                        FileInputStream(file).use { fi ->
+                            BufferedInputStream(fi).use { origin ->
+                                val path = zipPath.resolve(file.name)
+                                if (!paths.contains(path)) {
+                                    val entry = ZipEntry(path.toString())
+                                    out.putNextEntry(entry)
+                                    while (true) {
+                                        val readBytes = origin.read(data)
+                                        if (readBytes == -1) {
+                                            break
+                                        }
+                                        out.write(data, 0, readBytes)
                                     }
-                                    out.write(data, 0, readBytes)
+                                    paths.add(path)
                                 }
-                                paths.add(path)
                             }
                         }
                     }
@@ -89,7 +94,9 @@ class ImportExportServiceImpl : ImportExportService {
         uploadRequired: Boolean,
         unzipProgressFun: UnzipProcessCallback?
     ): Collection<Component> {
-        val targetDir = Path.of(sdkSettings["maven.local.repo"]).also {
+        val localRepository = repositoryManager.getRepository("sdk-local", RepositoryTarget.SOURCE)
+            ?: throw IllegalStateException("\"sdk-local\" source repository does not exists")
+        val targetDir = Path.of(localRepository.url).also {
             if (!Files.exists(it)) {
                 Files.createDirectories(it)
             }

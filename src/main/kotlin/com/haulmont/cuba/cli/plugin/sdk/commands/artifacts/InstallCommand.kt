@@ -26,7 +26,7 @@ class InstallCommand : BaseInstallCommand() {
 
     @Parameter(
         names = ["--c", "--components"],
-        description = "List of framework, addon or lib components via ',' in <name>:<version> or in full coordinates format <group>:<name>:<version>. Example: framework-cuba:7.2.1,addon-dashboard:3.2.1",
+        description = "List of components via ',' in <name>:<version> or in full coordinates format <group>:<name>:<version>. Example: cuba-7.2.1,addon-dashboard:3.2.1",
         hidden = true
     )
     private var nameVersions: String? = null

@@ -17,10 +17,9 @@
 package com.haulmont.cuba.cli.plugin.sdk.dto
 
 data class Component(
-    val packageName: String,
-    val name: String? = null,
+    val groupId: String,
+    val artifactId: String,
     val version: String,
-    val type: ComponentType = ComponentType.LIB,
     val classifiers: MutableList<Classifier> = mutableListOf(
         Classifier.default(),
         Classifier.pom(),
@@ -29,10 +28,21 @@ data class Component(
     val url: String? = null,
     var frameworkVersion: String? = null,
     val components: MutableSet<Component> = HashSet(),
-    val dependencies: MutableSet<MvnArtifact> = HashSet()
+    val dependencies: MutableSet<MvnArtifact> = HashSet(),
+    val type: String = "",
+    val id: String? = null,
+    val name: String? = null,
+    val description: String? = null,
+    val category: String? = null
 ) {
     override fun toString(): String {
-        return (name ?: "${packageName}:${name ?: ""}") + ":$version"
+        name?.let {
+            return "$name:$version"
+        }
+        id?.let {
+            return "$id:$version"
+        }
+        return "$groupId:$artifactId:$version"
     }
 
     fun collectAllDependencies(): Set<MvnArtifact> {
@@ -45,5 +55,10 @@ data class Component(
     }
 
     fun globalModule() =
-        components.filter { it.name != null && it.name.endsWith("-global") }.firstOrNull()
+        components.filter { it.artifactId.endsWith("-global") }.firstOrNull()
+
+    fun isSame(component: Component) = type == component.type &&
+            artifactId == component.artifactId &&
+            groupId == component.groupId &&
+            version == component.version
 }

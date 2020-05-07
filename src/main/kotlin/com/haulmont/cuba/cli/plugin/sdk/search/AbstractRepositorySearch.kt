@@ -52,7 +52,7 @@ abstract class AbstractRepositorySearch : RepositorySearch {
         result.fold(
             success = {
                 log.info("Component found in ${repository}: ${component}")
-                return handleResultJson(Gson().fromJson<JsonElement>(it, JsonElement::class.java), component)
+                return handleResultJson(Gson().fromJson(it, JsonElement::class.java), component)
             },
             failure = { error ->
                 log.info("Component not found in ${repository}: ${component}")
@@ -75,10 +75,5 @@ abstract class AbstractRepositorySearch : RepositorySearch {
     }
 
     internal fun componentAlreadyExists(componentsList: Collection<Component>, toAdd: Component): Component? =
-        componentsList.filter {
-            it.packageName == toAdd.packageName
-                    && it.name == toAdd.name
-                    && it.version == toAdd.version
-                    && it.type == toAdd.type
-        }.firstOrNull()
+        componentsList.filter { it.isSame(toAdd) }.firstOrNull()
 }

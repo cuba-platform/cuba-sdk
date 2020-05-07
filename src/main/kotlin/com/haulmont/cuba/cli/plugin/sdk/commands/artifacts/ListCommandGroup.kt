@@ -17,12 +17,18 @@
 package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
 import com.beust.jcommander.Parameters
+import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
+import com.haulmont.cuba.cli.plugin.sdk.templates.ComponentRegistry
+import org.kodein.di.generic.instance
 
-@Parameters(commandDescription = "List artifacts in SDK")
+@Parameters(commandDescription = "List components in SDK")
 class ListCommandGroup : AbstractSdkCommand() {
 
+    protected val registry: ComponentRegistry by sdkKodein.instance<ComponentRegistry>()
+
     override fun run() {
-        printWriter.println("Use 'framework', 'addon', 'lib' or 'repository' subcommands.")
+        val providerNames = registry.providers().map { it.getType() }.joinToString(separator = ", ")
+        printWriter.println("Use $providerNames subcommands.")
     }
 }

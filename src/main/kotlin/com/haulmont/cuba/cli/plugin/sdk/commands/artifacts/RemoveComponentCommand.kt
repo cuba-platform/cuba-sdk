@@ -18,27 +18,16 @@ package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
 import com.beust.jcommander.Parameter
 import com.beust.jcommander.Parameters
-import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
-import com.haulmont.cuba.cli.plugin.sdk.dto.MvnArtifact
-import com.haulmont.cuba.cli.plugin.sdk.services.ArtifactManager
-import org.kodein.di.generic.instance
+import com.haulmont.cuba.cli.plugin.sdk.templates.ComponentProvider
 
-@Parameters(commandDescription = "Export library with dependencies")
-class ExportLibCommand : AbstractComponentExportCommand() {
+@Parameters(commandDescription = "Remove component from SDK")
+class RemoveComponentCommand(val provider: ComponentProvider) : BaseRemoveCommand() {
 
-    internal val artifactManager: ArtifactManager by sdkKodein.instance()
-
-    @Parameter(description = "Lib group, name and version <group>:<name>:<version>")
+    @Parameter(description = "Component name and version <name>:<version>", hidden = true)
     private var nameVersion: String? = null
 
     override fun createSearchContext(): Component? {
-        return nameVersion?.resolveLibraryCoordinates() ?: fail(messages["lib.unknown"].format(nameVersion))
-    }
-
-    override fun search(component: Component): Component? {
-        artifactManager.readPom(MvnArtifact(component.packageName, component.name as String, component.version))
-            ?: return null
-        return component
+        return providerResolvedSearchContext(nameVersion, provider)
     }
 }

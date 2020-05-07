@@ -25,7 +25,6 @@ import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
 import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
 import org.gradle.tooling.GradleConnector
 import org.gradle.tooling.ProgressEvent
-import org.gradle.tooling.internal.consumer.ConnectorServices
 import org.gradle.tooling.model.GradleProject
 import org.kodein.di.generic.instance
 import java.io.ByteArrayOutputStream
@@ -38,9 +37,9 @@ typealias ProgressCallback = (event: ProgressEvent?) -> Unit
 
 class GradleConnector() {
     private val connector: GradleConnector
-    private val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
-    private val repositoryManager: RepositoryManager by sdkKodein.instance()
-    private val printWriter: PrintWriter by sdkKodein.instance()
+    private val sdkSettings: SdkSettingsHolder by sdkKodein.instance<SdkSettingsHolder>()
+    private val repositoryManager: RepositoryManager by sdkKodein.instance<RepositoryManager>()
+    private val printWriter: PrintWriter by sdkKodein.instance<PrintWriter>()
 
     init {
         connector = GradleConnector.newConnector()
@@ -104,7 +103,6 @@ class GradleConnector() {
 
         } finally {
             connection.close()
-            ConnectorServices.reset()
         }
     }
 

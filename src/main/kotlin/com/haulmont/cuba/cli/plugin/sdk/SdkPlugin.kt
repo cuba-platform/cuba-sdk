@@ -25,19 +25,35 @@ import com.haulmont.cuba.cli.plugin.sdk.commands.PrintPropertiesCommand
 import com.haulmont.cuba.cli.plugin.sdk.commands.SdkCommand
 import com.haulmont.cuba.cli.plugin.sdk.commands.artifacts.*
 import com.haulmont.cuba.cli.plugin.sdk.commands.repository.*
-import com.haulmont.cuba.cli.plugin.sdk.services.ComponentVersionManager
+import com.haulmont.cuba.cli.plugin.sdk.templates.ComponentRegistry
+import com.haulmont.cuba.cli.plugin.sdk.templates.CubaAddonProvider
+import com.haulmont.cuba.cli.plugin.sdk.templates.CubaFrameworkProvider
+import com.haulmont.cuba.cli.plugin.sdk.templates.LibProvider
+import org.gradle.tooling.internal.consumer.ConnectorServices
 import org.kodein.di.generic.instance
+import kotlin.concurrent.thread
 
 class SdkPlugin : CliPlugin {
 
-    private val componentVersionsManager: ComponentVersionManager by sdkKodein.instance()
+    private val componentRegistry: ComponentRegistry by sdkKodein.instance<ComponentRegistry>()
+
+    init {
+        componentRegistry.addProviders(
+            CubaAddonProvider(), CubaFrameworkProvider(), LibProvider()
+        //    , SpringBootProvider()
+        )
+    }
 
     override val apiVersion: Int
         get() = 5
 
     @Subscribe
     fun onInit(event: InitPluginEvent) {
-        componentVersionsManager.load {}
+        for (provider in componentRegistry.providers()) {
+            thread {
+                provider.load()
+            }
+        }
         event.commandsRegistry {
             command("sdk", SdkCommand()) {
                 command("properties", PrintPropertiesCommand())
@@ -51,17 +67,17 @@ class SdkPlugin : CliPlugin {
 
                 command("repository", RepositoryCommandGroup()) {
                     command("list", ListRepositoryCommand()) {
-                        command("sdk", ListTargetRepositoryCommand())
+                        command("target", ListTargetRepositoryCommand())
                         command("source", ListSourceRepositoryCommand())
                         command("search", ListSearchRepositoryCommand())
                     }
                     command("add", AddRepositoryCommand()) {
-                        command("sdk", AddTargetRepositoryCommand())
+                        command("target", AddTargetRepositoryCommand())
                         command("source", AddSourceRepositoryCommand())
                         command("search", AddSearchRepositoryCommand())
                     }
                     command("remove", RemoveRepositoryCommand()) {
-                        command("sdk", RemoveTargetRepositoryCommand())
+                        command("target", RemoveTargetRepositoryCommand())
                         command("source", RemoveSourceRepositoryCommand())
                         command("search", RemoveSearchRepositoryCommand())
                     }
@@ -70,39 +86,39 @@ class SdkPlugin : CliPlugin {
                 command("import", ImportCommand())
 
                 command("export", ExportCommand()) {
-                    command("framework", ExportFrameworkCommand())
-                    command("addon", ExportAddonCommand())
-                    command("lib", ExportLibCommand())
+                    for (provider in componentRegistry.providers()) {
+                        command(provider.getType(), ExportComponentCommand(provider))
+                    }
                 }
 
                 command("resolve", ResolveCommand()) {
-                    command("framework", ResolveFrameworkCommand())
-                    command("addon", ResolveAddonCommand())
-                    command("lib", ResolveLibCommand())
+                    for (provider in componentRegistry.providers()) {
+                        command(provider.getType(), ResolveComponentCommand(provider))
+                    }
                 }
 
                 command("push", PushCommand()) {
-                    command("framework", PushFrameworkCommand())
-                    command("addon", PushAddonCommand())
-                    command("lib", PushLibCommand())
+                    for (provider in componentRegistry.providers()) {
+                        command(provider.getType(), PushComponentCommand(provider))
+                    }
                 }
 
                 command("install", InstallCommand()) {
-                    command("framework", InstallFrameworkCommand())
-                    command("addon", InstallAddonCommand())
-                    command("lib", InstallLibCommand())
+                    for (provider in componentRegistry.providers()) {
+                        command(provider.getType(), InstallComponentCommand(provider))
+                    }
                 }
 
                 command("remove", RemoveCommandGroup()) {
-                    command("framework", RemoveFrameworkCommand())
-                    command("addon", RemoveAddonCommand())
-                    command("lib", RemoveLibCommand())
+                    for (provider in componentRegistry.providers()) {
+                        command(provider.getType(), RemoveComponentCommand(provider))
+                    }
                 }
 
                 command("list", ListCommandGroup()) {
-                    command("framework", ListFrameworkCommand())
-                    command("addon", ListAddonCommand())
-                    command("lib", ListLibsCommand())
+                    for (provider in componentRegistry.providers()) {
+                        command(provider.getType(), ListComponentCommand(provider))
+                    }
                 }
             }
         }
@@ -110,6 +126,7 @@ class SdkPlugin : CliPlugin {
         Runtime.getRuntime().addShutdownHook(object : Thread() {
             override fun run() {
                 StopCommand().apply { checkState = false }.execute()
+                ConnectorServices.reset()
             }
         })
     }
@@ -117,8 +134,7 @@ class SdkPlugin : CliPlugin {
     @Subscribe
     fun onDestroy(event: DestroyPluginEvent) {
         StopCommand().apply { checkState = false }.execute()
+        ConnectorServices.reset()
     }
-
-
 
 }

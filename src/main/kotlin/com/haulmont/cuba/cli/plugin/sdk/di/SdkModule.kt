@@ -22,6 +22,8 @@ import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusManagerImpl
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusScriptManager
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusScriptManagerImpl
 import com.haulmont.cuba.cli.plugin.sdk.services.*
+import com.haulmont.cuba.cli.plugin.sdk.templates.ComponentRegistry
+import com.haulmont.cuba.cli.plugin.sdk.templates.ComponentRegistryImpl
 import org.kodein.di.Kodein
 import org.kodein.di.generic.bind
 import org.kodein.di.generic.singleton
@@ -74,6 +76,10 @@ private val sdkModule = Kodein.Module {
 
     bind<DbProvider>() with singleton {
         DbProviderImpl()
+    }
+
+    bind< ComponentRegistry>() with singleton {
+        ComponentRegistryImpl()
     }
 }
 

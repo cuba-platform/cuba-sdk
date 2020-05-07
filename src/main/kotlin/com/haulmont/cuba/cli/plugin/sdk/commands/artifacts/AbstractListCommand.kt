@@ -18,27 +18,26 @@ package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
-import com.haulmont.cuba.cli.plugin.sdk.dto.ComponentType
 import com.haulmont.cuba.cli.plugin.sdk.services.MetadataHolder
 import com.haulmont.cuba.cli.plugin.sdk.utils.doubleUnderline
 import org.kodein.di.generic.instance
 
 abstract class AbstractListCommand : AbstractSdkCommand() {
 
-    internal val metadataHolder: MetadataHolder by sdkKodein.instance()
+    internal val metadataHolder: MetadataHolder by sdkKodein.instance<MetadataHolder>()
 
     override fun run() {
-        printWriter.println(messages["list.resolved.${getComponentType()}"].doubleUnderline())
+        printWriter.println(messages["list.resolved"].format(getComponentType()).doubleUnderline())
         for (component in metadataHolder.getResolved().filter { it.type == getComponentType() }) {
             printWriter.println("$component")
         }
         printWriter.println()
-        printWriter.println(messages["list.installed.${getComponentType()}"].doubleUnderline())
+        printWriter.println(messages["list.installed"].format(getComponentType()).doubleUnderline())
         for (component in metadataHolder.getInstalled().filter { it.type == getComponentType() }) {
             printWriter.println("$component")
         }
         printWriter.println()
     }
 
-    abstract fun getComponentType(): ComponentType
+    abstract fun getComponentType(): String
 }

@@ -32,7 +32,7 @@ import java.nio.file.Path
 @Parameters(commandDescription = "Import SDK")
 class ImportCommand : BaseComponentCommand() {
 
-    internal val exportService: ImportExportService by sdkKodein.instance()
+    internal val exportService: ImportExportService by sdkKodein.instance<ImportExportService>()
 
     @Parameter(description = "SDK archive to import")
     private var importFile: String? = null
@@ -74,7 +74,7 @@ class ImportCommand : BaseComponentCommand() {
             .also { components ->
                 printWriter.println(messages["import.components"].doubleUnderline())
                 components.sortedBy { "${it.type}_${it}" }.forEach {
-                    printWriter.println("${messages[it.type.toString().toLowerCase()]} $it")
+                    printWriter.println("${messages[it.type.toLowerCase()]} $it")
                 }
             }
         printWriter.println()

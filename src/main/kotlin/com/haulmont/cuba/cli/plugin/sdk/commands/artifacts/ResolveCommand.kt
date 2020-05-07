@@ -21,12 +21,12 @@ import com.beust.jcommander.Parameters
 import com.haulmont.cuba.cli.green
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 
-@Parameters(commandDescription = "Resolve artifact with dependencies in SDK")
+@Parameters(commandDescription = "Resolve component with dependencies in SDK")
 class ResolveCommand : BaseRemoveCommand() {
 
     @Parameter(
         names = ["--c", "--components"],
-        description = "List of framework, addon or lib components via ',' in <name>:<version> or in full coordinates format <group>:<name>:<version>. Example: framework-cuba:7.2.1,addon-dashboard:3.2.1",
+        description = "List components via ',' in <name>:<version> or in full coordinates format <group>:<name>:<version>. Example: cuba-7.2.1,addon-dashboard:3.2.1",
         hidden = true
     )
     private var nameVersions: String? = null

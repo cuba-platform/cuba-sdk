@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Haulmont.
+ * Copyright (c) 2008-2020 Haulmont.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
+package com.haulmont.cuba.cli.plugin.sdk.dto
 
-import com.beust.jcommander.Parameters
-import com.haulmont.cuba.cli.plugin.sdk.dto.ComponentType
-
-@Parameters(commandDescription = "List available frameworks in SDK")
-class ListFrameworkCommand : AbstractListCommand() {
-
-    override fun getComponentType(): ComponentType = ComponentType.FRAMEWORK
-}
+data class Version(
+    val version: String,
+    val major: String,
+    val minor: Int?,
+    val qualifier: String?
+)

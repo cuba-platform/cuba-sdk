@@ -34,6 +34,7 @@ abstract class BaseInstallCommand : BaseComponentCommand() {
     override fun run() {
         checkRepositories(repositoryNames)?.let { repositories ->
             createSearchContext()?.let {
+                printWriter.println(messages["install.start"].format(it))
                 if (force(it) || !componentManager.isAlreadyInstalled(it)) {
                     var component = searchInMetadata(it)
                     val componentsToResolve = mutableListOf<Component>()

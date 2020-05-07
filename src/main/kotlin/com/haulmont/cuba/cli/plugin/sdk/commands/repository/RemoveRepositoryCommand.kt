@@ -29,7 +29,7 @@ import org.kodein.di.generic.instance
 @Parameters(commandDescription = "Remove repository from SDK")
 open class RemoveRepositoryCommand : AbstractSdkCommand() {
 
-    internal val repositoryManager: RepositoryManager by sdkKodein.instance()
+    internal val repositoryManager: RepositoryManager by sdkKodein.instance<RepositoryManager>()
     internal var target: RepositoryTarget? = null
 
     @Parameter(description = "Repository name")
@@ -38,7 +38,7 @@ open class RemoveRepositoryCommand : AbstractSdkCommand() {
     override fun run() {
         if (target == null) {
             val targetAnswers = Prompts.create {
-                textOptions("target", messages["repository.target"], listOf("source", "sdk", "search"))
+                textOptions("target", messages["repository.target"], listOf("source", "target", "search"))
             }.ask()
             target = RepositoryTarget.getTarget(targetAnswers["target"] as String)
         }

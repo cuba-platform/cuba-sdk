@@ -18,7 +18,7 @@ package com.haulmont.cuba.cli.plugin.sdk.dto
 
 import com.github.kittinunf.fuel.core.Request
 
-open class Repository(
+data class Repository(
     val active: Boolean = true,
     val name: String,
     val type: RepositoryType,

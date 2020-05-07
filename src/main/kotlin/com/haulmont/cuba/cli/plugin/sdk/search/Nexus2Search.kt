@@ -25,8 +25,8 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 
 class Nexus2Search(repository: Repository) : AbstractRepositorySearch(repository) {
     override fun searchParameters(component: Component): List<Pair<String, String>> = listOf(
-        "g" to component.packageName,
-        "a" to if (component.globalModule() != null) component.globalModule()!!.name!!.substringBefore("-global") else "",
+        "g" to component.groupId,
+        "a" to if (component.globalModule() != null) component.globalModule()!!.artifactId.substringBefore("-global") else "",
         "v" to component.version
     )
 
@@ -34,7 +34,7 @@ class Nexus2Search(repository: Repository) : AbstractRepositorySearch(repository
         if (!it.isJsonArray) return null
         val array = it as JsonArray
         if (array.size() == 0) {
-            log.info("Unknown ${component.type}: ${component.packageName}")
+            log.info("Unknown ${component.type}: ${component.groupId}")
             return null
         }
         val json = array.get(0) as JsonObject
@@ -51,7 +51,7 @@ class Nexus2Search(repository: Repository) : AbstractRepositorySearch(repository
                 val groupId = dataObj.get("groupId").asString
                 val artifactId = dataObj.get("artifactId").asString
                 if (component.globalModule() != null) {
-                    val prefix = component.globalModule()!!.name!!.substringBefore("-global")
+                    val prefix = component.globalModule()!!.artifactId.substringBefore("-global")
                     if (!artifactId.startsWith(prefix)) {
                         return@map null
                     }

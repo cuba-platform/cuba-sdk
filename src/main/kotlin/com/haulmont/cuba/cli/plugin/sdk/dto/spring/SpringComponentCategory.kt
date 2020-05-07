@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Haulmont.
+ * Copyright (c) 2008-2020 Haulmont.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
+package com.haulmont.cuba.cli.plugin.sdk.dto.spring
 
-import com.beust.jcommander.Parameters
-import com.haulmont.cuba.cli.plugin.sdk.dto.ComponentType
-
-@Parameters(commandDescription = "List available add-ons in SDK")
-class ListAddonCommand : AbstractListCommand() {
-
-    override fun getComponentType(): ComponentType = ComponentType.ADDON
-}
+data class SpringComponentCategory(
+    val name: String,
+    val content: List<SpringComponent>
+)

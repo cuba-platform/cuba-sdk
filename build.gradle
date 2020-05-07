@@ -19,7 +19,8 @@ buildscript {
             commonsLogging      : "1.1.1",
             kotlinXmlBuilder    : "1.6.0",
             jUnit               : "4.12",
-            toolingApi          : "6.2.2"
+            toolingApi          : "6.2.2",
+            mvnrepo             : "1.1.0"
     ]
 
     repositories {
@@ -111,7 +112,7 @@ idea {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:${versions.kotlin}"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$versions.kotlin"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$versions.kotlin"
     extraLibs "org.jetbrains.kotlin:kotlin-stdlib-common:$versions.kotlin"
 
@@ -144,6 +145,11 @@ dependencies {
 
     implementation("commons-logging:commons-logging:$versions.commonsLogging")
 
+    extraLibs("com.github.devcsrj:mvnrepository-api-client:$versions.mvnrepo"){
+        exclude(group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib')
+        exclude(group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8')
+        exclude(group: 'org.jetbrains.kotlin', module: 'kotlin-reflect')
+    }
     extraLibs("org.json:json:$versions.json")
     extraLibs("com.github.kittinunf.fuel:fuel:$versions.fuel") {
         exclude(group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib')
@@ -161,8 +167,6 @@ dependencies {
         exclude(group: 'com.google.errorprone', module: 'error_prone_annotations')
         exclude(group: 'com.google.guava', module: 'guava')
     }
-
-
 
     extraLibs "org.gradle:gradle-tooling-api:$versions.toolingApi"
     // The tooling API need an SLF4J implementation available at runtime, replace this with any other implementation

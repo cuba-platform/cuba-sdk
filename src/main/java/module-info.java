@@ -41,9 +41,12 @@ module com.haulmont.cuba.cli.plugin.sdk {
     requires java.desktop;
     requires mapdb;
     requires kotlin.xml.builder;
+    requires mvnrepository.api.client;
+    requires okhttp;
 
     opens com.haulmont.cuba.cli.plugin.sdk;
     opens com.haulmont.cuba.cli.plugin.sdk.dto;
+    opens com.haulmont.cuba.cli.plugin.sdk.dto.spring;
     opens com.haulmont.cuba.cli.plugin.sdk.commands;
     opens com.haulmont.cuba.cli.plugin.sdk.commands.artifacts;
     opens com.haulmont.cuba.cli.plugin.sdk.commands.repository;

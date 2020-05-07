@@ -43,10 +43,10 @@ class GradleArtifactManagerImpl : ArtifactManager {
 
     private val log: Logger = Logger.getLogger(GradleArtifactManagerImpl::class.java.name)
 
-    internal val printWriter: PrintWriter by sdkKodein.instance()
-    internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
-    internal val repositoryManager: RepositoryManager by sdkKodein.instance()
-    internal val dbProvider: DbProvider by sdkKodein.instance()
+    internal val printWriter: PrintWriter by sdkKodein.instance<PrintWriter>()
+    internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance<SdkSettingsHolder>()
+    internal val repositoryManager: RepositoryManager by sdkKodein.instance<RepositoryManager>()
+    internal val dbProvider: DbProvider by sdkKodein.instance<DbProvider>()
 
     override fun init() {
         val gradleBuild = Path.of(sdkSettings["gradle.home"]).resolve("build.gradle").also {
@@ -64,10 +64,10 @@ class GradleArtifactManagerImpl : ArtifactManager {
         val dependencies = mutableListOf<MvnArtifact>()
         for (classifier in component.classifiers) {
             val componentPath = Path.of("raw")
-                .resolve(component.packageName)
-                .resolve(component.name)
+                .resolve(component.groupId)
+                .resolve(component.artifactId)
                 .resolve(component.version)
-                .resolve("${component.name}-${component.version}.${classifier.extension}")
+                .resolve("${component.artifactId}-${component.version}.${classifier.extension}")
             Files.createDirectories(Path.of(sdkSettings["gradle.cache"]).resolve(componentPath).parent)
             if (component.url != null) {
                 val (_, response, _) = FileUtils.downloadFile(
@@ -77,8 +77,8 @@ class GradleArtifactManagerImpl : ArtifactManager {
                 if (response.statusCode == 200) {
 
                     val mvnArtifact = MvnArtifact(
-                        component.packageName,
-                        component.name!!,
+                        component.groupId,
+                        component.artifactId!!,
                         component.version,
                         classifiers = component.classifiers
                     )

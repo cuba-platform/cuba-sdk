@@ -23,6 +23,7 @@ abstract class BaseResolveCommand : BaseComponentCommand() {
 
     override fun run() {
         createSearchContext()?.let {
+            printWriter.println(messages["resolve.start"].format(it))
             var component = searchInMetadata(it)
 
             if (force(it) || component == null) {

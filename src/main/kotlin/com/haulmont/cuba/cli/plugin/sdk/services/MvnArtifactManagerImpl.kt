@@ -35,10 +35,10 @@ class MvnArtifactManagerImpl : ArtifactManager {
 
     private val log: Logger = Logger.getLogger(MvnArtifactManagerImpl::class.java.name)
 
-    internal val printWriter: PrintWriter by sdkKodein.instance()
-    internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
-    private val repositoryManager: RepositoryManager by sdkKodein.instance()
-    internal val mavenExecutor: MavenExecutor by sdkKodein.instance()
+    internal val printWriter: PrintWriter by sdkKodein.instance<PrintWriter>()
+    internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance<SdkSettingsHolder>()
+    private val repositoryManager: RepositoryManager by sdkKodein.instance<RepositoryManager>()
+    internal val mavenExecutor: MavenExecutor by sdkKodein.instance<MavenExecutor>()
 
     override fun init() {
 
@@ -48,10 +48,10 @@ class MvnArtifactManagerImpl : ArtifactManager {
         val dependencies = mutableListOf<MvnArtifact>()
         for (classifier in component.classifiers) {
             val componentPath = Path.of(sdkSettings["maven.local.repo"])
-                .resolve(component.packageName)
-                .resolve(component.name)
+                .resolve(component.groupId)
+                .resolve(component.artifactId)
                 .resolve(component.version)
-                .resolve("${component.name}-${component.version}.${classifier.extension}")
+                .resolve("${component.artifactId}-${component.version}.${classifier.extension}")
             Files.createDirectories(componentPath.parent)
             if (component.url != null) {
                 val (_, response, _) = FileUtils.downloadFile(
@@ -61,8 +61,8 @@ class MvnArtifactManagerImpl : ArtifactManager {
                 if (response.statusCode == 200) {
                     dependencies.add(
                         MvnArtifact(
-                            component.packageName,
-                            component.name!!,
+                            component.groupId,
+                            component.artifactId!!,
                             component.version,
                             classifiers = component.classifiers
                         )

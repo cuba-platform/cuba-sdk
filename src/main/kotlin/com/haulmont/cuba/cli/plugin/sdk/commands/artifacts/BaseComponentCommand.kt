@@ -18,7 +18,6 @@ package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
 import com.beust.jcommander.Parameter
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
-import com.haulmont.cuba.cli.cubaplugin.model.PlatformVersionsManager
 import com.haulmont.cuba.cli.green
 import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
 import com.haulmont.cuba.cli.plugin.sdk.commands.CommonSdkParameters
@@ -27,9 +26,11 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryType
 import com.haulmont.cuba.cli.plugin.sdk.services.ComponentManager
-import com.haulmont.cuba.cli.plugin.sdk.services.ComponentVersionManager
 import com.haulmont.cuba.cli.plugin.sdk.services.MetadataHolder
 import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
+import com.haulmont.cuba.cli.plugin.sdk.templates.ComponentProvider
+import com.haulmont.cuba.cli.plugin.sdk.templates.ComponentRegistry
+import com.haulmont.cuba.cli.plugin.sdk.utils.splitVersion
 import com.haulmont.cuba.cli.prompting.Option
 import com.haulmont.cuba.cli.prompting.Prompts
 import com.haulmont.cuba.cli.prompting.ValidationException
@@ -41,15 +42,13 @@ typealias NameVersion = String
 
 abstract class BaseComponentCommand : AbstractSdkCommand() {
 
-    internal val componentManager: ComponentManager by sdkKodein.instance()
+    internal val componentManager: ComponentManager by sdkKodein.instance<ComponentManager>()
 
-    internal val repositoryManager: RepositoryManager by sdkKodein.instance()
+    internal val repositoryManager: RepositoryManager by sdkKodein.instance<RepositoryManager>()
 
-    internal val metadataHolder: MetadataHolder by sdkKodein.instance()
+    internal val metadataHolder: MetadataHolder by sdkKodein.instance<MetadataHolder>()
 
-    internal val componentVersionsManager: ComponentVersionManager by sdkKodein.instance()
-
-    internal val platformVersionsManager: PlatformVersionsManager by sdkKodein.instance()
+    internal val componentRegistry: ComponentRegistry by sdkKodein.instance<ComponentRegistry>()
 
     internal var needToFindDependentAddons: Boolean? = null
 
@@ -136,38 +135,8 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
         printWriter.println(messages["resolve.finished"].green())
     }
 
-    internal fun searchAdditionalComponents(
-        component: Component
-    ): Collection<Component> {
-        if (notSearchAdditionalDependencies != true && needToFindDependentAddons != false) {
-            printWriter.println(messages["search.searchAdditionalComponents"])
-            componentManager.searchForAdditionalComponents(component).let {
-                if (it.isNotEmpty()) {
-                    printWriter.println(messages["search.foundAdditionalComponents"])
-                    it.sortedBy { it.toString() }.forEach { component ->
-                        printWriter.println("   $component")
-                    }
-                    printWriter.println()
-                    if (needToFindDependentAddons == null) {
-                        val answer = Prompts.create {
-                            confirmation("resolve", messages["base.resolveAddonsCaption"])
-                        }.ask()
-
-                        needToFindDependentAddons = answer["resolve"] as Boolean
-                    }
-
-                    if (needToFindDependentAddons == true) {
-                        return it
-                    }
-                }
-            }
-        }
-        return emptyList()
-    }
-
     internal fun componentWithDependents(component: Component): List<Component> =
-        mutableListOf(component).apply { addAll(searchAdditionalComponents(component)) }
-
+        mutableListOf(component).apply { addAll(componentManager.searchForAdditionalComponents(component)) }
 
     internal fun repositories(repositoryNames: List<String>?): List<Repository>? {
         repositoryNames ?: return null
@@ -193,7 +162,7 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
     }
 
     open fun search(component: Component): Component? {
-        return componentManager.search(component)
+        return componentRegistry.providerByName(component.type).getComponent(component)
     }
 
     fun fail(cause: String): Nothing = throw ValidationException(cause)
@@ -203,25 +172,13 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
         val searchThread = thread {
             nameVersions.split(",").map { coordinate ->
                 coordinate.split("-").let {
-                    val component = when (it[0]) {
-                        "framework" -> it[1].resolveFrameworkCoordinates() ?: fail(
-                            messages["framework.unknown"].format(
-                                it[1]
-                            )
+                    val component = componentRegistry.providerByName(it[0]).resolveCoordinates(it[1]) ?: fail(
+                        messages["component.unknown"].format(
+                            it[0], it[1]
                         )
-                        "addon" -> it[1].resolveAddonCoordinates() ?: fail(
-                            messages["addon.unknown"].format(
-                                it[1]
-                            )
-                        )
-                        "lib" -> it[1].resolveLibraryCoordinates()
-                            ?: fail(messages["lib.unknown"].format(it[1]))
-                        else -> null
-                    }
-                    if (component != null) {
-                        search(component)?.let {
-                            components.add(it)
-                        }
+                    )
+                    search(component)?.let {
+                        components.add(it)
                     }
                 }
             }
@@ -264,26 +221,7 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
             waitTask(messages["search.searchAdditionalComponents"]) {
                 searchAdditionalThread.isAlive
             }
-
-            if (additionalComponents.isNotEmpty()) {
-                printWriter.println(messages["search.foundAdditionalComponents"])
-                additionalComponents.sortedBy { it.toString() }.forEach { component ->
-                    printWriter.println("   $component")
-                }
-                printWriter.println()
-                if (needToFindDependentAddons == null) {
-                    val answer = Prompts.create {
-                        confirmation("resolve", messages["base.resolveAddonsCaption"])
-                    }.ask()
-
-                    needToFindDependentAddons = answer["resolve"] as Boolean
-                }
-
-                if (needToFindDependentAddons == true) {
-                    components.addAll(additionalComponents)
-                }
-            }
-
+            components.addAll(additionalComponents)
         }
         return components
     }
@@ -292,27 +230,16 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
         val components = mutableListOf<Component>()
         var installNext = true
         while (installNext) {
+            val providerNames = componentRegistry.providers().map { it.getType() }.joinToString(separator = "/")
             val nameVersionAnswer = Prompts.create {
-                question("nameVersion", messages["base.askComponentCoordinates"])
+                question("nameVersion", messages["base.askComponentCoordinates"].format(providerNames))
             }.ask()
             val componentCoordinates = nameVersionAnswer["nameVersion"] as String
             componentCoordinates.split(" ").let {
                 val nameVersion = if (it.size > 1) it[1] else null
-                val component = when (it[0]) {
-                    "framework" -> askAllFrameworkNameVersion(nameVersion).resolveFrameworkCoordinates() ?: fail(
-                        messages["framework.unknown"].format(
-                            nameVersion
-                        )
-                    )
-                    "addon" -> askAllAddonsNameVersion(nameVersion).resolveAddonCoordinates() ?: fail(
-                        messages["addon.unknown"].format(
-                            nameVersion
-                        )
-                    )
-                    "lib" -> nameVersion?.resolveLibraryCoordinates()
-                        ?: fail(messages["lib.unknown"].format(nameVersion))
-                    else -> null
-                }
+
+                val component = providerSearchContext(nameVersion, componentRegistry.providerByName(it[0]))
+
                 if (component != null) {
                     components.add(component)
                 } else {
@@ -329,54 +256,86 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
 
     fun askNameVersion(
         nameVersion: NameVersion?,
-        msgPrefix: String,
-        names: List<String>,
+        provider: ComponentProvider,
+        components: List<Component>?,
         versions: (name: String) -> List<Option<String>>
     ): NameVersion {
+        val type = provider.getType()
+
         if (nameVersion == null) {
-            val name = askName(msgPrefix, names)
-            val version = askVersion(msgPrefix, versions, name)
-            return "${name.toLowerCase()}:$version"
+            return if (components != null) {
+                val name = askName(type, components)
+                val version = askVersion(name, versions)
+                "${name.toLowerCase()}:$version"
+            } else {
+                val version = askVersion("", versions)
+                version
+            }
         }
         val split = nameVersion.split(":")
-        if (split.size == 1) {
-            val version = askVersion(msgPrefix, versions, nameVersion)
+        if (split.last().splitVersion() == null) {
+            val version = askVersion(nameVersion, versions)
             return "${nameVersion.toLowerCase()}:$version"
         }
         return nameVersion
     }
 
     private fun askVersion(
-        msgPrefix: String,
-        versions: (name: String) -> List<Option<String>>,
-        name: String
+        name: String,
+        versions: (name: String) -> List<Option<String>>
     ): String {
         val versionsList = versions(name)
         if (versionsList.isEmpty()) {
             return Prompts.create {
                 question(
                     "version",
-                    messages["$msgPrefix.question.version"]
+                    messages["ask.question.version"].format(name)
                 )
             }.ask()["version"] as String
         } else {
             return Prompts.create {
                 options(
                     "version",
-                    messages["$msgPrefix.version"],
+                    messages["ask.version"].format(name),
                     versionsList
                 )
             }.ask()["version"] as String
         }
     }
 
-    private fun askName(msgPrefix: String, addons: List<String>): String {
-        val nameAnswers = Prompts.create {
-            textOptions("name", messages["$msgPrefix.name"], addons)
-        }.ask()
-
-        val name = nameAnswers["name"] as String
-        return name
+    private fun askName(msgPrefix: String, innerComponents: List<Component>): String {
+        if (innerComponents.isEmpty()) {
+            return Prompts.create {
+                question(
+                    "name",
+                    messages["ask.question.name"].format(msgPrefix)
+                )
+            }.ask()["name"] as String
+        } else {
+            if (innerComponents.map { it.category }.distinct().filterNotNull().isEmpty()) {
+                val components = innerComponents
+                    .map { Option(it.id!!, it.name ?: it.id, it.id) }
+                    .toList()
+                return Prompts.create {
+                    options("name", messages["ask.name"].format(msgPrefix), components)
+                }.ask()["name"] as String
+            } else {
+                val categories = innerComponents.map { it.category ?: "Others" }
+                    .distinct()
+                    .map { Option(it, it, it) }
+                    .toList()
+                val category = Prompts.create {
+                    options("category", messages["ask.category"].format(msgPrefix), categories)
+                }.ask()["category"] as String
+                val components = innerComponents
+                    .filter { it.category == if (category == "Others") null else category }
+                    .map { Option(it.id!!, it.name ?: it.id, it.id) }
+                    .toList()
+                return Prompts.create {
+                    options("name", messages["ask.name"].format(msgPrefix), components)
+                }.ask()["name"] as String
+            }
+        }
     }
 
     internal fun checkRepositories(repositoryNames: List<String>?): List<Repository>? {
@@ -387,6 +346,35 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
             printWriter.println(messages["repository.noTargetRepositories"].red())
         }
         return repositories
+    }
+
+    internal fun providerSearchContext(nameVersion: NameVersion?, provider: ComponentProvider): Component? {
+        return provider.resolveCoordinates(
+            askNameVersion(
+                nameVersion,
+                provider,
+                provider.innerComponents()
+            ) { name ->
+                return@askNameVersion provider.availableVersions(name)
+            })
+    }
+
+    internal fun providerResolvedSearchContext(nameVersion: NameVersion?, provider: ComponentProvider): Component? {
+        return provider.resolveCoordinates(
+            askNameVersion(
+                nameVersion,
+                provider,
+                metadataHolder.getResolved().filter { it.type == provider.getType() }.toList()
+            ) { name ->
+                val resolvedVersions = metadataHolder.getResolved()
+                    .filter { it.id == name }
+                    .filter { it.type == provider.getType() }
+                    .map { it.version }
+                    .distinct()
+                    .toList()
+                return@askNameVersion provider.availableVersions(name)
+                    .filter { it.id in (resolvedVersions) }
+            })
     }
 
     internal fun force(component: Component): Boolean =

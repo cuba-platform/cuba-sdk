@@ -30,8 +30,6 @@ interface ComponentManager {
 
     fun searchInMetadata(component: Component): Component?
 
-    fun search(component: Component): Component?
-
     fun resolve(component: Component, progress: ResolveProgressCallback? = null): Component?
 
     fun searchForAdditionalComponents(component: Component): Set<Component>

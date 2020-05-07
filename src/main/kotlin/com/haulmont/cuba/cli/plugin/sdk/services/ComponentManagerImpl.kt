@@ -20,10 +20,13 @@ import com.github.kittinunf.fuel.Fuel
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.generation.VelocityHelper
 import com.haulmont.cuba.cli.plugin.sdk.commands.CommonSdkParameters
-import com.haulmont.cuba.cli.plugin.sdk.dto.*
+import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
+import com.haulmont.cuba.cli.plugin.sdk.dto.Component
+import com.haulmont.cuba.cli.plugin.sdk.dto.MvnArtifact
+import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusManager
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusScriptManager
-import com.haulmont.cuba.cli.plugin.sdk.search.*
+import com.haulmont.cuba.cli.plugin.sdk.templates.ComponentRegistry
 import com.haulmont.cuba.cli.plugin.sdk.utils.authorizeIfRequired
 import com.haulmont.cuba.cli.plugin.sdk.utils.performance
 import org.json.JSONObject
@@ -36,14 +39,15 @@ class ComponentManagerImpl : ComponentManager {
 
     private val log: Logger = Logger.getLogger(ComponentManagerImpl::class.java.name)
 
-    private val componentTemplates: ComponentTemplates by sdkKodein.instance()
-    private val metadataHolder: MetadataHolder by sdkKodein.instance()
-    private val repositoryManager: RepositoryManager by sdkKodein.instance()
-    private val artifactManager: ArtifactManager by sdkKodein.instance()
-    private val nexusManager: NexusManager by sdkKodein.instance()
-    private val nexusScriptManager: NexusScriptManager by sdkKodein.instance()
-    private val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
+    private val componentTemplates: ComponentTemplates by sdkKodein.instance<ComponentTemplates>()
+    private val metadataHolder: MetadataHolder by sdkKodein.instance<MetadataHolder>()
+    private val repositoryManager: RepositoryManager by sdkKodein.instance<RepositoryManager>()
+    private val artifactManager: ArtifactManager by sdkKodein.instance<ArtifactManager>()
+    private val nexusManager: NexusManager by sdkKodein.instance<NexusManager>()
+    private val nexusScriptManager: NexusScriptManager by sdkKodein.instance<NexusScriptManager>()
+    private val sdkSettings: SdkSettingsHolder by sdkKodein.instance<SdkSettingsHolder>()
     private val velocityHelper = VelocityHelper()
+    private val componentRegistry: ComponentRegistry by sdkKodein.instance<ComponentRegistry>()
 
     private fun localProgress(component: Component) =
         1f / (3 + getClassifiersToResolve(component).size)
@@ -60,27 +64,10 @@ class ComponentManagerImpl : ComponentManager {
         return "$groupUrl/$name/$version/$name-$version.${classifier.extension}"
     }
 
-    override fun search(component: Component): Component? {
-        val template = componentTemplates.findTemplate(component)
-        return searchInExternalRepo(template ?: component)?.let { resolved ->
-            if (resolved.name == null || resolved.name.isBlank()) {
-                resolved.components.find { it.name != null && it.name.endsWith("-global") }?.let {
-                    return resolved.copy(name = it.name?.substringBefore("-global"))
-                }
-            }
-            return resolved
-        } ?: template
-    }
-
     override fun isAlreadyInstalled(component: Component): Boolean {
         val componentTemplate = componentTemplates.findTemplate(component) ?: component
         return metadataHolder.getInstalled().stream()
-            .filter {
-                it.type == componentTemplate.type &&
-                        it.name == componentTemplate.name &&
-                        it.packageName == componentTemplate.packageName &&
-                        it.version == componentTemplate.version
-            }
+            .filter { it.isSame(componentTemplate) }
             .findAny()
             .isPresent
     }
@@ -92,43 +79,11 @@ class ComponentManagerImpl : ComponentManager {
         )
 
     private fun searchComponent(component: Component, components: Collection<Component>): Component? =
-        components.stream()
-            .filter {
-                it.type == component.type &&
-                        it.name == component.name &&
-                        it.packageName == component.packageName &&
-                        it.version == component.version
-            }
-            .findAny()
-            .orElse(null)
-
-    private fun searchInExternalRepo(component: Component): Component? {
-        log.info("Search component in external repo: ${component}")
-        for (searchContext in repositoryManager.getRepositories(RepositoryTarget.SEARCH)) {
-            initSearch(searchContext).search(component)?.let { return it }
-        }
-        return null
-    }
-
-    private fun initSearch(repository: Repository): RepositorySearch = when (repository.type) {
-        RepositoryType.BINTRAY -> BintraySearch(repository)
-        RepositoryType.NEXUS2 -> Nexus2Search(repository)
-        RepositoryType.NEXUS3 -> Nexus3Search(repository)
-        RepositoryType.LOCAL -> LocalRepositorySearch(repository)
-    }
-
+        components.find { it.isSame(component) }
 
     override fun resolve(component: Component, progress: ResolveProgressCallback?): Component? {
         progress?.let { it(component, 0f, 1) }
         if (component.components.isNotEmpty()) {
-            if (ComponentType.FRAMEWORK == component.type) {
-                performance("Resolve SDK BOM") {
-                    resolveSdkBom(component)
-                }
-            }
-            performance("Read framework version") {
-                readFrameworkVersion(component)
-            }
             log.info("Resolve complex component: ${component}")
             val resolvedComponents = ArrayList<Component>()
             val total = component.components.size
@@ -155,59 +110,8 @@ class ComponentManagerImpl : ComponentManager {
         return component
     }
 
-    private fun readFrameworkVersion(component: Component) {
-        if (listOf(ComponentType.FRAMEWORK, ComponentType.ADDON).contains(component.type)) {
-            component.globalModule()?.let {
-                val model = artifactManager.readPom(
-                    MvnArtifact(
-                        it.packageName,
-                        it.name!!,
-                        it.version
-                    )
-                )
-                if (model == null) {
-                    log.info("Component not found: ${component}")
-                    throw IllegalStateException("Component not found: ${component}")
-                }
-                component.frameworkVersion =
-                    model.dependencies.filter { it.artifactId == "cuba-global" }.map { it.version }.firstOrNull()
-            }
-        }
-    }
-
-    override fun searchForAdditionalComponents(component: Component): Set<Component> {
-        val additionalComponentList = mutableSetOf<Component>()
-        if (listOf(ComponentType.FRAMEWORK, ComponentType.ADDON).contains(component.type)) {
-            component.globalModule()?.let {
-                val model = artifactManager.readPom(
-                    MvnArtifact(
-                        it.packageName,
-                        it.name!!,
-                        it.version
-                    )
-                )
-                if (model == null) {
-                    log.info("Component not found: ${component}")
-                    throw IllegalStateException("Component not found: ${component}")
-                }
-                model.dependencies.filter { it.artifactId.endsWith("-global") && !it.artifactId.startsWith("cuba") }
-                    .forEach {
-                        search(
-                            Component(
-                                it.groupId,
-                                it.artifactId.substringBeforeLast("-global"),
-                                it.version,
-                                type = ComponentType.ADDON
-                            )
-                        )?.let {
-                            additionalComponentList.add(it)
-                            additionalComponentList.addAll(searchForAdditionalComponents(it))
-                        }
-                    }
-            }
-        }
-        return additionalComponentList
-    }
+    override fun searchForAdditionalComponents(component: Component): Set<Component> =
+        componentRegistry.providerByName(component.type).searchAdditionalComponents(component)
 
     private fun resolveRawComponent(component: Component): Component? {
         val dependencies = artifactManager.uploadComponentToLocalCache(component)
@@ -216,39 +120,6 @@ class ComponentManagerImpl : ComponentManager {
             return component
         } else {
             return null
-        }
-    }
-
-    private fun resolveSdkBom(component: Component) {
-        val model = artifactManager.readPom(
-            MvnArtifact("com.haulmont.gradle", "cuba-plugin", component.version),
-            Classifier.sdk()
-        )
-        if (model != null) {
-            val tomcatVersion = model.properties["tomcat.version"] as String?
-            if (tomcatVersion != null) {
-                component.components.add(
-                    Component(
-                        "org.apache.tomcat", "tomcat", tomcatVersion, classifiers = mutableListOf(
-                            Classifier.pom(),
-                            Classifier("", "zip")
-                        )
-                    )
-                )
-            }
-            val gradleVersion = model.properties["gradle.version"] as String?
-            if (gradleVersion != null) {
-                component.components.add(
-                    Component(
-                        packageName = "gradle",
-                        name = "gradle",
-                        url = sdkSettings["gradle.downloadLink"].format(gradleVersion),
-                        version = gradleVersion,
-                        classifiers = mutableListOf(Classifier("", "zip")),
-                        type = ComponentType.RAW
-                    )
-                )
-            }
         }
     }
 
@@ -330,19 +201,6 @@ class ComponentManagerImpl : ComponentManager {
         }
     }
 
-    private fun repositoriesToUpload(repository: Repository?): List<Repository> =
-        if (repository != null)
-            listOf(repository)
-        else repositoryManager.getRepositories(RepositoryTarget.TARGET)
-            .filter {
-                it.type in listOf(
-                    RepositoryType.NEXUS3,
-                    RepositoryType.NEXUS2,
-                    RepositoryType.BINTRAY
-                )
-            }
-
-
     private fun componentResolveStream(component: Component) =
         if (CommonSdkParameters.singleThread) component.components.stream() else component.components.parallelStream()
 
@@ -364,12 +222,12 @@ class ComponentManagerImpl : ComponentManager {
     }
 
     private fun resolveDependencies(component: Component, progress: ResolveProgressCallback? = null): Component? {
-        if (ComponentType.LIB == component.type && component.name != null) {
+        if (component.url == null) {
             var progressCount = 0
             log.info("Resolve component dependencies: ${component}")
             val artifact = MvnArtifact(
-                component.packageName,
-                component.name,
+                component.groupId,
+                component.artifactId,
                 component.version
             )
 
@@ -411,20 +269,12 @@ class ComponentManagerImpl : ComponentManager {
             performance("Resolve all classifiers") {
                 for (classifier in getClassifiersToResolve(component)) {
                     progress?.let { it(component, localProgressCount(progressCount++, component), 1) }
-//                    if (classifier.type != "" || classifier.extension == "sdk") {
-//                        if (dependencies.isNotEmpty()) {
-//                            log.info("Resolve $component classifier \"$classifier\" dependencies")
-//                            performance("Resolve classifier \"$classifier\" dependencies") {
-//                                artifactManager.resolve(artifact, classifier)
-//                            }
-//                        }
-//                    }
                     component.dependencies.forEach { it.classifiers.add(classifier.copy()) }
                 }
             }
 
             progress?.let { it(component, localProgressCount(progressCount++, component), 1) }
-            log.fine("Resolve ${component.packageName} classifiers")
+            log.fine("Resolve ${component.groupId} classifiers")
             performance("Check classifiers resolved") {
                 artifactsStream(component.dependencies).forEach {
                     artifactManager.checkClassifiers(it)
@@ -433,8 +283,7 @@ class ComponentManagerImpl : ComponentManager {
             progress?.let { it(component, localProgressCount(progressCount, component), 1) }
 
             return component
-        }
-        if (ComponentType.RAW == component.type) {
+        } else {
             resolveRawComponent(component)?.let { return it }
         }
         return null

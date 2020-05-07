@@ -21,10 +21,11 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.haulmont.cuba.cli.commands.LaunchOptions
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
-import com.haulmont.cuba.cli.cubaplugin.model.PlatformVersionsManager
 import com.haulmont.cuba.cli.plugin.sdk.SdkPlugin
 import com.haulmont.cuba.cli.plugin.sdk.dto.MarketplaceAddon
 import com.haulmont.cuba.cli.plugin.sdk.dto.MarketplaceAddonCompatibility
+import com.haulmont.cuba.cli.plugin.sdk.templates.ComponentRegistry
+import com.haulmont.cuba.cli.plugin.sdk.templates.CubaFrameworkProvider
 import org.kodein.di.generic.instance
 import java.nio.charset.StandardCharsets
 import java.nio.file.Path
@@ -36,9 +37,9 @@ class ComponentVersionManagerImpl : ComponentVersionManager {
 
     private val log: Logger = Logger.getLogger(ComponentVersionManagerImpl::class.java.name)
 
-    private val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
+    private val sdkSettings: SdkSettingsHolder by sdkKodein.instance<SdkSettingsHolder>()
 
-    private val platformVersionsManager: PlatformVersionsManager by sdkKodein.instance()
+    private val componentRegistry: ComponentRegistry by sdkKodein.instance<ComponentRegistry>()
 
     var addons: List<MarketplaceAddon>? = null
 
@@ -49,7 +50,6 @@ class ComponentVersionManagerImpl : ComponentVersionManager {
                 readAddonsFile()
             )
         } else {
-            platformVersionsManager.load()
             var triple = Fuel.get(sdkSettings["addon.marketplaceUrl"])
                 .responseString()
 
@@ -78,6 +78,8 @@ class ComponentVersionManagerImpl : ComponentVersionManager {
 
     private fun readAddons(json: String): List<MarketplaceAddon> {
         val array = Gson().fromJson(json, JsonObject::class.java) ?: return emptyList()
+        val platformVersions =
+            componentRegistry.providerByName(CubaFrameworkProvider.CUBA_PLATFORM_PROVIDER).availableVersions(null)
         return array.getAsJsonArray("appComponents")
             .map { it as JsonObject }
             .map { Gson().fromJson(it, MarketplaceAddon::class.java) }
@@ -85,8 +87,8 @@ class ComponentVersionManagerImpl : ComponentVersionManager {
             .map {
                 if (it != null) {
                     if (isStandardCubaAddon(it)) {
-                        it.compatibilityList = platformVersionsManager.versions.map { version ->
-                            MarketplaceAddonCompatibility(version, listOf(version))
+                        it.compatibilityList = platformVersions.map { version ->
+                            MarketplaceAddonCompatibility(version.id, listOf(version.id))
                         }
                     }
                 }

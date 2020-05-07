@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Haulmont.
+ * Copyright (c) 2008-2020 Haulmont.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,13 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.dto
+package com.haulmont.cuba.cli.plugin.sdk.templates
 
-enum class RepositoryTarget {
-    SEARCH,
-    SOURCE,
-    TARGET;
+interface ComponentRegistry {
 
-    fun getId(): String {
-        return toString()
-    }
+    fun addProviders(vararg providers: ComponentProvider)
 
-    companion object {
-        fun getTarget(target: String): RepositoryTarget = when (target) {
-            "source" -> SOURCE
-            "target" -> TARGET
-            "search" -> SEARCH
-            else -> throw IllegalStateException("Unsupported repository target ${target}")
-        }
-    }
+    fun providers():Collection<ComponentProvider>
 
+    fun providerByName(name:String):ComponentProvider
 }

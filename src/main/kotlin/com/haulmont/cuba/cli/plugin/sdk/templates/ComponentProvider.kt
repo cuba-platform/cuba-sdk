@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Haulmont.
+ * Copyright (c) 2008-2020 Haulmont.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,26 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.services
+package com.haulmont.cuba.cli.plugin.sdk.templates
 
+import com.haulmont.cuba.cli.plugin.sdk.commands.artifacts.NameVersion
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
+import com.haulmont.cuba.cli.prompting.Option
 
-interface ComponentTemplates {
-    fun findTemplate(component: Component): Component?
+interface ComponentProvider {
+
+    fun getType(): String
+
+    fun getComponent(template: Component): Component
+
+    fun innerComponents(): List<Component>? = null
+
+    fun availableVersions(componentId: String?): List<Option<String>> = emptyList()
+
+    fun resolveCoordinates(nameVersion: NameVersion): Component?
+
+    fun searchAdditionalComponents(component: Component): Set<Component> = emptySet()
+
+    fun load()
+
 }
