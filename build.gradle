@@ -41,7 +41,7 @@ buildscript {
 }
 
 group 'com.haulmont.cuba.cli.plugin'
-version '0.1-SNAPSHOT'
+version '0.2-SNAPSHOT'
 
 def moduleName = "com.haulmont.cuba.cli.plugin.sdk"
 
