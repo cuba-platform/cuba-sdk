@@ -24,6 +24,7 @@ import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
 import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
 import com.haulmont.cuba.cli.prompting.Prompts
+import com.haulmont.cuba.cli.red
 import org.kodein.di.generic.instance
 
 @Parameters(commandDescription = "Remove repository from SDK")
@@ -54,7 +55,11 @@ open class RemoveRepositoryCommand : AbstractSdkCommand() {
     }
 
     private fun removeRepository(target: RepositoryTarget, name: String) {
-        repositoryManager.removeRepository(name, target)
-        printWriter.println(messages["repository.removed"].green())
+        if (repositoryManager.getRepository(name,target)!=null) {
+            repositoryManager.removeRepository(name, target)
+            printWriter.println(messages["repository.removed"].green())
+        } else{
+            printWriter.println(messages["repository.doesNotExists"].red())
+        }
     }
 }
