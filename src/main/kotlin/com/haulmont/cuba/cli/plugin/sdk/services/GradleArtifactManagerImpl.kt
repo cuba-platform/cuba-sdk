@@ -98,7 +98,7 @@ class GradleArtifactManagerImpl : ArtifactManager {
 
         var pomFile: Path? = readFromCache(artifact, classifier)
 
-        if (pomFile == null) {
+        if (pomFile == null || !Files.exists(pomFile)) {
             val pomJson = performance("Read POM") {
                 cacheResult(
                     GradleConnector().runTask(

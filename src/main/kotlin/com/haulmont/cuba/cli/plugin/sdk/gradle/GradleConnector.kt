@@ -96,7 +96,7 @@ class GradleConnector() {
             val stringResult = outputStream.toString()
             if (stringResult.contains("<JSON>") && stringResult.contains("</JSON>")) {
                 val json = stringResult.substringAfter("<JSON>").substringBefore("</JSON>")
-                return Gson().fromJson<JsonElement>(json, JsonElement::class.java)
+                return Gson().fromJson(json, JsonElement::class.java)
             } else {
                 return null
             }
