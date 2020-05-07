@@ -16,11 +16,19 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
+import com.beust.jcommander.Parameter
 import com.haulmont.cuba.cli.green
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.prompting.Prompts
+import com.haulmont.cuba.cli.red
 
 abstract class AbstractComponentExportCommand : AbstractExportCommand() {
+
+    @Parameter(
+        description = "Component name and version <name>:<version> or in full coordinates format <group>:<name>:<version>",
+        hidden = true
+    )
+    internal var nameVersion: String? = null
 
     var componentToExport: Component? = null
 
@@ -46,9 +54,13 @@ abstract class AbstractComponentExportCommand : AbstractExportCommand() {
 
     override fun run() {
         val searchContext = createSearchContext()
+        if (searchContext==null){
+            printWriter.println(messages["export.unknownComponent"].format(nameVersion).red())
+            return
+        }
         if (componentToExport(searchContext) == null) {
             val answers = Prompts.create {
-                confirmation("need-to-resolve", messages["export.needToResolve"].format(searchContext)) {
+                confirmation("need-to-resolve", messages["export.needToResolve"].format(searchContext?:nameVersion)) {
                     default(true)
                 }
             }.ask()

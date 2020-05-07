@@ -34,6 +34,7 @@ class CubaAddonProvider : CubaProvider() {
 
     internal val componentVersionsManager: ComponentVersionManager by sdkKodein.instance<ComponentVersionManager>()
     internal val artifactManager: ArtifactManager by sdkKodein.instance<ArtifactManager>()
+
     internal val componentRegistry: ComponentRegistry by sdkKodein.instance<ComponentRegistry>()
 
     private val log: Logger = Logger.getLogger(CubaAddonProvider::class.java.name)
@@ -41,8 +42,11 @@ class CubaAddonProvider : CubaProvider() {
     override fun getType() = "addon"
 
     override fun getComponent(template: Component): Component {
+        val mAddon = searchInMarketplace(
+            id = template.id, groupId = template.groupId, artifactId = template.artifactId
+        )?.let { initAddonTemplate(it, template.version) }
         return search(
-            template.copy(
+            mAddon ?: template.copy(
                 type = getType(),
                 components = addonComponents(template.groupId, template.artifactId, template.version)
             )
@@ -120,15 +124,21 @@ class CubaAddonProvider : CubaProvider() {
     override fun resolveCoordinates(nameVersion: NameVersion): Component? {
         nameVersion.split(":").let {
             when (it.size) {
-                3 -> return Component(
-                    groupId = it[0],
-                    artifactId = it[1].substringBefore("-global"),
-                    version = it[2],
-                    type = getType()
-                )
+                3 -> {
+                    val mAddon = searchInMarketplace(groupId = it[0], artifactId = it[1])
+                    if (mAddon != null) {
+                        return initAddonTemplate(mAddon, it[2])
+                    } else {
+                        return Component(
+                            groupId = it[0],
+                            artifactId = it[1].substringBefore("-global"),
+                            version = it[2],
+                            type = getType()
+                        )
+                    }
+                }
                 2 -> {
-                    val mAddon = componentVersionsManager.addons()
-                        .find { addon -> addon.id == it[0] }
+                    val mAddon = searchInMarketplace(it[0])
                     if (mAddon != null) {
                         return initAddonTemplate(mAddon, it[1])
                     }
@@ -139,14 +149,21 @@ class CubaAddonProvider : CubaProvider() {
         }
     }
 
+    private fun searchInMarketplace(id: String? = null, groupId: String? = null, artifactId: String? = null) =
+        componentVersionsManager.addons()
+            .find { addon ->
+                addon.id == id || (addon.groupId == groupId && addon.artifactId == artifactId)
+                        || (addon.groupId == groupId && addon.artifactId == "$artifactId-global")
+            }
+
     override fun searchAdditionalComponents(component: Component): Set<Component> {
         val additionalComponentList = mutableSetOf<Component>()
-        component.globalModule()?.let {
+        component.globalModule()?.let { global ->
             val model = artifactManager.readPom(
                 MvnArtifact(
-                    it.groupId,
-                    it.artifactId,
-                    it.version
+                    global.groupId,
+                    global.artifactId,
+                    global.version
                 )
             )
             if (model == null) {
@@ -158,7 +175,7 @@ class CubaAddonProvider : CubaProvider() {
             model.dependencies.filter { it.artifactId.endsWith("-global") }
                 .forEach {
                     if (!it.artifactId.startsWith("cuba")) {
-                        cubaAddon(it)?.let {
+                        cubaAddon(it).let {
                             additionalComponentList.add(it)
                             additionalComponentList.addAll(searchAdditionalComponents(it))
                         }
