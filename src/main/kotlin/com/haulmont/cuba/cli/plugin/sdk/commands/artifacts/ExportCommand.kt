@@ -28,7 +28,7 @@ class ExportCommand : AbstractExportCommand() {
         return metadataHolder.getResolved()
     }
 
-    override fun exportName() = "sdk-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm"))
+    override fun exportName() = "sdk_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH_mm"))
 
     override fun createSearchContext(): Component? {
         return null
