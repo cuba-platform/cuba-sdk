@@ -27,7 +27,7 @@ import org.kodein.di.generic.instance
 @Parameters(commandDescription = "Export SDK")
 abstract class AbstractExportCommand : BaseComponentCommand() {
 
-    internal val exportService: ImportExportService by sdkKodein.instance()
+    internal val exportService: ImportExportService by sdkKodein.instance<ImportExportService>()
 
     override fun run() {
         val components = componentsToExport()

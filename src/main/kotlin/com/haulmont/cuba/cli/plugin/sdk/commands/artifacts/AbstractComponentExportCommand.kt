@@ -24,11 +24,11 @@ abstract class AbstractComponentExportCommand : AbstractExportCommand() {
 
     var componentToExport: Component? = null
 
-    override fun componentsToExport(): List<Component>? = componentToExport()?.let { componentWithDependents(it) }
+    override fun componentsToExport(): List<Component>? = componentToExport(componentToExport?:createSearchContext())?.let { componentWithDependents(it) }
 
-    fun componentToExport(): Component? {
+    fun componentToExport(searchContext:Component?): Component? {
         componentToExport?.let { return it }
-        createSearchContext()?.let {
+        searchContext?.let {
             componentToExport = searchInMetadata(it)
         }
         return componentToExport
@@ -45,8 +45,8 @@ abstract class AbstractComponentExportCommand : AbstractExportCommand() {
     }
 
     override fun run() {
-        if (componentToExport() == null) {
-            val searchContext = createSearchContext()
+        val searchContext = createSearchContext()
+        if (componentToExport(searchContext) == null) {
             val answers = Prompts.create {
                 confirmation("need-to-resolve", messages["export.needToResolve"].format(searchContext)) {
                     default(true)
@@ -60,7 +60,7 @@ abstract class AbstractComponentExportCommand : AbstractExportCommand() {
                     }
                     printWriter.println()
                     printWriter.println(messages["resolved"].green())
-                    componentToExport()
+                    componentToExport(searchContext)
                     super.run()
                 }
             }
