@@ -30,7 +30,6 @@ import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand.Companion.ca
 import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand.Companion.printProgress
 import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
 import com.haulmont.cuba.cli.plugin.sdk.utils.FileUtils
-import org.kodein.di.generic.instance
 import java.io.PrintWriter
 import java.nio.file.Files
 import java.nio.file.Path
@@ -41,8 +40,8 @@ open class ToolInstaller(
     val installPath: Path,
     val skipFirstZipEntry: Boolean = false
 ) {
-    internal val printWriter: PrintWriter by sdkKodein.instance()
-    internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
+    internal val printWriter: PrintWriter by sdkKodein.instance<PrintWriter>()
+    internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance<SdkSettingsHolder>()
     internal val rootMessages = Messages(AbstractSdkCommand::class.java)
 
     fun downloadAndConfigure(configure: (Path) -> Unit, onFail: (Exception) -> Unit) {
@@ -63,9 +62,9 @@ open class ToolInstaller(
         }
     }
 
-    protected fun unzip(it: Path) {
-        beforeUnzip()
-        FileUtils.unzip(it, installPath, skipFirstZipEntry) { count, total ->
+    protected fun unzip(zipFilePath: Path) {
+        val zipFilePath = beforeUnzip(zipFilePath)
+        FileUtils.unzip(zipFilePath, installPath, skipFirstZipEntry) { count, total ->
             printProgress(
                 AbstractSdkCommand.rootMessages["unzipProgress"],
                 calculateProgress(count, total)
@@ -74,9 +73,7 @@ open class ToolInstaller(
         onUnzipFinished()
     }
 
-    open fun beforeUnzip() {
-
-    }
+    open fun beforeUnzip(zipFilePath: Path) = zipFilePath
 
     open fun onUnzipFinished() {
 

@@ -20,11 +20,10 @@ import com.github.kittinunf.fuel.httpHead
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusManager
-import org.kodein.di.generic.instance
 
 abstract class NexusCommand : AbstractSdkCommand() {
 
-    internal val nexusManager: NexusManager by sdkKodein.instance()
+    internal val nexusManager: NexusManager by sdkKodein.instance<NexusManager>()
 
     internal fun repositoryStarted(): Boolean {
         val (_, response, _) = sdkSettings["repository.url"]

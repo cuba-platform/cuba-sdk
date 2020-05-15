@@ -26,7 +26,6 @@ import com.haulmont.cuba.cli.localMessages
 import com.haulmont.cuba.cli.plugin.sdk.perf.SdkPerformance
 import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
 import com.haulmont.cuba.cli.prompting.ValidationException
-import org.kodein.di.generic.instance
 import java.io.PrintWriter
 import java.nio.file.Path
 
@@ -35,7 +34,7 @@ abstract class AbstractSdkCommand : AbstractCommand() {
     companion object{
         internal val PROGRESS_LINE_LENGHT = 110
         internal val rootMessages = Messages(AbstractSdkCommand::class.java)
-        internal val printWriter: PrintWriter by sdkKodein.instance()
+        internal val printWriter: PrintWriter by sdkKodein.instance<PrintWriter>()
 
         fun printProgress(message: String, progress: Float) {
             val progressStr = rootMessages["progress"].format(progress).green()
@@ -80,8 +79,8 @@ abstract class AbstractSdkCommand : AbstractCommand() {
     }
 
     internal val messages by localMessages()
-    internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
-    internal val workingDirectoryManager: WorkingDirectoryManager by sdkKodein.instance()
+    internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance<SdkSettingsHolder>()
+    internal val workingDirectoryManager: WorkingDirectoryManager by sdkKodein.instance<WorkingDirectoryManager>()
 
     @Parameter(
         names = ["--s", "--settings"],

@@ -30,7 +30,6 @@ import com.haulmont.cuba.cli.plugin.sdk.utils.splitVersion
 import com.haulmont.cuba.cli.prompting.Option
 import com.haulmont.cuba.cli.prompting.Prompts
 import com.haulmont.cuba.cli.red
-import org.kodein.di.generic.instance
 import kotlin.concurrent.thread
 
 @Parameters(commandDescription = "Check for minor resolved component updates")
@@ -84,28 +83,28 @@ class CheckForMinorUpdatesCommand : BaseComponentCommand() {
             return
         }
 
-        val versionAnswers = Prompts.create {
+        val installAll = Prompts.create {
             confirmation("installAll", messages["update.installAll"]) {
                 default(true)
             }
-            options(
-                "updates",
-                messages["update.selectComponents"],
-                allUpdates.map {
-                    Option(
-                        it.toString(),
-                        it.toString(),
-                        it
-                    )
-                }
-            ) {
-                askIf { it["installAll"] == false }
-            }
         }.ask()
 
-        if (versionAnswers["installAll"] as Boolean) {
+        if (installAll["installAll"] as Boolean) {
             installComponents(allUpdates, repositories)
         } else {
+            val versionAnswers = Prompts.create {
+                options(
+                    "updates",
+                    messages["update.selectComponents"],
+                    allUpdates.map {
+                        Option(
+                            it.toString(),
+                            it.toString(),
+                            it
+                        )
+                    }
+                )
+            }.ask()
             installComponents(listOf(versionAnswers["updates"] as Component), repositories)
         }
     }
@@ -118,10 +117,10 @@ class CheckForMinorUpdatesCommand : BaseComponentCommand() {
             thread.isAlive
         }
 
-        val addons = metadataHolder.getResolved()
+        val components = metadataHolder.getResolved()
             .filter { provider.getType() == it.type }
         val availableUpdates = mutableListOf<Component>()
-        addons.forEach { component ->
+        components.forEach { component ->
             component.version.splitVersion()?.let { version ->
                 val majorVersion = version.major
                 val minorVersion = version.minor
@@ -131,7 +130,7 @@ class CheckForMinorUpdatesCommand : BaseComponentCommand() {
                         .filter { versionSplit ->
                             return@filter versionSplit.major == majorVersion
                                     && versionSplit.minor != null
-                                    && versionSplit.minor!! > minorVersion
+                                    && versionSplit.minor > minorVersion
                         }.map { it.minor as Int }
                     if (newVersions.isNotEmpty()) {
                         val version = majorVersion + "." + newVersions.max()

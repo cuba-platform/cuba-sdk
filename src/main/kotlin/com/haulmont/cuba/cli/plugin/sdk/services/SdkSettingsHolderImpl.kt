@@ -18,7 +18,6 @@ package com.haulmont.cuba.cli.plugin.sdk.services
 
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.SdkPlugin
-import org.kodein.di.generic.instance
 import java.io.FileInputStream
 import java.io.FileWriter
 import java.io.InputStream
@@ -31,7 +30,7 @@ import java.util.*
 
 class SdkSettingsHolderImpl : SdkSettingsHolder {
 
-    internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
+    internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance<SdkSettingsHolder>()
 
     val SDK_PROPERTIES_PATH by lazy {
         Paths.get(

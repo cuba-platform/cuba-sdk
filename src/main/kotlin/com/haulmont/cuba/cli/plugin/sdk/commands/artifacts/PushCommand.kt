@@ -34,7 +34,7 @@ class PushCommand : BasePushCommand() {
     override fun run() {
         checkRepositories(repositoryNames)?.let { repositories ->
 
-            val components = nameVersions?.let { parseComponents(it) } ?: askComponentsWithDependencies()
+            val components = nameVersions?.let { parseComponents(it) } ?: askComponentsWithDependencies(true)
             val componentsToResolve = mutableListOf<Component>()
             components.forEach {
                 if (force(it) || !componentManager.isAlreadyInstalled(it)) {

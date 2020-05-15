@@ -24,7 +24,6 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.OsType
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
 import com.haulmont.cuba.cli.plugin.sdk.utils.copyInputStreamToFile
 import com.haulmont.cuba.cli.plugin.sdk.utils.currentOsType
-import org.kodein.di.generic.instance
 import org.redundent.kotlin.xml.Node
 import org.redundent.kotlin.xml.xml
 import java.io.BufferedReader
@@ -39,9 +38,9 @@ import java.util.logging.Logger
 class MavenExecutorImpl : MavenExecutor {
 
     private val log: Logger = Logger.getLogger(MavenExecutorImpl::class.java.name)
-    private val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
-    private val repositoryManager: RepositoryManager by sdkKodein.instance()
-    private val printWriter: PrintWriter by sdkKodein.instance()
+    private val sdkSettings: SdkSettingsHolder by sdkKodein.instance<SdkSettingsHolder>()
+    private val repositoryManager: RepositoryManager by sdkKodein.instance<RepositoryManager>()
+    private val printWriter: PrintWriter by sdkKodein.instance<PrintWriter>()
 
     private fun mvnSettingsPath() = Path.of(sdkSettings["maven.settings"])
 

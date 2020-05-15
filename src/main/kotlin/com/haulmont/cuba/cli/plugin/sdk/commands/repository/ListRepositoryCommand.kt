@@ -25,12 +25,11 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryType
 import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
 import com.haulmont.cuba.cli.plugin.sdk.utils.doubleUnderline
 import com.haulmont.cuba.cli.red
-import org.kodein.di.generic.instance
 
 @Parameters(commandDescription = "Add source repository for SDK")
 open class ListRepositoryCommand : AbstractSdkCommand() {
 
-    internal val repositoryManager: RepositoryManager by sdkKodein.instance()
+    internal val repositoryManager: RepositoryManager by sdkKodein.instance<RepositoryManager>()
 
     override fun run() {
         for (target in getTargets()) {

@@ -19,7 +19,6 @@ package com.haulmont.cuba.cli.plugin.sdk.perf
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.commands.CommonSdkParameters
 import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
-import org.kodein.di.generic.instance
 import java.io.PrintWriter
 import java.nio.file.Files
 import java.nio.file.StandardOpenOption
@@ -29,7 +28,7 @@ import java.time.format.DateTimeFormatter
 
 object SdkPerformance {
 
-    internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
+    internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance<SdkSettingsHolder>()
 
     internal val timers = mutableListOf<TaskInfo>()
 
@@ -43,7 +42,7 @@ object SdkPerformance {
     fun finish() {
         if (!CommonSdkParameters.measurePerformance) return
         mainTask?.let { stop(it) }
-        val printWriter: PrintWriter by sdkKodein.instance()
+        val printWriter: PrintWriter by sdkKodein.instance<PrintWriter>()
         printWriter.println(prettyPrint().also {
             Files.writeString(
                 sdkSettings.sdkHome().resolve("perflogs").resolve(

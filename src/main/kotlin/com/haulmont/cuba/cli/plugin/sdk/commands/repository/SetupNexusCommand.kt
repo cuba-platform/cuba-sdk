@@ -16,7 +16,6 @@ import com.haulmont.cuba.cli.prompting.QuestionsList
 import com.haulmont.cuba.cli.red
 import org.gradle.internal.impldep.org.apache.commons.lang.BooleanUtils
 import org.json.JSONObject
-import org.kodein.di.generic.instance
 import java.io.FileInputStream
 import java.io.FileWriter
 import java.io.InputStreamReader
@@ -30,8 +29,8 @@ import java.util.*
 @Parameters(commandDescription = "Setup embedded nexus")
 class SetupNexusCommand : AbstractSdkCommand() {
 
-    internal val repositoryManager: RepositoryManager by sdkKodein.instance()
-    internal val nexusScriptManager: NexusScriptManager by sdkKodein.instance()
+    internal val repositoryManager: RepositoryManager by sdkKodein.instance<RepositoryManager>()
+    internal val nexusScriptManager: NexusScriptManager by sdkKodein.instance<NexusScriptManager>()
 
     override fun run() {
         Prompts.create(kodein) { askRepositorySettings() }
@@ -88,8 +87,21 @@ class SetupNexusCommand : AbstractSdkCommand() {
     private fun downloadAndConfigureNexus(answers: Answers): Boolean {
         val installer =
             object : ToolInstaller("Nexus", nexusDownloadLink(), Path.of(answers["repository-path"] as String)) {
-                override fun beforeUnzip() {
+                override fun beforeUnzip(zipFilePath: Path): Path {
                     Companion.printWriter.println(messages["setup.unzipRepositoryCaption"].format(answers["repository-path"]))
+                    var tempFileName: Path? = null
+                    val tempDirectory = Files.createTempDirectory("nexus")
+                    ZipFile(zipFilePath.toFile()).use { zip ->
+                        val firstEntry = zip.entries().nextElement()
+                        if (zip.entries().asSequence().count() == 1 && firstEntry.name.endsWith(".tar")) {
+                            tempFileName = tempDirectory.resolve(firstEntry.name)
+                        }
+                    }
+                    if (tempFileName != null) {
+                        FileUtils.unzip(zipFilePath, tempDirectory)
+                        return tempFileName!!
+                    }
+                    return zipFilePath
                 }
 
                 override fun onUnzipFinished() {

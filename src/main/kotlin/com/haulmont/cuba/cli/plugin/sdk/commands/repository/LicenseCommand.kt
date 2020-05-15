@@ -27,12 +27,11 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryType
 import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
 import com.haulmont.cuba.cli.prompting.Prompts
-import org.kodein.di.generic.instance
 
 @Parameters(commandDescription = "Set license key for SDK")
 class LicenseCommand : AbstractSdkCommand() {
 
-    internal val repositoryManager: RepositoryManager by sdkKodein.instance()
+    internal val repositoryManager: RepositoryManager by sdkKodein.instance<RepositoryManager>()
 
     @Parameter(
         description = "License key in format ************-************",

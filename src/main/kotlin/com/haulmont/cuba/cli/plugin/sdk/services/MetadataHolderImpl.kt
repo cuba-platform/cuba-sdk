@@ -19,12 +19,10 @@ package com.haulmont.cuba.cli.plugin.sdk.services
 import com.google.gson.Gson
 import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
-import org.kodein.di.generic.instance
 
 class MetadataHolderImpl : MetadataHolder {
 
-    private val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
-    private val dbProvider: DbProvider by sdkKodein.instance()
+    private val dbProvider: DbProvider by sdkKodein.instance<DbProvider>()
 
     private fun dbInstance() = dbProvider.get("metadata")
 

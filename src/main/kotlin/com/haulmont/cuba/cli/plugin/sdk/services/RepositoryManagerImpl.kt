@@ -26,15 +26,14 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryType
 import com.haulmont.cuba.cli.plugin.sdk.utils.authorizeIfRequired
 import com.haulmont.cuba.cli.prompting.ValidationException
-import org.kodein.di.generic.instance
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
 class RepositoryManagerImpl : RepositoryManager {
 
-    internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
-    internal val dbProvider: DbProvider by sdkKodein.instance()
+    internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance<SdkSettingsHolder>()
+    internal val dbProvider: DbProvider by sdkKodein.instance<DbProvider>()
 
     inline fun <reified T> fromJson(json: String): T {
         return Gson().fromJson(json, object : TypeToken<T>() {}.type)
@@ -95,6 +94,16 @@ class RepositoryManagerImpl : RepositoryManager {
                     name = "local",
                     type = RepositoryType.LOCAL,
                     url = Paths.get(System.getProperty("user.home")).resolve(".m2").resolve("repository").toString()
+                ),
+                Repository(
+                    name = "jcenter",
+                    type = RepositoryType.BINTRAY,
+                    url = "https://jcenter.bintray.com/"
+                ),
+                Repository(
+                    name = "central",
+                    type = RepositoryType.NEXUS2,
+                    url = "https://repo1.maven.org/maven2/"
                 ),
                 Repository(
                     name = "cuba-bintray",

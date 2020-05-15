@@ -22,12 +22,11 @@ import com.haulmont.cuba.cli.green
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusManager
 import com.haulmont.cuba.cli.plugin.sdk.utils.doubleUnderline
 import com.haulmont.cuba.cli.red
-import org.kodein.di.generic.instance
 
 @Parameters(commandDescription = "CUBA SDK")
 class SdkCommand : AbstractSdkCommand() {
 
-    private val nexusManager: NexusManager by sdkKodein.instance()
+    private val nexusManager: NexusManager by sdkKodein.instance<NexusManager>()
 
     override fun run() {
         if (!sdkSettings.sdkConfigured()){

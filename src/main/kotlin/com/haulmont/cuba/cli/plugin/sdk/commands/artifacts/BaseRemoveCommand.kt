@@ -24,11 +24,10 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusManager
 import com.haulmont.cuba.cli.prompting.Prompts
 import com.haulmont.cuba.cli.red
-import org.kodein.di.generic.instance
 
 abstract class BaseRemoveCommand : BaseComponentCommand() {
 
-    internal val nexusManager: NexusManager by sdkKodein.instance()
+    internal val nexusManager: NexusManager by sdkKodein.instance<NexusManager>()
 
     @Parameter(names = ["--local-only"], description = "Do not remove from local repository", hidden = true)
     var localOnly: Boolean = false

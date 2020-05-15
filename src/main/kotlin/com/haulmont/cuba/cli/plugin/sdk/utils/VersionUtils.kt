@@ -21,13 +21,13 @@ import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 fun String.splitVersion(): Version? {
-    val versionPattern: Pattern = Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)(?:[.-]([a-zA-Z0-9]+))?")
+    val versionPattern: Pattern = Pattern.compile("(\\d+)\\.(\\d+)(?:\\.(\\d+))?(?:[.-]([a-zA-Z0-9]+))?")
     val matcher: Matcher = versionPattern.matcher(this)
 
     if (matcher.matches()) {
         val majorVersion = matcher.group(1) + "." + matcher.group(2)
         val qualifier = matcher.group(4)
-        val minorVersion = Integer.parseInt(matcher.group(3))
+        val minorVersion = matcher.group(3)?.let { Integer.parseInt(matcher.group(3)) }
         return Version(this, majorVersion, minorVersion, qualifier)
     }
     return null

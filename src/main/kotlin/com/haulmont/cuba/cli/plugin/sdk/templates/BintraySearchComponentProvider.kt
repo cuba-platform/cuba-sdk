@@ -67,10 +67,14 @@ abstract class BintraySearchComponentProvider : ComponentProvider {
                         .flatMap { it.getAsJsonArray("versions").map { it.asString } }
                         .asSequence()
                         .distinct()
-                        .sortedDescending()
                         .map { it.splitVersion() }
                         .filterNotNull()
-                        .distinctBy { it.major }
+                        .groupBy { it.major }
+                        .entries
+                        .asSequence()
+                        .map { it.value.filter { it.minor!=null }.maxBy { v-> v.minor!! } }
+                        .filterNotNull()
+                        .sortedBy { it.major }
                         .map { it.version }
                         .map { Option(it, it, it) }
                         .toList()

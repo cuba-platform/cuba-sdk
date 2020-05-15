@@ -30,16 +30,15 @@ import com.haulmont.cuba.cli.prompting.Answers
 import com.haulmont.cuba.cli.prompting.Prompts
 import com.haulmont.cuba.cli.prompting.QuestionsList
 import org.json.JSONObject
-import org.kodein.di.generic.instance
 import java.nio.file.Files
 import java.nio.file.Path
 
 @Parameters(commandDescription = "Clean SDK")
 class CleanCommand : AbstractSdkCommand() {
 
-    internal val nexusManager: NexusManager by sdkKodein.instance()
-    internal val repositoryManager: RepositoryManager by sdkKodein.instance()
-    internal val nexusScriptManager: NexusScriptManager by sdkKodein.instance()
+    internal val nexusManager: NexusManager by sdkKodein.instance<NexusManager>()
+    internal val repositoryManager: RepositoryManager by sdkKodein.instance<RepositoryManager>()
+    internal val nexusScriptManager: NexusScriptManager by sdkKodein.instance<NexusScriptManager>()
 
     @Parameter(names = ["--local-only"], description = "Do not remove from local repository", hidden = true)
     var localOnly: Boolean = false

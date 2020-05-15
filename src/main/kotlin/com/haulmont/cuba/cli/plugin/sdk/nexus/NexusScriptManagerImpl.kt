@@ -25,11 +25,10 @@ import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
 import com.haulmont.cuba.cli.plugin.sdk.utils.Headers
 import com.haulmont.cuba.cli.plugin.sdk.utils.header
 import org.json.JSONObject
-import org.kodein.di.generic.instance
 
 class NexusScriptManagerImpl : NexusScriptManager {
 
-    internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance()
+    internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance<SdkSettingsHolder>()
 
     override fun loadScript(name: String): String {
         SdkPlugin::class.java

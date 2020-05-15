@@ -35,7 +35,6 @@ import com.haulmont.cuba.cli.prompting.Option
 import com.haulmont.cuba.cli.prompting.Prompts
 import com.haulmont.cuba.cli.prompting.ValidationException
 import com.haulmont.cuba.cli.red
-import org.kodein.di.generic.instance
 import kotlin.concurrent.thread
 
 typealias NameVersion = String
@@ -189,8 +188,8 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
         return components
     }
 
-    fun askComponentsWithDependencies(): Set<Component> {
-        val componentCoordinates = askComponentsList()
+    fun askComponentsWithDependencies(resolved: Boolean = false): Set<Component> {
+        val componentCoordinates = askComponentsList(resolved)
         val components = mutableSetOf<Component>()
         val searchThread = thread {
             componentCoordinates.forEach {
@@ -226,7 +225,7 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
         return components
     }
 
-    fun askComponentsList(): List<Component> {
+    fun askComponentsList(resolved: Boolean): List<Component> {
         val components = mutableListOf<Component>()
         var installNext = true
         while (installNext) {
@@ -238,7 +237,10 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
             componentCoordinates.split(" ").let {
                 val nameVersion = if (it.size > 1) it[1] else null
 
-                val component = providerSearchContext(nameVersion, componentRegistry.providerByName(it[0]))
+                val component = if (resolved)
+                    providerResolvedSearchContext(nameVersion, componentRegistry.providerByName(it[0]))
+                else
+                    providerSearchContext(nameVersion, componentRegistry.providerByName(it[0]))
 
                 if (component != null) {
                     components.add(component)
@@ -268,7 +270,7 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
                 val version = askVersion(name, versions)
                 "${name.toLowerCase()}:$version"
             } else {
-                val version = askVersion("", versions)
+                val version = askVersion(type, versions)
                 version
             }
         }
@@ -364,16 +366,21 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
             askNameVersion(
                 nameVersion,
                 provider,
-                metadataHolder.getResolved().filter { it.type == provider.getType() }.toList()
+                provider.innerComponents()
+                    ?.let { metadataHolder.getResolved().filter { it.type == provider.getType() }.toList() }
             ) { name ->
-                val resolvedVersions = metadataHolder.getResolved()
-                    .filter { it.id == name }
+                val versions = ArrayList(provider.availableVersions(name))
+                    .map { it.id to it }
+                    .toMap()
+
+                return@askNameVersion metadataHolder.getResolved()
+                    .asSequence()
                     .filter { it.type == provider.getType() }
+                    .filter { name.isEmpty() || it.id == name }
                     .map { it.version }
                     .distinct()
+                    .map { versions.getOrElse(it) { Option(it, it, it) } }
                     .toList()
-                return@askNameVersion provider.availableVersions(name)
-                    .filter { it.id in (resolvedVersions) }
             })
     }
 
