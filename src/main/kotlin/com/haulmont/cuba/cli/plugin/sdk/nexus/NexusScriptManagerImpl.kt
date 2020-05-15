@@ -19,12 +19,13 @@ package com.haulmont.cuba.cli.plugin.sdk.nexus
 import com.github.kittinunf.fuel.core.Response
 import com.github.kittinunf.fuel.httpDelete
 import com.github.kittinunf.fuel.httpPost
-import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.SdkPlugin
+import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
 import com.haulmont.cuba.cli.plugin.sdk.utils.Headers
 import com.haulmont.cuba.cli.plugin.sdk.utils.header
 import org.json.JSONObject
+import org.kodein.di.generic.instance
 
 class NexusScriptManagerImpl : NexusScriptManager {
 

@@ -16,8 +16,9 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.nexus
 
-import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
+import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
+import org.kodein.di.generic.instance
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import kotlin.concurrent.thread

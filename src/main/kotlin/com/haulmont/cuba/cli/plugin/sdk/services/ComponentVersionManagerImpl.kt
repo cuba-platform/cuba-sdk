@@ -20,8 +20,8 @@ import com.github.kittinunf.fuel.Fuel
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.haulmont.cuba.cli.commands.LaunchOptions
-import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.SdkPlugin
+import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.dto.MarketplaceAddon
 import com.haulmont.cuba.cli.plugin.sdk.dto.MarketplaceAddonCompatibility
 import com.haulmont.cuba.cli.plugin.sdk.templates.ComponentRegistry

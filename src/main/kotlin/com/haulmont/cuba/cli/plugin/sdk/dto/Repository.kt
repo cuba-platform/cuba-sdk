@@ -16,8 +16,6 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.dto
 
-import com.github.kittinunf.fuel.core.Request
-
 data class Repository(
     val active: Boolean = true,
     val name: String,
@@ -25,13 +23,5 @@ data class Repository(
     val url: String,
     val authentication: Authentication? = null,
     val repositoryName: String = ""
-) {
-    public fun Request.authorizeIfRequired(repository: Repository): Request {
-        if (repository.authentication != null) {
-            val authentication: Authentication = repository.authentication
-            this.authenticate(authentication.login, authentication.password)
-        }
-        return this
-    }
-}
+)
 

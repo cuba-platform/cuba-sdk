@@ -16,7 +16,7 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.services
 
-import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
+import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.templates.ComponentRegistry
 import org.kodein.di.generic.instance

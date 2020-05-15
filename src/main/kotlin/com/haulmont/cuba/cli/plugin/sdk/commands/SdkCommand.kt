@@ -17,11 +17,12 @@
 package com.haulmont.cuba.cli.plugin.sdk.commands
 
 import com.beust.jcommander.Parameters
-import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.green
+import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusManager
 import com.haulmont.cuba.cli.plugin.sdk.utils.doubleUnderline
 import com.haulmont.cuba.cli.red
+import org.kodein.di.generic.instance
 
 @Parameters(commandDescription = "CUBA SDK")
 class SdkCommand : AbstractSdkCommand() {

@@ -20,12 +20,13 @@ import com.beust.jcommander.Parameter
 import com.haulmont.cuba.cli.Messages
 import com.haulmont.cuba.cli.WorkingDirectoryManager
 import com.haulmont.cuba.cli.commands.AbstractCommand
-import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.green
 import com.haulmont.cuba.cli.localMessages
+import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.perf.SdkPerformance
 import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
 import com.haulmont.cuba.cli.prompting.ValidationException
+import org.kodein.di.generic.instance
 import java.io.PrintWriter
 import java.nio.file.Path
 

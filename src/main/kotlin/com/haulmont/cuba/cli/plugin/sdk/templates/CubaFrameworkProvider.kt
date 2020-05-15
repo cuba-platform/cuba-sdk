@@ -16,8 +16,8 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.templates
 
-import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.commands.artifacts.NameVersion
+import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier.Companion.default
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier.Companion.javadoc

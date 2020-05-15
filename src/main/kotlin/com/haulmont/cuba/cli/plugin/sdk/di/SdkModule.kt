@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.cubaplugin.di
+package com.haulmont.cuba.cli.plugin.sdk.di
 
 import com.haulmont.cuba.cli.kodein
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusManager
@@ -28,7 +28,7 @@ import org.kodein.di.Kodein
 import org.kodein.di.generic.bind
 import org.kodein.di.generic.singleton
 
-private val sdkModule = Kodein.Module {
+val sdkModule = Kodein.Module {
 
     bind<SdkSettingsHolder>() with singleton {
         SdkSettingsHolderImpl()
@@ -83,7 +83,7 @@ private val sdkModule = Kodein.Module {
     }
 }
 
-internal val sdkKodein = Kodein {
+val sdkKodein = Kodein {
     extend(kodein)
     import(sdkModule)
 }

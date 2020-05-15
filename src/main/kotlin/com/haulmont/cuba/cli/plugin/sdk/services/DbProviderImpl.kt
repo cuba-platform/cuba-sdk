@@ -16,8 +16,9 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.services
 
-import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.db.DbInstance
+import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
+import org.kodein.di.generic.instance
 import org.mapdb.DBMaker.fileDB
 import java.nio.file.Files
 import java.nio.file.Path

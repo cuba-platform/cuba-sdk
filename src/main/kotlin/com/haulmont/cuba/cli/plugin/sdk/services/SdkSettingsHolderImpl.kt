@@ -16,8 +16,9 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.services
 
-import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.SdkPlugin
+import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
+import org.kodein.di.generic.instance
 import java.io.FileInputStream
 import java.io.FileWriter
 import java.io.InputStream

@@ -18,13 +18,13 @@ package com.haulmont.cuba.cli.plugin.sdk
 
 import com.google.common.eventbus.Subscribe
 import com.haulmont.cuba.cli.CliPlugin
-import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.event.DestroyPluginEvent
 import com.haulmont.cuba.cli.event.InitPluginEvent
 import com.haulmont.cuba.cli.plugin.sdk.commands.PrintPropertiesCommand
 import com.haulmont.cuba.cli.plugin.sdk.commands.SdkCommand
 import com.haulmont.cuba.cli.plugin.sdk.commands.artifacts.*
 import com.haulmont.cuba.cli.plugin.sdk.commands.repository.*
+import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.templates.ComponentRegistry
 import com.haulmont.cuba.cli.plugin.sdk.templates.CubaAddonProvider
 import com.haulmont.cuba.cli.plugin.sdk.templates.CubaFrameworkProvider

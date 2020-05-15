@@ -17,9 +17,10 @@
 package com.haulmont.cuba.cli.plugin.sdk.commands.repository
 
 import com.github.kittinunf.fuel.httpHead
-import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
+import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusManager
+import org.kodein.di.generic.instance
 
 abstract class NexusCommand : AbstractSdkCommand() {
 

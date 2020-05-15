@@ -24,12 +24,13 @@ import com.github.kittinunf.result.Result
 import com.haulmont.cuba.cli.Messages
 import com.haulmont.cuba.cli.PrintHelper
 import com.haulmont.cuba.cli.commands.CommonParameters
-import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
 import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand.Companion.calculateProgress
 import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand.Companion.printProgress
+import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
 import com.haulmont.cuba.cli.plugin.sdk.utils.FileUtils
+import org.kodein.di.generic.instance
 import java.io.PrintWriter
 import java.nio.file.Files
 import java.nio.file.Path

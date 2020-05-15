@@ -1,9 +1,9 @@
 package com.haulmont.cuba.cli.plugin.sdk.commands.repository
 
 import com.beust.jcommander.Parameters
-import com.haulmont.cuba.cli.cubaplugin.di.sdkKodein
 import com.haulmont.cuba.cli.green
 import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
+import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.dto.*
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusScriptManager
 import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
@@ -16,6 +16,7 @@ import com.haulmont.cuba.cli.prompting.QuestionsList
 import com.haulmont.cuba.cli.red
 import org.gradle.internal.impldep.org.apache.commons.lang.BooleanUtils
 import org.json.JSONObject
+import org.kodein.di.generic.instance
 import java.io.FileInputStream
 import java.io.FileWriter
 import java.io.InputStreamReader
@@ -24,6 +25,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import java.util.*
+import java.util.zip.ZipFile
 
 
 @Parameters(commandDescription = "Setup embedded nexus")
