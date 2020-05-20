@@ -22,7 +22,7 @@ import com.haulmont.cli.core.green
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 
 @Parameters(commandDescription = "Resolve component with dependencies in SDK")
-class ResolveCommand : BaseRemoveCommand() {
+class ResolveCommand : BaseResolveCommand() {
 
     @Parameter(
         names = ["--c", "--components"],

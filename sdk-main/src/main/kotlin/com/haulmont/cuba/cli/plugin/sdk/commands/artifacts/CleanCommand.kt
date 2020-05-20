@@ -27,6 +27,8 @@ import com.haulmont.cuba.cli.plugin.sdk.commands.repository.StartCommand
 import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusManager
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusScriptManager
+import com.haulmont.cuba.cli.plugin.sdk.services.ComponentManager
+import com.haulmont.cuba.cli.plugin.sdk.services.MetadataHolder
 import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
 import com.haulmont.cuba.cli.plugin.sdk.utils.FileUtils
 import org.json.JSONObject
@@ -40,6 +42,8 @@ class CleanCommand : AbstractSdkCommand() {
     internal val nexusManager: NexusManager by sdkKodein.instance<NexusManager>()
     internal val repositoryManager: RepositoryManager by sdkKodein.instance<RepositoryManager>()
     internal val nexusScriptManager: NexusScriptManager by sdkKodein.instance<NexusScriptManager>()
+    internal val componentManager: ComponentManager by sdkKodein.instance<ComponentManager>()
+    private val metadataHolder: MetadataHolder by sdkKodein.instance<MetadataHolder>()
 
     @Parameter(names = ["--local-only"], description = "Do not remove from local repository", hidden = true)
     var localOnly: Boolean = false
@@ -59,6 +63,10 @@ class CleanCommand : AbstractSdkCommand() {
             Path.of(sdkSettings["gradle.cache"]).also {
                 FileUtils.deleteDirectory(it)
                 Files.createDirectories(it)
+            }
+
+            metadataHolder.getResolved().forEach {
+                componentManager.remove(it, false)
             }
 
             if (nexusManager.isLocal() && nexusManager.isStarted() && !localOnly) {
