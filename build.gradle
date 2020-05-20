@@ -66,7 +66,7 @@ subprojects {
     targetCompatibility = 11
 
     group 'com.haulmont.cli.core.plugin'
-    version '0.2-SNAPSHOT'
+    version '0.3-SNAPSHOT'
 
     dependencies {
         implementation "org.jetbrains.kotlin:kotlin-reflect:$versions.kotlin"
