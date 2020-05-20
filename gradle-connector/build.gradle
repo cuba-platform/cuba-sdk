@@ -46,25 +46,28 @@ task bundle(group: 'distribution', dependsOn: ['jar',':sdk-main:bundle'], type: 
 
     def bundleOutput = file("${rootProject.buildDir}/bundle" + bundlePlatform)
 
-    jar.outputs.files.each {
-        from it
-    }
+    if (bundleOutput.exists()) {
 
-    configurations.extraLibs.each {
-        from it
-    }
+        jar.outputs.files.each {
+            from it
+        }
 
-    def pluginsFolder = file("${bundleOutput}/plugins")
-    pluginsFolder.mkdir()
+        configurations.extraLibs.each {
+            from it
+        }
 
-    into pluginsFolder
+        def pluginsFolder = file("${bundleOutput}/plugins")
+        pluginsFolder.mkdir()
 
-    def osName = System.getProperty("os.name").toLowerCase()
-    if (osName.contains('nux')
-            || osName.contains('mac')) {
-        exec {
-            executable 'chmod'
-            args = ['u+w', '-R', pluginsFolder]
+        into pluginsFolder
+
+        def osName = System.getProperty("os.name").toLowerCase()
+        if (osName.contains('nux')
+                || osName.contains('mac')) {
+            exec {
+                executable 'chmod'
+                args = ['u+w', '-R', pluginsFolder]
+            }
         }
     }
 }
