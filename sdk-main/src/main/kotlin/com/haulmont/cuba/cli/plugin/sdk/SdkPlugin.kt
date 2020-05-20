@@ -33,7 +33,6 @@ import com.haulmont.cuba.cli.plugin.sdk.templates.CubaAddonProvider
 import com.haulmont.cuba.cli.plugin.sdk.templates.CubaFrameworkProvider
 import com.haulmont.cuba.cli.plugin.sdk.templates.LibProvider
 import org.jline.terminal.Terminal
-import org.jline.terminal.impl.DumbTerminal
 import org.kodein.di.generic.instance
 import java.io.PrintWriter
 import java.nio.file.Path
@@ -57,11 +56,7 @@ class SdkPlugin : MainCliPlugin {
     override val apiVersion = API_VERSION
 
     override fun welcome() {
-        if (terminal !is DumbTerminal) {
-            writer.println(messages["welcomeMessage"].trimMargin())
-        } else {
-            writer.println(messages["welcomeMessageDumb"].trimMargin())
-        }
+        writer.println(messages["welcomeMessage"].trimMargin())
     }
 
     @Subscribe
