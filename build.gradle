@@ -44,6 +44,8 @@ buildscript {
     }
 }
 
+apply plugin: 'base'
+
 allprojects {
     repositories {
         jcenter()

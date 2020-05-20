@@ -95,7 +95,7 @@ startScripts {
 def bundlePlatform = project.hasProperty('targetOsPlatform') ? '-' + project.property('targetOsPlatform') : '';
 
 def bundlesDir = file("bundles")
-def bundleOutput = file("${buildDir}/bundle" + bundlePlatform)
+def bundleOutput = file("${rootProject.buildDir}/bundle" + bundlePlatform)
 def nativeBundle = file("${bundleOutput}/native" + bundlePlatform)
 
 def modulesDir = file("${project.buildDir}/modules")
@@ -335,8 +335,6 @@ task bundle(dependsOn: jarPatch, group: 'distribution', description: 'Builds bun
 
 //        project(':gradle-connector').tasks["installPlugin"].execute()
     }
-
-    finalizedBy ':gradle-connector:installPlugin'
 }
 
 task buildWinSetup(dependsOn: bundle, group: 'distribution', description: 'Builds Windows installer') {

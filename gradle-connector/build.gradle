@@ -39,34 +39,32 @@ compileJava {
     }
 }
 
-task installPlugin(group: 'install', dependsOn: jar, type: Copy) {
-    doLast {
-        inputs.files jar.outputs.files
+task bundle(group: 'distribution', dependsOn: ['jar',':sdk-main:bundle'], type: Copy) {
+    inputs.files jar.outputs.files
 
-        def bundlePlatform = project.hasProperty('targetOsPlatform') ? '-' + project.property('targetOsPlatform') : '';
+    def bundlePlatform = project.hasProperty('targetOsPlatform') ? '-' + project.property('targetOsPlatform') : '';
 
-        def bundleOutput = file("${project(":sdk-main").buildDir}/bundle" + bundlePlatform)
+    def bundleOutput = file("${rootProject.buildDir}/bundle" + bundlePlatform)
 
-        jar.outputs.files.each {
-            from it
-        }
+    jar.outputs.files.each {
+        from it
+    }
 
-        configurations.extraLibs.each {
-            from it
-        }
+    configurations.extraLibs.each {
+        from it
+    }
 
-        def pluginsFolder = file("${bundleOutput}/plugins")
-        pluginsFolder.mkdir()
+    def pluginsFolder = file("${bundleOutput}/plugins")
+    pluginsFolder.mkdir()
 
-        into pluginsFolder
+    into pluginsFolder
 
-        def osName = System.getProperty("os.name").toLowerCase()
-        if (osName.contains('nux')
-                || osName.contains('mac')) {
-            exec {
-                executable 'chmod'
-                args = ['u+w', '-R', pluginsFolder]
-            }
+    def osName = System.getProperty("os.name").toLowerCase()
+    if (osName.contains('nux')
+            || osName.contains('mac')) {
+        exec {
+            executable 'chmod'
+            args = ['u+w', '-R', pluginsFolder]
         }
     }
 }
