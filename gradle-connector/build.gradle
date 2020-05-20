@@ -1,0 +1,70 @@
+def moduleName = "com.haulmont.cuba.cli.plugin.sdk.gradle"
+
+configurations {
+    // configuration that holds jars to include in the jar
+    extraLibs
+}
+repositories {
+    maven { url 'https://repo.gradle.org/gradle/libs-releases' }
+}
+
+task sourceJar(type: Jar) {
+    from file('src/main/java')
+    from file('src/main/kotlin')
+    from file('src/main/resources')
+    classifier = 'sources'
+}
+
+artifacts {
+    archives sourceJar
+}
+
+dependencies {
+    compile project(":sdk-main")
+    extraLibs "org.gradle:gradle-tooling-api:$versions.toolingApi"
+    // The tooling API need an SLF4J implementation available at runtime, replace this with any other implementation
+    extraLibs 'org.slf4j:slf4j-simple:1.7.10'
+
+    configurations.compile.extendsFrom(configurations.extraLibs)
+}
+
+compileJava {
+    inputs.property("moduleName", moduleName)
+    doFirst {
+        options.compilerArgs = [
+                '--module-path', classpath.asPath,
+                '--patch-module', "$moduleName=${compileKotlin.destinationDir}"
+        ]
+        classpath = files()
+    }
+}
+
+task installPlugin(group: 'install', dependsOn: jar, type: Copy) {
+    inputs.files jar.outputs.files
+
+    def bundlePlatform = project.hasProperty('targetOsPlatform') ? '-' + project.property('targetOsPlatform') : '';
+
+    def bundleOutput = file("${project(":sdk-main").buildDir}/bundle" + bundlePlatform)
+
+    jar.outputs.files.each {
+        from it
+    }
+
+    configurations.extraLibs.each {
+        from it
+    }
+
+    def pluginsFolder = file("${bundleOutput}/plugins")
+    pluginsFolder.mkdir()
+
+    into pluginsFolder
+
+    def osName = System.getProperty("os.name").toLowerCase()
+    if (osName.contains('nux')
+            || osName.contains('mac')) {
+        exec {
+            executable 'chmod'
+            args = ['u+w', '-R', pluginsFolder]
+        }
+    }
+}

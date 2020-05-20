@@ -1,7 +1,7 @@
 buildscript {
     ext.versions = [
             kotlin              : "1.2.71",
-            cubaCli             : "2.1.1",
+            cliCore             : "1.0-SNAPSHOT",
             velocity            : "1.7",
             jCommander          : "1.72",
             jansi               : "1.17",
@@ -19,8 +19,13 @@ buildscript {
             commonsLogging      : "1.1.1",
             kotlinXmlBuilder    : "1.6.0",
             jUnit               : "4.12",
-            toolingApi          : "6.2.2",
-            mvnrepo             : "1.1.0"
+            toolingApi          : "6.4.1",
+            mvnrepo             : "1.1.0",
+            mapdb               : "3.0.8",
+            slf4j               : "1.7.10",
+            eclipseCollections  : "10.2.0",
+            elsa                : "3.0.0-M5",
+            lang3               : "3.5",
     ]
 
     repositories {
@@ -36,201 +41,70 @@ buildscript {
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$versions.kotlin"
-        classpath "gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:0.4.2"
     }
 }
 
-group 'com.haulmont.cuba.cli.plugin'
-version '0.2-SNAPSHOT'
+allprojects {
+    repositories {
+        jcenter()
+        mavenLocal()
 
-def moduleName = "com.haulmont.cuba.cli.plugin.sdk"
-
-apply plugin: 'groovy'
-apply plugin: 'kotlin'
-apply plugin: 'maven'
-apply plugin: 'application'
-apply plugin: 'org.jetbrains.gradle.plugin.idea-ext'
-
-sourceCompatibility = 11
-targetCompatibility = 11
-
-configurations {
-    // configuration that holds jars to include in the jar
-    extraLibs
-}
-
-repositories {
-    jcenter()
-    mavenLocal()
-
-    maven {
-        url "https://dl.bintray.com/cuba-platform/main"
-    }
-    maven { url 'https://repo.gradle.org/gradle/libs-releases' }
-}
-
-task sourceJar(type: Jar) {
-    from file('src/main/java')
-    from file('src/main/kotlin')
-    from file('src/main/resources')
-    classifier = 'sources'
-}
-
-artifacts {
-    archives sourceJar
-}
-
-idea.project.settings {
-    copyright {
-        useDefault = 'Apache'
-        profiles {
-            Apache {
-                allowReplaceRegexp = ''
-                keyword = 'Copyright'
-                notice = '''Copyright (c) 2008-$today.year Haulmont.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.'''
-            }
+        maven {
+            url "https://dl.bintray.com/cuba-platform/main"
         }
     }
+
 }
 
-idea {
-    project {
-        vcs = 'Git'
-    }
-}
+subprojects {
+    apply plugin: 'groovy'
+    apply plugin: 'kotlin'
+    apply plugin: 'application'
+    //so that we can use 'compile', 'testCompile' for dependencies
 
-dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$versions.kotlin"
-    implementation "org.jetbrains.kotlin:kotlin-reflect:$versions.kotlin"
-    extraLibs "org.jetbrains.kotlin:kotlin-stdlib-common:$versions.kotlin"
+    sourceCompatibility = 11f
+    targetCompatibility = 11
 
-    implementation "com.beust:jcommander:$versions.jCommander"
-    implementation "org.jline:jline:$versions.jline"
-    implementation "org.fusesource.jansi:jansi:$versions.jansi"
+    group 'com.haulmont.cli.core.plugin'
+    version '0.2-SNAPSHOT'
 
-    implementation("org.apache.velocity:velocity:$versions.velocity") {
-        // jlink: org.apache.commons.lang.enum: Invalid package name: 'enum' is not a Java identifier
-        exclude(group: 'commons-lang', module: 'commons-lang')
-    }
-    // Using custom JAR without 'enum' package
-    implementation("commons-lang:commons-lang:$versions.commonsLang")
+    dependencies {
+        implementation "org.jetbrains.kotlin:kotlin-reflect:$versions.kotlin"
+//    implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$versions.kotlin"
 
-    implementation("com.google.guava:guava:$versions.guava") {
-        exclude(group: 'com.google.code.findbugs', module: 'jsr305')
-    }
+        implementation("com.haulmont.cli.core:cli-core:$versions.cliCore")
 
-    implementation "org.kodein.di:kodein-di-generic-jvm:$versions.kodein"
+        implementation "com.beust:jcommander:$versions.jCommander"
+        implementation "org.jline:jline:$versions.jline"
+        implementation "org.fusesource.jansi:jansi:$versions.jansi"
 
-    implementation("net.sf.practicalxml:practicalxml:$versions.practicalxml") {
-        exclude(group: "junit", module: "junit")
-    }
+        // Using custom JAR without 'enum' package
+        implementation("commons-lang:commons-lang:$versions.commonsLang")
 
-    implementation("com.google.code.gson:gson:$versions.gson")
+        implementation("com.google.guava:guava:$versions.guava") {
+            exclude(group: 'com.google.code.findbugs', module: 'jsr305')
+        }
 
-    implementation("commons-configuration:commons-configuration:$versions.commonsConfiguration") {
-        exclude(group: 'commons-lang', module: 'commons-lang')
-    }
+        implementation "org.kodein.di:kodein-di-generic-jvm:$versions.kodein"
 
-    implementation("commons-logging:commons-logging:$versions.commonsLogging")
+        implementation("com.google.code.gson:gson:$versions.gson")
 
-    extraLibs("com.github.devcsrj:mvnrepository-api-client:$versions.mvnrepo"){
-        exclude(group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib')
-        exclude(group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8')
-        exclude(group: 'org.jetbrains.kotlin', module: 'kotlin-reflect')
-    }
-    extraLibs("org.json:json:$versions.json")
-    extraLibs("com.github.kittinunf.fuel:fuel:$versions.fuel") {
-        exclude(group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib')
-    }
-//    compile("com.github.kittinunf.fuel:fuel-coroutines:$versions.fuel") {
-//        exclude(group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib')
-//    }
-    extraLibs("com.github.kittinunf.fuel:fuel-gson:$versions.fuel") {
-        exclude(group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib')
-        exclude(group: 'com.google.code.gson', module: 'gson')
+        implementation("commons-configuration:commons-configuration:$versions.commonsConfiguration") {
+            exclude(group: 'commons-lang', module: 'commons-lang')
+        }
+
+        implementation("commons-logging:commons-logging:$versions.commonsLogging")
+
+        implementation("org.json:json:$versions.json")
     }
 
-    extraLibs("org.mapdb:mapdb:3.0.8") {
-        exclude(group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib')
-        exclude(group: 'com.google.errorprone', module: 'error_prone_annotations')
-        exclude(group: 'com.google.guava', module: 'guava')
+    configurations {
+        compile {
+            exclude(group: 'org.jetbrains', module: 'annotations')
+        }
     }
 
-    extraLibs "org.gradle:gradle-tooling-api:$versions.toolingApi"
-    // The tooling API need an SLF4J implementation available at runtime, replace this with any other implementation
-    extraLibs 'org.slf4j:slf4j-simple:1.7.10'
-
-//    compile("com.github.kittinunf.fuel:fuel-json:$versions.fuel") {
-//        exclude(group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib')
-//    }
-
-    //Uncomment for repository script dev
-//    compileOnly group: 'org.sonatype.nexus', name: 'nexus-core', version: versions.nxrm3
-//    compileOnly group: 'org.sonatype.nexus', name: 'nexus-script', version: versions.nxrm3
-//    compileOnly group: 'org.sonatype.nexus', name: 'nexus-security', version: versions.nxrm3
-//    compileOnly group: 'org.sonatype.nexus', name: 'nexus-repository', version: versions.nxrm3
-//    compileOnly group: 'org.sonatype.nexus.plugins', name: 'nexus-repository-maven', version: versions.nxrm3
-//    compileOnly group: 'org.sonatype.nexus.plugins', name: 'nexus-script-plugin', version: versions.nxrm3
-
-    extraLibs("org.apache.maven:maven-model:$versions.maven")
-
-    extraLibs("org.redundent:kotlin-xml-builder:$versions.kotlinXmlBuilder")
-
-    testImplementation group: 'junit', name: 'junit', version: versions.jUnit
-
-    implementation "com.haulmont.cuba.cli:cuba-cli:$versions.cubaCli"
-
-    configurations.compile.extendsFrom(configurations.extraLibs)
-}
-
-[compileKotlin, compileTestKotlin].each {
-    it.kotlinOptions.jvmTarget = '1.8'
-}
-
-compileJava {
-    inputs.property("moduleName", moduleName)
-    doFirst {
-        options.compilerArgs = [
-                '--module-path', classpath.asPath,
-                '--patch-module', "$moduleName=${compileKotlin.destinationDir}"
-        ]
-        classpath = files()
+    [compileKotlin, compileTestKotlin].each {
+        it.kotlinOptions.jvmTarget = '1.8'
     }
-}
-
-//jar {
-//    from {
-//        configurations.extraLibs.collect { it.isDirectory() ? it : zipTree(it) }
-//    }
-//}
-
-task installPlugin(group: 'install', dependsOn: [jar], type: Copy) {
-    inputs.files jar.outputs.files
-
-    jar.outputs.files.each {
-        from it
-    }
-
-    configurations.extraLibs.each {
-        from it
-    }
-
-    into System.getProperty("user.home") + "/.haulmont/cli/plugins/"
-}
-
-task copyLibs(type: Copy) {
-    from configurations.compile
-    into System.getProperty("user.home") + "/.haulmont/cli/plugins/"
 }

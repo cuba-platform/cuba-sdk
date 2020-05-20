@@ -1,0 +1,109 @@
+/*
+ * Copyright (c) 2008-2020 Haulmont.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.haulmont.cli.plugin.sdk.gradle
+
+import com.google.gson.Gson
+import com.google.gson.JsonElement
+import com.haulmont.cuba.cli.plugin.sdk.commands.CommonSdkParameters
+import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
+import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
+import com.haulmont.cuba.cli.plugin.sdk.gradle.ProgressCallback
+import com.haulmont.cuba.cli.plugin.sdk.gradle.SdkGradleConnector
+import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
+import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
+import org.gradle.tooling.GradleConnector
+import org.gradle.tooling.ProgressEvent
+import org.gradle.tooling.model.GradleProject
+import org.kodein.di.generic.instance
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.PrintWriter
+import java.nio.file.Files
+import java.nio.file.Path
+
+class SdkGradleConnectorImpl : SdkGradleConnector {
+    private val connector: GradleConnector = GradleConnector.newConnector()
+    private val sdkSettings: SdkSettingsHolder by sdkKodein.instance<SdkSettingsHolder>()
+    private val repositoryManager: RepositoryManager by sdkKodein.instance<RepositoryManager>()
+    private val printWriter: PrintWriter by sdkKodein.instance<PrintWriter>()
+
+    init {
+        val gradleHome = Path.of(sdkSettings["gradle.home"]).also {
+            if (!Files.exists(it)) {
+                Files.createDirectories(it)
+            }
+        }.toFile()
+        connector.useGradleVersion(sdkSettings["gradle.version"])
+        connector.useGradleUserHomeDir(File(sdkSettings["gradle.home"]))
+        connector.useBuildDistribution()
+        connector.forProjectDirectory(gradleHome)
+    }
+
+    override fun runTask(
+        name: String, params: Map<String, Any?>,
+        progressFun: ProgressCallback?
+    ): JsonElement? {
+        val connection = connector.connect()
+        connection.model(GradleProject::class.java)
+        try {
+            val outputStream = ByteArrayOutputStream()
+            if (CommonSdkParameters.info) {
+                printWriter.println()
+            }
+            val repositoriesJson = Gson().toJson(repositoryManager.getRepositories(RepositoryTarget.SOURCE))
+            val buildLauncher = connection.newBuild()
+                .withArguments(params.filter { it.value != null }.map { "-P${it.key}=${it.value}" }.toList())
+                .addArguments("-g", sdkSettings["gradle.cache"])
+                .addArguments("-PsdkRepositories=${repositoriesJson}")
+                .addArguments("-Dorg.gradle.parallel=true")
+                .forTasks(name)
+                .setStandardOutput(outputStream)
+
+            CommonSdkParameters.gradleOptions?.let { list ->
+                list.forEach {
+                    buildLauncher.addArguments(it)
+                }
+            }
+
+            if (progressFun != null) {
+                buildLauncher.addProgressListener { event: ProgressEvent? ->
+                    progressFun(event)
+                }
+            }
+            if (CommonSdkParameters.info) {
+                buildLauncher.addArguments("--info")
+                buildLauncher.addProgressListener { event: ProgressEvent? ->
+                    printWriter.println(event?.description)
+                }
+            }
+            buildLauncher.run()
+            if (CommonSdkParameters.info) {
+                printWriter.println()
+            }
+            val stringResult = outputStream.toString()
+            if (stringResult.contains("<JSON>") && stringResult.contains("</JSON>")) {
+                val json = stringResult.substringAfter("<JSON>").substringBefore("</JSON>")
+                return Gson().fromJson(json, JsonElement::class.java)
+            } else {
+                return null
+            }
+
+        } finally {
+            connection.close()
+        }
+    }
+}
