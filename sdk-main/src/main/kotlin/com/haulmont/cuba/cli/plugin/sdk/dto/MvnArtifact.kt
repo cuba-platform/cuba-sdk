@@ -16,7 +16,6 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.dto
 
-import java.nio.file.Files
 import java.nio.file.Path
 
 
@@ -72,9 +71,6 @@ data class MvnArtifact(
             path = path.resolve(groupPart)
         }
         path = path.resolve(artifactId).resolve(version)
-        if (!Files.exists(path)) {
-            Files.createDirectories(path)
-        }
         val classifierSuffix = if (classifier.type.isEmpty()) "" else "-${classifier.type}"
         return path.resolve("${artifactId}-${version}${classifierSuffix}.${classifier.extension}")
     }
