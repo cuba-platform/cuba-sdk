@@ -39,28 +39,27 @@ compileJava {
     }
 }
 
-task bundle(group: 'distribution', dependsOn: ['jar',':sdk-main:bundle'], type: Copy) {
+task bundle(group: 'distribution', dependsOn: ['jar', ':sdk-main:bundle'], type: Copy) {
     inputs.files jar.outputs.files
 
     def bundlePlatform = project.hasProperty('targetOsPlatform') ? '-' + project.property('targetOsPlatform') : '';
 
     def bundleOutput = file("${rootProject.buildDir}/bundle" + bundlePlatform)
 
+    jar.outputs.files.each {
+        from it
+    }
+
+    configurations.extraLibs.each {
+        from it
+    }
+
+    def pluginsFolder = file("${bundleOutput}/plugins")
+    pluginsFolder.mkdir()
+
+    into pluginsFolder
+
     if (bundleOutput.exists()) {
-
-        jar.outputs.files.each {
-            from it
-        }
-
-        configurations.extraLibs.each {
-            from it
-        }
-
-        def pluginsFolder = file("${bundleOutput}/plugins")
-        pluginsFolder.mkdir()
-
-        into pluginsFolder
-
         def osName = System.getProperty("os.name").toLowerCase()
         if (osName.contains('nux')
                 || osName.contains('mac')) {
@@ -70,4 +69,5 @@ task bundle(group: 'distribution', dependsOn: ['jar',':sdk-main:bundle'], type: 
             }
         }
     }
+
 }
