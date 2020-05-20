@@ -1,6 +1,7 @@
 def moduleName = "com.haulmont.cuba.cli.plugin.sdk"
 
 apply plugin: 'maven'
+apply plugin: 'application'
 
 task sourceJar(type: Jar) {
     from file('src/main/java')
