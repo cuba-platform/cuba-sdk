@@ -79,7 +79,7 @@ By default the following repositories are configured:
 - **source scope:**
   - Local `m2`
   - Jcenter
-  - Java central
+  - Maven central
   - CUBA Bintray
   - CUBA Nexus   
 - **sdk scope:**
