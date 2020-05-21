@@ -17,7 +17,9 @@
 package com.haulmont.cuba.cli.plugin.sdk.nexus
 
 import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
+import com.haulmont.cuba.cli.plugin.sdk.dto.OsType
 import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
+import com.haulmont.cuba.cli.plugin.sdk.utils.currentOsType
 import org.kodein.di.generic.instance
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -35,7 +37,7 @@ class NexusManagerImpl : NexusManager {
             val newProcess = Runtime.getRuntime().exec(
                 arrayOf(
                     sdkSettings.nexusRepositoryPath().toString(),
-                    "/run"
+                    if (currentOsType() == OsType.WINDOWS) "/run" else "run"
                 )
             )
             InputStreamReader(newProcess.inputStream).use {

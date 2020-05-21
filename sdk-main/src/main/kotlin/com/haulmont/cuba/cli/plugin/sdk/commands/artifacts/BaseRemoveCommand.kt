@@ -23,6 +23,7 @@ import com.haulmont.cli.core.red
 import com.haulmont.cuba.cli.plugin.sdk.commands.repository.StartCommand
 import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
+import com.haulmont.cuba.cli.plugin.sdk.event.SdkEvent
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusManager
 import org.kodein.di.generic.instance
 
@@ -61,12 +62,14 @@ abstract class BaseRemoveCommand : BaseComponentCommand() {
     }
 
     internal fun remove(component: Component, removeFromRepository: Boolean) {
+        bus.post(SdkEvent.BeforeRemoveEvent(component, removeFromRepository))
         componentManager.remove(component, removeFromRepository) { artifact, removed, total ->
             printProgress(
                 messages["remove.removeDependency"].format(artifact.mvnCoordinates()),
                 calculateProgress(removed, total)
             )
         }
+        bus.post(SdkEvent.AfterRemoveEvent(component, removeFromRepository))
         printWriter.println(messages["remove.finished"].green())
 
     }

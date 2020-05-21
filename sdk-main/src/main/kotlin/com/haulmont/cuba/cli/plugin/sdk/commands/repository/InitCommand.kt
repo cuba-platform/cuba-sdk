@@ -7,6 +7,7 @@ import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryType
+import com.haulmont.cuba.cli.plugin.sdk.event.SdkEvent
 import com.haulmont.cuba.cli.plugin.sdk.gradle.SdkGradleConnector
 import com.haulmont.cuba.cli.plugin.sdk.services.ArtifactManager
 import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
@@ -34,6 +35,7 @@ class InitCommand : AbstractSdkCommand() {
         createSdkRepoSettingsFile()
         downloadAndConfigureGradle()
         initLocalMavenRepo()
+        bus.post(SdkEvent.SdkInitEvent())
         printWriter.println(messages["setup.sdkConfigured"].green())
     }
 

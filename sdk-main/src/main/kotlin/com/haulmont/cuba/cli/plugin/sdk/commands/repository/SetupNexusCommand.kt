@@ -25,7 +25,6 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import java.util.*
-import java.util.zip.ZipFile
 
 
 @Parameters(commandDescription = "Setup embedded nexus")
@@ -91,18 +90,6 @@ class SetupNexusCommand : AbstractSdkCommand() {
             object : ToolInstaller("Nexus", nexusDownloadLink(), Path.of(answers["repository-path"] as String)) {
                 override fun beforeUnzip(zipFilePath: Path): Path {
                     Companion.printWriter.println(messages["setup.unzipRepositoryCaption"].format(answers["repository-path"]))
-                    var tempFileName: Path? = null
-                    val tempDirectory = Files.createTempDirectory("nexus")
-                    ZipFile(zipFilePath.toFile()).use { zip ->
-                        val firstEntry = zip.entries().nextElement()
-                        if (zip.entries().asSequence().count() == 1 && firstEntry.name.endsWith(".tar")) {
-                            tempFileName = tempDirectory.resolve(firstEntry.name)
-                        }
-                    }
-                    if (tempFileName != null) {
-                        FileUtils.unzip(zipFilePath, tempDirectory)
-                        return tempFileName!!
-                    }
                     return zipFilePath
                 }
 

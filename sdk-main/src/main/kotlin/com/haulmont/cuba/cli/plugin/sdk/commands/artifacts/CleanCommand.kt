@@ -25,6 +25,7 @@ import com.haulmont.cli.core.prompting.QuestionsList
 import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
 import com.haulmont.cuba.cli.plugin.sdk.commands.repository.StartCommand
 import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
+import com.haulmont.cuba.cli.plugin.sdk.event.SdkEvent
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusManager
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusScriptManager
 import com.haulmont.cuba.cli.plugin.sdk.services.ComponentManager
@@ -66,7 +67,9 @@ class CleanCommand : AbstractSdkCommand() {
             }
 
             metadataHolder.getResolved().forEach {
+                bus.post(SdkEvent.BeforeRemoveEvent(it, false))
                 componentManager.remove(it, false)
+                bus.post(SdkEvent.AfterRemoveEvent(it, false))
             }
 
             if (nexusManager.isLocal() && nexusManager.isStarted() && !localOnly) {

@@ -47,6 +47,7 @@ module com.haulmont.cuba.cli.plugin.sdk {
     requires velocity;
     requires jline;
     requires commons.lang;
+    requires org.apache.commons.compress;
 
     opens com.haulmont.cuba.cli.plugin.sdk;
     opens com.haulmont.cuba.cli.plugin.sdk.dto;
@@ -57,13 +58,17 @@ module com.haulmont.cuba.cli.plugin.sdk {
     opens com.haulmont.cuba.cli.plugin.sdk.gradle;
     opens com.haulmont.cuba.cli.plugin.sdk.di;
     opens com.haulmont.cuba.cli.plugin.sdk.services;
+    opens com.haulmont.cuba.cli.plugin.sdk.event;
 
     exports com.haulmont.cuba.cli.plugin.sdk.dto;
     exports com.haulmont.cuba.cli.plugin.sdk.commands;
+    exports com.haulmont.cuba.cli.plugin.sdk.commands.artifacts;
+    exports com.haulmont.cuba.cli.plugin.sdk.commands.repository;
     exports com.haulmont.cuba.cli.plugin.sdk.di;
     exports com.haulmont.cuba.cli.plugin.sdk.services;
     exports com.haulmont.cuba.cli.plugin.sdk;
     exports com.haulmont.cuba.cli.plugin.sdk.gradle;
+    exports com.haulmont.cuba.cli.plugin.sdk.event;
 
     provides MainCliPlugin with SdkPlugin;
 

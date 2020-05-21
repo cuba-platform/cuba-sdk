@@ -13,6 +13,7 @@
   - [Manage Repositories](#manage-repositories)
   - [Manage Components](#manage-components)
 - [SDK Settings](#sdk-settings)
+- [Plugins](#plugins)
 
 # 1. Overview <a name="overview"></a>
 
@@ -189,6 +190,37 @@ Following parameters can be applied to all commands:
 - `--s` or `--settings` - path to the custom settings file. All settings from this file override the default setting properties. This feature can be useful to create SDK profiles.
 - `--sp` or `--setting-property` override default setting parameter, for example `--sp maven.local.repo=/home/user/other-m2`.
 
+# 6. SDK Plugins <a name="plugins"></a>
 
+CUBA SDK supports external plugins. Plugins are similar to [CUBA CLI](https://github.com/cuba-platform/cuba-cli) plugins. 
+Please check more info about plugin development in [CUBA CLI documentation](https://github.com/cuba-platform/cuba-cli/wiki/Plugin-Development).
 
+CUBA SDK plugins should be located in `<user.home>/.haulmont/sdk/plugins/` directory.
+
+To add new component provider it is required to implement `com.haulmont.cuba.cli.plugin.sdk.templates.ComponentProvider` interface methods 
+and add implementation to `ComponentRegistry` in `InitPluginEvent` plugin handler. 
+
+Example:
+```$java
+private val componentRegistry: ComponentRegistry by sdkKodein.instance<ComponentRegistry>()
+
+    @Subscribe
+    fun onInit(event: InitPluginEvent) {
+        componentRegistry.addProviders(YourProvider())
+``` 
+
+CUBA SDK provides additional events which can be used in external plugins:
+
+- `SdkInitEvent` - fires after sdk was initiated
+- `BeforeResolveEvent` - fires before component will be resolved, provides component which will be resolved
+- `AfterResolveEvent` - fires after component was resolved, provides component which will be resolved
+- `BeforePushEvent` - fires before component will be pushed to repository, provides component and repositories
+- `AfterPushEvent` - fires after component was pushed to repository, provides component and repositories
+- `BeforeRemoveEvent` - fires before component will be removed to repository, provides component
+- `AfterRemoveEvent` - fires after component was removed to repository, provides component
+- `NewVersionAvailableEvent` - fires when new component versions found in check versions command, provides component and new version
+- `BeforeAddRepositoryEvent` - fires before repository will be added, provides repository
+- `AfterAddRepositoryEvent` - fires after repository was added, provides repository
+- `BeforeRemoveRepositoryEvent` - fires before repository will be removed, provides repository
+- `AfterRemoveRepositoryEvent` - fires after repository was removed, provides repository
 

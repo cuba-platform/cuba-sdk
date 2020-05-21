@@ -17,6 +17,7 @@
 package com.haulmont.cuba.cli.plugin.sdk.commands
 
 import com.beust.jcommander.Parameter
+import com.google.common.eventbus.EventBus
 import com.haulmont.cli.core.Messages
 import com.haulmont.cli.core.WorkingDirectoryManager
 import com.haulmont.cli.core.commands.AbstractCommand
@@ -81,6 +82,7 @@ abstract class AbstractSdkCommand : AbstractCommand() {
 
     internal val messages by localMessages()
     internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance<SdkSettingsHolder>()
+    internal val bus: EventBus by com.haulmont.cli.core.kodein.instance<EventBus>()
     internal val workingDirectoryManager: WorkingDirectoryManager by sdkKodein.instance<WorkingDirectoryManager>()
 
     @Parameter(

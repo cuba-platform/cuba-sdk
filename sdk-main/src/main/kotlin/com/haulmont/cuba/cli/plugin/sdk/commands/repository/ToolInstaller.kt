@@ -85,7 +85,8 @@ open class ToolInstaller(
     }
 
     private fun download(): Path {
-        val archive = sdkSettings.sdkHome().resolve("${name.toLowerCase()}.zip")
+        val ext = downloadLink.substringAfterLast(".")
+        val archive = sdkSettings.sdkHome().resolve("${name.toLowerCase()}.${ext}")
         if (!Files.exists(archive)) {
             printProgress(
                 rootMessages["setup.download"].format(name),

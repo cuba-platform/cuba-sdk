@@ -26,6 +26,7 @@ import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
+import com.haulmont.cuba.cli.plugin.sdk.event.SdkEvent
 import com.haulmont.cuba.cli.plugin.sdk.templates.ComponentProvider
 import com.haulmont.cuba.cli.plugin.sdk.templates.ComponentRegistry
 import com.haulmont.cuba.cli.plugin.sdk.utils.doubleUnderline
@@ -138,6 +139,7 @@ class CheckForMinorUpdatesCommand : BaseComponentCommand() {
                         val update =
                             Component(component.groupId, component.artifactId, version, type = component.type)
                         if (!updateAlreadyResolved(update)) {
+                            bus.post(SdkEvent.NewVersionAvailableEvent(component, update))
                             availableUpdates.add(update)
                         }
                     }

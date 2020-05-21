@@ -29,6 +29,7 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryType
+import com.haulmont.cuba.cli.plugin.sdk.event.SdkEvent
 import com.haulmont.cuba.cli.plugin.sdk.services.ComponentManager
 import com.haulmont.cuba.cli.plugin.sdk.services.MetadataHolder
 import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
@@ -108,12 +109,14 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
     internal fun upload(components: List<Component>, repositories: List<Repository>) {
         components.forEach { component ->
             printWriter.println(messages["upload.progress"].format(component))
+            bus.post(SdkEvent.BeforePushEvent(component, repositories))
             componentManager.upload(component, repositories) { artifact, uploaded, total ->
                 printProgress(
                     messages["upload.progress"].format(artifact.mvnCoordinates()),
                     calculateProgress(uploaded, total)
                 )
             }
+            bus.post(SdkEvent.AfterPushEvent(component, repositories))
         }
         printWriter.println(messages["upload.finished"].green())
     }
@@ -124,12 +127,14 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
 
     internal fun resolve(components: List<Component>) {
         components.forEach { component ->
+            bus.post(SdkEvent.BeforeResolveEvent(component))
             componentManager.resolve(component) { resolvedComponent, resolved, total ->
                 printProgress(
                     messages["resolve.progress"].format(component),
                     calculateProgress(resolved, total)
                 )
             }
+            bus.post(SdkEvent.AfterResolveEvent(component))
             componentManager.register(component)
         }
         printWriter.println(messages["resolve.finished"].green())

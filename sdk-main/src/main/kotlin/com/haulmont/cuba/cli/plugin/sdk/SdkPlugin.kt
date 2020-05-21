@@ -17,17 +17,15 @@
 package com.haulmont.cuba.cli.plugin.sdk
 
 import com.google.common.eventbus.Subscribe
-import com.haulmont.cli.core.API_VERSION
-import com.haulmont.cli.core.MainCliPlugin
+import com.haulmont.cli.core.*
 import com.haulmont.cli.core.event.DestroyPluginEvent
 import com.haulmont.cli.core.event.InitPluginEvent
-import com.haulmont.cli.core.kodein
-import com.haulmont.cli.core.localMessages
 import com.haulmont.cuba.cli.plugin.sdk.commands.PrintPropertiesCommand
 import com.haulmont.cuba.cli.plugin.sdk.commands.SdkCommand
 import com.haulmont.cuba.cli.plugin.sdk.commands.artifacts.*
 import com.haulmont.cuba.cli.plugin.sdk.commands.repository.*
 import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
+import com.haulmont.cuba.cli.plugin.sdk.perf.SdkPerformance.sdkSettings
 import com.haulmont.cuba.cli.plugin.sdk.templates.ComponentRegistry
 import com.haulmont.cuba.cli.plugin.sdk.templates.CubaAddonProvider
 import com.haulmont.cuba.cli.plugin.sdk.templates.CubaFrameworkProvider
@@ -136,6 +134,11 @@ class SdkPlugin : MainCliPlugin {
                     command(provider.getType(), ListComponentCommand(provider))
                 }
             }
+        }
+
+        if (!sdkSettings.sdkConfigured()){
+            writer.println(messages["setup.initSdk"].green())
+            InitCommand().execute()
         }
 
         Runtime.getRuntime().addShutdownHook(object : Thread() {

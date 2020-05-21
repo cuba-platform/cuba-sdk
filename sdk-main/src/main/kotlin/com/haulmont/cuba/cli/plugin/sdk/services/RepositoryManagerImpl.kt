@@ -17,14 +17,17 @@
 package com.haulmont.cuba.cli.plugin.sdk.services
 
 import com.github.kittinunf.fuel.Fuel
+import com.google.common.eventbus.EventBus
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.haulmont.cli.core.kodein
 import com.haulmont.cli.core.prompting.ValidationException
 import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.dto.Authentication
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryType
+import com.haulmont.cuba.cli.plugin.sdk.event.SdkEvent
 import com.haulmont.cuba.cli.plugin.sdk.utils.authorizeIfRequired
 import org.kodein.di.generic.instance
 import java.nio.file.Files
@@ -35,6 +38,7 @@ class RepositoryManagerImpl : RepositoryManager {
 
     internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance<SdkSettingsHolder>()
     internal val dbProvider: DbProvider by sdkKodein.instance<DbProvider>()
+    private val bus: EventBus by kodein.instance<EventBus>()
 
     inline fun <reified T> fromJson(json: String): T {
         return Gson().fromJson(json, object : TypeToken<T>() {}.type)
@@ -130,20 +134,28 @@ class RepositoryManagerImpl : RepositoryManager {
         if (getRepository(repository.name, target) != null) {
             throw IllegalStateException("Repository with name ${repository.name} already exist")
         }
+        bus.post(SdkEvent.BeforeAddRepositoryEvent(repository))
         if (RepositoryType.LOCAL == repository.type && !Files.exists(Path.of(repository.url))) {
             Files.createDirectories(Path.of(repository.url))
         }
         dbInstance().set(target.toString(), repository.name, Gson().toJson(repository))
         (sdkRepositories[target]
             ?: throw IllegalStateException("Unknown repository target $target")).add(repository)
+        bus.post(SdkEvent.AfterAddRepositoryEvent(repository))
     }
 
     override fun removeRepository(name: String, target: RepositoryTarget, force: Boolean) {
         if (!force && RepositoryTarget.TARGET == target && name == sdkSettings["repository.name"]) {
             throw ValidationException("Unable to delete configured local SDK repository")
         }
-        getInternalRepositories(target).remove(getRepository(name, target))
-        dbInstance().remove(target.toString(), name)
+
+        val repository = getRepository(name, target)
+        if (repository != null) {
+            bus.post(SdkEvent.AfterRemoveRepositoryEvent(repository))
+            getInternalRepositories(target).remove(repository)
+            dbInstance().remove(target.toString(), name)
+            bus.post(SdkEvent.AfterRemoveRepositoryEvent(repository))
+        }
     }
 
     private fun dbInstance() = dbProvider.get("repository")

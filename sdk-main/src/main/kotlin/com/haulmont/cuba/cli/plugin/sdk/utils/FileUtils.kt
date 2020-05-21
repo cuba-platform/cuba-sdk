@@ -21,12 +21,16 @@ import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.core.Response
 import com.github.kittinunf.result.Result
+import org.apache.commons.compress.archivers.ArchiveEntry
+import org.apache.commons.compress.archivers.ArchiveInputStream
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
+import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream
 import java.io.*
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
 import java.util.zip.ZipEntry
-import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
 
 
@@ -50,41 +54,86 @@ class FileUtils {
         }
 
         fun unzip(
-            zipFileName: Path, targetDir: Path, skipFirstEntry: Boolean = false,
+            fileName: Path, targetDir: Path, skipFirstEntry: Boolean = false,
             progressFun: UnzipProcessCallback? = null
         ): Path {
-            var firstZipEntry: ZipEntry? = null;
-            ZipFile(zipFileName.toFile()).use { zip ->
-                val total = zip.entries().asSequence().count()
-                var count = 0
-                zip.entries().asSequence().forEach { entry ->
-                    if (firstZipEntry == null) {
-                        firstZipEntry = entry
-                    }
-                    zip.getInputStream(entry).use { input ->
-                        var entryName = entry.name
-                        if (skipFirstEntry && firstZipEntry != null) {
-                            entryName = entryName.replaceFirst(firstZipEntry!!.getName(), "")
-                        }
-                        targetDir.resolve(entryName).also {
-                            Files.createDirectories(it.parent)
-                            if (Files.exists(it)) {
-                                Files.delete(it)
-                            }
-                        }.also {
-                            if (!entry.isDirectory) {
-                                Files.createFile(it)
-                                    .toFile().outputStream().use { output ->
-                                        input.copyTo(output)
-                                    }
-                            }
-                        }
-                    }
+            var total = 0
+            var count = 0
+            createArchiveEntry(fileName).use { zip ->
+                while (zip.nextEntry != null) {
+                    total++
+                }
+            }
+            var firstEntry: ArchiveEntry? = null
+            createArchiveEntry(fileName).use { zip ->
+                var entry: ArchiveEntry? = zip.nextEntry
 
+                if (firstEntry == null) {
+                    firstEntry = entry
+                }
+
+                while (entry != null) { // create a file with the same name as the tarEntry
+                    var entryName = entry.name
+                    if (skipFirstEntry && firstEntry != null) {
+                        entryName = entryName.replaceFirst(firstEntry!!.getName(), "")
+                    }
+                    val destPath = targetDir.resolve(entryName)
+                    if (Files.exists(destPath)) {
+                        Files.delete(destPath)
+                    }
+                    if (entry.isDirectory) {
+                        Files.createDirectories(destPath)
+                    } else {
+                        if (!Files.exists(destPath.parent)) {
+                            Files.createDirectories(destPath.parent)
+                        }
+                        Files.createFile(destPath)
+                        var btoRead: ByteArray? = ByteArray(1024)
+                        BufferedOutputStream(FileOutputStream(destPath.toFile())).use {
+                            var len = 0
+                            while (zip.read(btoRead).also { len = it } != -1) {
+                                it.write(btoRead, 0, len)
+                            }
+                        }
+                        btoRead = null
+
+                    }
                     progressFun?.let { it(++count, total) }
+                    entry = zip.nextEntry
                 }
             }
             return targetDir
+        }
+
+        private fun createArchiveEntry(zipFileName: Path): ArchiveInputStream {
+            val ext = zipFileName.toString().substringAfterLast(".")
+            return when (ext) {
+                "tar" -> TarArchiveInputStream(
+                    BufferedInputStream(
+                        FileInputStream(
+                            zipFileName.toFile()
+                        )
+                    )
+                )
+                "tar.gz", "tgz", "gz" -> TarArchiveInputStream(
+                    GzipCompressorInputStream(
+                        BufferedInputStream(
+                            FileInputStream(
+                                zipFileName.toFile()
+                            )
+                        )
+                    )
+                )
+                "zip" ->
+                    ZipArchiveInputStream(
+                        BufferedInputStream(
+                            FileInputStream(
+                                zipFileName.toFile()
+                            )
+                        )
+                    )
+                else -> throw IllegalStateException("Unsupported $ext archive format")
+            }
         }
 
         fun zip(zipFileName: Path, files: Collection<File>) {
