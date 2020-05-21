@@ -22,6 +22,8 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 
 interface ComponentProvider {
 
+    fun getName(): String
+
     fun getType(): String
 
     fun getComponent(template: Component): Component

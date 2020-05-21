@@ -24,6 +24,8 @@ open class LibProvider : BintraySearchComponentProvider() {
 
     override fun getType() = "lib"
 
+    override fun getName() = "Library"
+
     override fun getComponent(template: Component): Component {
         return Component(
             id = "${template.groupId}:${template.artifactId}",

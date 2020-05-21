@@ -64,7 +64,7 @@ class CheckForMinorUpdatesCommand : BaseComponentCommand() {
             if (updates.isNotEmpty()) {
                 printWriter.println(
                     messages["update.availableComponentUpdates"]
-                        .format(provider.getType()).doubleUnderline()
+                        .format(provider.getName()).doubleUnderline()
                 )
                 updates.forEach { printWriter.println("$it") }
                 printWriter.println()
@@ -115,7 +115,7 @@ class CheckForMinorUpdatesCommand : BaseComponentCommand() {
         val thread = thread {
             provider.load()
         }
-        waitTask(messages["update.checkUpdates"].format(provider.getType())) {
+        waitTask(messages["update.checkUpdates"].format(provider.getName())) {
             thread.isAlive
         }
 

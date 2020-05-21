@@ -41,6 +41,8 @@ class CubaFrameworkProvider : CubaProvider() {
 
     override fun getType() = CUBA_PLATFORM_PROVIDER
 
+    override fun getName() = "CUBA"
+
     override fun availableVersions(componentId: String?) = super.availableVersions("com.haulmont.cuba:cuba-global")
 
     override fun resolveCoordinates(nameVersion: NameVersion): Component? {
@@ -50,13 +52,15 @@ class CubaFrameworkProvider : CubaProvider() {
                     groupId = "com.haulmont.cuba",
                     artifactId = "cuba",
                     version = it[0],
-                    type = getType()
+                    type = getType(),
+                    name = getName()
                 )
                 2 -> return Component(
                     groupId = "com.haulmont.cuba",
                     artifactId = "cuba",
                     version = it[1],
-                    type = getType()
+                    type = getType(),
+                    name = getName()
                 )
                 else -> return null
             }

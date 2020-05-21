@@ -17,10 +17,28 @@
 package com.haulmont.cuba.cli.plugin.sdk.commands.artifacts
 
 import com.beust.jcommander.Parameters
+import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
+import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
+import com.haulmont.cuba.cli.plugin.sdk.services.MetadataHolder
 import com.haulmont.cuba.cli.plugin.sdk.templates.ComponentProvider
+import com.haulmont.cuba.cli.plugin.sdk.utils.doubleUnderline
+import org.kodein.di.generic.instance
 
 @Parameters(commandDescription = "List available components in SDK")
-class ListComponentCommand(val provider: ComponentProvider) : AbstractListCommand() {
+class ListComponentCommand(val provider: ComponentProvider) : AbstractSdkCommand() {
 
-    override fun getComponentType(): String = provider.getType()
+    internal val metadataHolder: MetadataHolder by sdkKodein.instance<MetadataHolder>()
+
+    override fun run() {
+        printWriter.println(messages["list.resolved"].format(provider.getName()).doubleUnderline())
+        for (component in metadataHolder.getResolved().filter { it.type == provider.getType() }) {
+            printWriter.println("$component")
+        }
+        printWriter.println()
+        printWriter.println(messages["list.installed"].format(provider.getName()).doubleUnderline())
+        for (component in metadataHolder.getInstalled().filter { it.type == provider.getType() }) {
+            printWriter.println("$component")
+        }
+        printWriter.println()
+    }
 }

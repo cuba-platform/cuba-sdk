@@ -41,6 +41,8 @@ class CubaAddonProvider : CubaProvider() {
 
     override fun getType() = "addon"
 
+    override fun getName() = "CUBA addon"
+
     override fun getComponent(template: Component): Component {
         val mAddon = searchInMarketplace(
             id = template.id, groupId = template.groupId, artifactId = template.artifactId

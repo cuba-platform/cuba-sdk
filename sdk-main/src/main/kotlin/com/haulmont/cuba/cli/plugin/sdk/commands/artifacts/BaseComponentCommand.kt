@@ -272,61 +272,69 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
 
         if (nameVersion == null) {
             return if (components != null) {
-                val name = askName(type, components)
-                val version = askVersion(name, versions)
-                "${name.toLowerCase()}:$version"
+                val idName = askName(provider.getName(), components)
+                val version = askVersion(idName.first, idName.second, versions)
+                "${idName.first.toLowerCase()}:$version"
             } else {
-                val version = askVersion(type, versions)
+                val version = askVersion(provider.getType(), provider.getName(), versions)
                 version
             }
         }
         val split = nameVersion.split(":")
         if (split.last().splitVersion() == null) {
-            val version = askVersion(nameVersion, versions)
+            val version = askVersion(nameVersion, null, versions)
             return "${nameVersion.toLowerCase()}:$version"
         }
         return nameVersion
     }
 
     private fun askVersion(
-        name: String,
+        id: String,
+        name: String?,
         versions: (name: String) -> List<Option<String>>
     ): String {
-        val versionsList = versions(name)
+        val versionsList = versions(id)
+        val displayName = name ?: id
         if (versionsList.isEmpty()) {
             return Prompts.create {
                 question(
                     "version",
-                    messages["ask.question.version"].format(name)
+                    messages["ask.question.version"].format(displayName)
                 )
             }.ask()["version"] as String
         } else {
             return Prompts.create {
                 options(
                     "version",
-                    messages["ask.version"].format(name),
+                    messages["ask.version"].format(displayName),
                     versionsList
                 )
             }.ask()["version"] as String
         }
     }
 
-    private fun askName(msgPrefix: String, innerComponents: List<Component>): String {
+    private fun askName(msgPrefix: String, innerComponents: List<Component>): Pair<String, String?> {
         if (innerComponents.isEmpty()) {
-            return Prompts.create {
+            return Pair(Prompts.create {
                 question(
                     "name",
                     messages["ask.question.name"].format(msgPrefix)
                 )
-            }.ask()["name"] as String
+            }.ask()["name"] as String, null)
         } else {
             if (innerComponents.map { it.category }.distinct().filterNotNull().isEmpty()) {
                 val components = innerComponents
                     .map { Option(it.id!!, it.name ?: it.id, it.id) }
                     .toList()
-                return Prompts.create {
+                val id = Prompts.create {
                     options("name", messages["ask.name"].format(msgPrefix), components)
                 }.ask()["name"] as String
+                val component = innerComponents.find { it.id == id }
+                return if (component != null) {
+                    Pair(id, component.name)
+                } else {
+                    Pair(id, null)
+                }
             } else {
                 val categories = innerComponents.map { it.category ?: "Others" }
                     .distinct()
@@ -339,9 +347,16 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
                     .filter { it.category == if (category == "Others") null else category }
                     .map { Option(it.id!!, it.name ?: it.id, it.id) }
                     .toList()
-                return Prompts.create {
+                val id = Prompts.create {
                     options("name", messages["ask.name"].format(msgPrefix), components)
                 }.ask()["name"] as String
+                val component = innerComponents.find { it.id == id }
+                return if (component != null) {
+                    Pair(id, component.name)
+                } else {
+                    Pair(id, null)
+                }
+
             }
         }
     }

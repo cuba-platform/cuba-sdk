@@ -32,6 +32,8 @@ class SpringBootProvider : BintraySearchComponentProvider() {
 
     override fun getType() = "boot"
 
+    override fun getName() = "Spring boot"
+
     override fun getComponent(template: Component): Component {
         return template.copy(type = getType())
     }
