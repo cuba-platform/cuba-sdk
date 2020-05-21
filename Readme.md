@@ -17,31 +17,35 @@
 
 # 1. Overview <a name="overview"></a>
 
-CUBA SDK is a plugin for [CUBA CLI](https://github.com/cuba-platform/cuba-cli). This is a command-line tool that provides an ability to resolve and export all dependencies for CUBA framework, add-ons or any external library and then use SDK as an embedded repository. 
-All resolved dependencies will be stored in the local SDK maven repository. This tool has a built-in [Nexus 3 repository](https://www.sonatype.com/nexus-repository-oss). 
+CUBA SDK is a command-line tool that provides an ability to resolve and export all dependencies 
+for CUBA framework, add-ons or any external library and then use SDK as an embedded repository with 
+few simple commands. This tool has a built-in [Nexus 3 repository](https://www.sonatype.com/nexus-repository-oss). 
+
+CUBA SDK is a useful tool if it is required to develop applications with limited network environment. 
+
+
+### Main CUBA SDK features
+- IDE-Agnostic command line tool.
+- Can be installed on CI server.
+- Automatically collect and resolve all artifact dependencies.
+- User friendly command line interface.
+- Supports external plugins.
+- Using Gradle to resolve artifact dependencies.
+- Checks for new artifacts versions and can install them automatically with all dependencies.
+- Can work with few a source and target repositories.
+- Supports local `m2` repository as source or target repository.
+- Can install and setup embedded Nexus OSS repository.
+- Import/Export resolved artifacts with dependencies.
+- Integrated with CUBA addons marketplace. 
+- Supports difeerent profiles for one CUBA SDK instance. 
 
 # 2. Installation <a name="installation"></a>
 
-CUBA CLI and SDK compatibility:
-
-| CUBA CLI Version | SDK Version    |
-|------------------|----------------|
-| 2.1.1            | 0.1-SNAPSHOT   |  
-
-## 2.1. Manual Installation from Sources <a name="manual-installation-from-sources"></a>
-
-1. Install compatible CUBA CLI tool according to the [instruction](https://github.com/cuba-platform/cuba-cli/wiki/Installation).
-2. Checkout CUBA SDK sources from [GitHub](https://github.com/cuba-platform/cuba-sdk).
-3. Run `installPlugin` gradle task.
-4. Run `cuba-cli` in the command line. 
-
-If CUBA SDK plugin was loaded successfully then the following message will be displayed in the command line:
-
-![plugin_loaded](img/plugin_loaded.png)
+Tool will be available in SDK MAN repository soon. 
 
 # 3. Configuration <a name="configuration"></a>
 
-SDK should be configured before the first usage. To configure SDK run the `sdk init` command. 
+SDK should be configured before the first usage. To configure SDK run the `init` command. 
 
 # 4. Commands Reference <a name="commands-reference"></a>
 
@@ -63,8 +67,8 @@ SDK should be configured before the first usage. To configure SDK run the `sdk i
 ## 4.3. Manage Repositories <a name="manage-repositories"></a>
 
 SDK tool has three repository scopes:
-- **search** - repository to search components for frameworks and add-ons. 
-- **source** - source repository for maven commands. Dependencies will be downloaded from these repositories.  
+- **search** - repository to search components for CUBA frameworks and add-ons. 
+- **source** - source repository for components. Dependencies will be downloaded from these repositories.  
 - **target** - target repository to upload components with dependencies.
 
 By default the following repositories are configured:
@@ -73,7 +77,9 @@ By default the following repositories are configured:
   - CUBA Bintray
   - CUBA Nexus
 - **source scope:**
-  - Local `m2` repository
+  - Local `m2`
+  - Jcenter
+  - Java central
   - CUBA Bintray
   - CUBA Nexus   
 - **sdk scope:**
@@ -171,17 +177,16 @@ Configured SDK settings by default are located in the `<User.home>/cli/sdk/sdk.p
 - `sdk.export` - path to the directory to save exported SDK archives.
 
 *Local repo settings*
-- `maven.local.repo` - local *m2* repository folder path.
+- `maven.local.repo` - local *m2* repository folder path. This folder using for components import.
 
 *Gradle settings*
-- `maven.local.repo` - local *m2* repository folder path.
 - `gradle.home` - gradle home folder
 - `gradle.cache` - gradle cache folder
 - `gradle.version` - gradle version
 
 ### Apply Custom SDK Settings
 
-Following parameters can be applied to all `sdk` commands:
+Following parameters can be applied to all commands:
 - `--s` or `--settings` - path to the custom settings file. All settings from this file override the default setting properties. This feature can be useful to create SDK profiles.
 - `--sp` or `--setting-property` override default setting parameter, for example `--sp maven.local.repo=/home/user/other-m2`.
 
