@@ -6,7 +6,6 @@
 
 - [Overview](#overview) 
 - [Installation](#installation)
-  - [Manual Installation from Sources](#manual-installation-from-sources)
 - [Configuration](#configuration)
 - [Commands Reference](#commands-reference)
   - [Common SDK Commands](#common-sdk-commands)
