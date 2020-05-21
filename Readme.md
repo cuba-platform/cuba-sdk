@@ -28,6 +28,7 @@ CUBA SDK is a useful tool if it is required to develop applications with limited
 - IDE-Agnostic command line tool.
 - Can be installed on CI server.
 - Automatically collect and resolve all artifact dependencies.
+- Automatically download and resolve artifact sources. 
 - User friendly command line interface.
 - Supports external plugins.
 - Using Gradle to resolve artifact dependencies.
