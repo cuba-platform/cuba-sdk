@@ -14,29 +14,39 @@
  * limitations under the License.
  */
 
-package com.haulmont.cli.plugin.sdk.gradle
+package com.haulmont.cli.plugin.sdk.maven
 
 import com.google.common.eventbus.Subscribe
 import com.haulmont.cli.core.API_VERSION
 import com.haulmont.cli.core.CliPlugin
 import com.haulmont.cli.core.event.DestroyPluginEvent
 import com.haulmont.cli.core.event.InitPluginEvent
-import org.gradle.tooling.internal.consumer.ConnectorServices
+import com.haulmont.cli.plugin.sdk.maven.di.mavenSdkKodein
+import com.haulmont.cuba.cli.plugin.sdk.event.SdkEvent
+import org.kodein.di.generic.instance
 
-class GradleConnectorPlugin : CliPlugin {
+
+class MavenResolverPlugin : CliPlugin {
     override val apiVersion = API_VERSION
+
+    internal val mavenExecutor: MavenExecutor by mavenSdkKodein.instance<MavenExecutor>()
 
     @Subscribe
     fun onInit(event: InitPluginEvent) {
-        Runtime.getRuntime().addShutdownHook(object : Thread() {
-            override fun run() {
-                ConnectorServices.reset()
-            }
-        })
+
     }
 
     @Subscribe
     fun onDestroy(event: DestroyPluginEvent) {
-        ConnectorServices.reset()
+    }
+
+    @Subscribe
+    fun addRepository(event: SdkEvent.AfterAddRepositoryEvent) {
+        mavenExecutor.buildMavenSettingsFile()
+    }
+
+    @Subscribe
+    fun removeRepository(event: SdkEvent.AfterRemoveRepositoryEvent) {
+        mavenExecutor.buildMavenSettingsFile()
     }
 }

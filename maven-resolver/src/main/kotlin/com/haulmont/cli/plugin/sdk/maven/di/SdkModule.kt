@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2020 Haulmont.
+ * Copyright (c) 2008-2019 Haulmont.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,22 @@
  * limitations under the License.
  */
 
-rootProject.name = 'cuba-sdk'
+package com.haulmont.cli.plugin.sdk.maven.di
 
-include 'sdk-main', 'gradle-resolver', 'maven-resolver'
+import com.haulmont.cli.plugin.sdk.maven.MavenExecutor
+import com.haulmont.cli.plugin.sdk.maven.MavenExecutorImpl
+import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
+import org.kodein.di.Kodein
+import org.kodein.di.generic.bind
+import org.kodein.di.generic.singleton
+
+val mavenSdkModule = Kodein.Module {
+    bind<MavenExecutor>() with singleton {
+        MavenExecutorImpl()
+    }
+}
+
+val mavenSdkKodein = Kodein {
+    extend(sdkKodein)
+    import(mavenSdkModule)
+}

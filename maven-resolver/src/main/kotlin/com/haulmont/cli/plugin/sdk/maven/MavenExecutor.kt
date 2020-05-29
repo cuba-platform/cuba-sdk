@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Haulmont.
+ * Copyright (c) 2008-2020 Haulmont.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.services
+package com.haulmont.cli.plugin.sdk.maven
 
 interface MavenExecutor {
 
@@ -22,4 +22,5 @@ interface MavenExecutor {
 
     fun mvn(profile: String, command: String, commands: List<String>, ignoreErrors: Boolean = false): String
 
+    fun buildMavenSettingsFile()
 }

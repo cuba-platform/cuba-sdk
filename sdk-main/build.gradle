@@ -50,8 +50,6 @@ dependencies {
 
     implementation("org.apache.maven:maven-model:$versions.maven")
 
-    implementation("org.redundent:kotlin-xml-builder:$versions.kotlinXmlBuilder")
-
     testImplementation group: 'junit', name: 'junit', version: versions.jUnit
 }
 
@@ -108,7 +106,6 @@ def modulesConfig = [
         'com.haulmont.cli.core'       : "cli-core-${versions.cliCore}.jar",
         'velocity'                    : "velocity-${versions.velocity}.jar",
         'commons.lang'                : "commons-lang-${versions.commonsLang}.jar",
-        'commons.lang3'               : "commons-lang3-${versions.commonsLang3}.jar",
         'commons.collections'         : "commons-collections-${versions.commonsCollections}.jar",
         'commons.configuration'       : "commons-configuration-${versions.commonsConfiguration}.jar",
         'commons.logging'             : "commons-logging-${versions.commonsLogging}.jar",
@@ -142,7 +139,6 @@ def modulesConfig = [
         'mapdb'                       : "mapdb-${versions.mapdb}.jar",
         'maven.model'                 : "maven-model-${versions.maven}.jar",
         'plexus.utils'                : "plexus-utils-${versions.plexus}.jar",
-        'kotlin.xml.builder'          : "kotlin-xml-builder-${versions.kotlinXmlBuilder}.jar",
 ]
 
 task jarPatch(dependsOn: installDist, group: 'build',

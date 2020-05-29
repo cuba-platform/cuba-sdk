@@ -20,6 +20,7 @@ import com.haulmont.cli.core.CliContext
 import com.haulmont.cli.core.PluginLoader
 import com.haulmont.cli.core.bgRed
 import com.haulmont.cli.core.kodein
+import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import org.kodein.di.generic.instance
 import java.io.PrintWriter
 import java.lang.module.ModuleFinder
@@ -37,9 +38,15 @@ class SdkArtifactManagerLoader {
 
     private val context: CliContext by kodein.instance<CliContext>()
 
+    private val sdkSettings: SdkSettingsHolder by sdkKodein.instance<SdkSettingsHolder>()
+
     fun instance(): ArtifactManager? {
         val managers = loadClassImplFromPlugins(ArtifactManager::class.java)
-        return managers.firstOrNull { it.name == "gradle" }
+        return managers.firstOrNull { it.name == sdkSettings["artifact.resolver"] }
+    }
+
+    fun instances(): Collection<ArtifactManager> {
+        return loadClassImplFromPlugins(ArtifactManager::class.java)
     }
 
     private fun walkDirectory(rootDir: Path, action: (dir: Path) -> Unit) {

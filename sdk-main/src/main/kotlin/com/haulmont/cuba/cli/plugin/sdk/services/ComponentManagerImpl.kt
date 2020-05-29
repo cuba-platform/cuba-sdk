@@ -324,7 +324,7 @@ class ComponentManagerImpl : ComponentManager {
             }
         } catch (e: Exception) {
             log.throwing(
-                MvnArtifactManagerImpl::class.java.name,
+                ComponentManagerImpl::class.java.name,
                 "Error on reading pom file for ${artifact.mvnCoordinates()}",
                 e
             )

@@ -34,10 +34,6 @@ val sdkModule = Kodein.Module {
         SdkSettingsHolderImpl()
     }
 
-    bind<MavenExecutor>() with singleton {
-        MavenExecutorImpl()
-    }
-
     bind<ComponentManager>() with singleton {
         ComponentManagerImpl()
     }

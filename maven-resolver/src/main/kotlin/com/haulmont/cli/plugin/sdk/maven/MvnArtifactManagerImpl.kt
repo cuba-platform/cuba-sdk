@@ -14,44 +14,120 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.services
+package com.haulmont.cli.plugin.sdk.maven
 
+import com.haulmont.cli.core.green
+import com.haulmont.cli.core.localMessages
+import com.haulmont.cli.core.red
+import com.haulmont.cli.plugin.sdk.maven.di.mavenSdkKodein
+import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
+import com.haulmont.cuba.cli.plugin.sdk.commands.repository.ToolInstaller
 import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.dto.*
+import com.haulmont.cuba.cli.plugin.sdk.services.ArtifactManager
+import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
+import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
 import com.haulmont.cuba.cli.plugin.sdk.utils.FileUtils
 import com.haulmont.cuba.cli.plugin.sdk.utils.performance
 import org.apache.maven.model.Model
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
 import org.kodein.di.generic.instance
 import java.io.FileReader
+import java.io.InputStream
+import java.io.InputStreamReader
 import java.io.PrintWriter
+import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
+import java.util.*
 import java.util.logging.Logger
+import kotlin.collections.ArrayList
+import kotlin.concurrent.thread
 
 
 class MvnArtifactManagerImpl : ArtifactManager {
 
     private val log: Logger = Logger.getLogger(MvnArtifactManagerImpl::class.java.name)
 
+    internal val messages by localMessages()
     internal val printWriter: PrintWriter by sdkKodein.instance<PrintWriter>()
     internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance<SdkSettingsHolder>()
-    private val repositoryManager: RepositoryManager by sdkKodein.instance<RepositoryManager>()
-    internal val mavenExecutor: MavenExecutor by sdkKodein.instance<MavenExecutor>()
+    internal val repositoryManager: RepositoryManager by sdkKodein.instance<RepositoryManager>()
+    internal val mvnExecutor: MavenExecutor by mavenSdkKodein.instance<MavenExecutor>()
 
     override val name = "maven"
 
     override fun init() {
+        printWriter.println(messages["setup.initMaven"])
+
+        val pluginPropertyies =
+            readProperties(MavenResolverPlugin::class.java.getResourceAsStream("application.properties"))
+        for (entry in pluginPropertyies) {
+            sdkSettings[entry.key as String] = entry.value as String?
+        }
+
+        sdkSettings["maven.settings"] = sdkSettings.sdkHome().resolve("sdk-settings.xml").toString()
+        sdkSettings["maven.local.repo"] = sdkSettings.sdkHome().resolve(".m2").toString()
+        sdkSettings["maven.path"] = sdkSettings.sdkHome().resolve("mvn").toString()
+        sdkSettings.flushAppProperties()
+        downloadAndConfigureMaven()
+    }
+
+    private fun readProperties(
+        propertiesInputStream: InputStream,
+        defaultProperties: Properties = Properties()
+    ): Properties {
+        val properties = Properties(defaultProperties)
+        propertiesInputStream.use {
+            val inputStreamReader = InputStreamReader(propertiesInputStream, StandardCharsets.UTF_8)
+            properties.load(inputStreamReader)
+        }
+        return properties
+    }
+
+    private fun downloadAndConfigureMaven() {
+        ToolInstaller(
+            "Maven",
+            mavenDownloadLink(),
+            sdkSettings.sdkHome().resolve(sdkSettings["maven.path"]),
+            true
+        ).downloadAndConfigure(
+            configure = {
+                mvnExecutor.buildMavenSettingsFile()
+                val thread = thread {
+                    mvnExecutor.init()
+                }
+                AbstractSdkCommand.waitTask(messages["setup.maven.configuration"], 500) {
+                    thread.isAlive
+                }
+            },
+            onFail = {
+                printWriter.println(
+                    messages["setup.maven.configurationFailed"].format(it.message).red()
+                )
+            }
+        )
+
 
     }
 
-    override fun clean() {
+    private fun mavenDownloadLink() = sdkSettings["maven.downloadLink"]
+        .format(
+            sdkSettings["maven.version"],
+            sdkSettings["maven.version"]
+        )
 
+    override fun clean() {
+        Path.of(sdkSettings["maven.local.repo"]).also {
+            FileUtils.deleteDirectory(it)
+            Files.createDirectories(it)
+        }
     }
 
     override fun printInfo() {
-
+        printWriter.println("Maven install path: ${sdkSettings["maven.path"].green()}")
+        printWriter.println("Maven local repository: ${sdkSettings["maven.local.repo"].green()}")
     }
 
     override fun uploadComponentToLocalCache(component: Component): List<MvnArtifact> {
@@ -63,16 +139,16 @@ class MvnArtifactManagerImpl : ArtifactManager {
                 .resolve(component.version)
                 .resolve("${component.artifactId}-${component.version}.${classifier.extension}")
             Files.createDirectories(componentPath.parent)
-            if (component.url != null) {
+            component.url?.let { url ->
                 val (_, response, _) = FileUtils.downloadFile(
-                    component.url,
+                    url,
                     componentPath
                 )
                 if (response.statusCode == 200) {
                     dependencies.add(
                         MvnArtifact(
                             component.groupId,
-                            component.artifactId!!,
+                            component.artifactId,
                             component.version,
                             classifiers = component.classifiers
                         )
@@ -89,7 +165,7 @@ class MvnArtifactManagerImpl : ArtifactManager {
 
         performance("Read POM") {
             if (!Files.exists(pomFile)) {
-                mavenExecutor.mvn(
+                mvnExecutor.mvn(
                     RepositoryTarget.SOURCE.getId(),
                     "org.apache.maven.plugins:maven-dependency-plugin:3.1.1:get",
                     arrayListOf("-Dartifact=${artifact.mvnCoordinates(classifier)}"),
@@ -185,7 +261,7 @@ class MvnArtifactManagerImpl : ArtifactManager {
                     }
                 }
 
-                val commandResult = mavenExecutor.mvn(
+                val commandResult = mvnExecutor.mvn(
                     RepositoryTarget.TARGET.getId(),
                     "org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file",
                     commands
@@ -214,7 +290,7 @@ class MvnArtifactManagerImpl : ArtifactManager {
         pomClassifier: Classifier = Classifier.pom()
     ): List<MvnArtifact> {
         log.info("Resolve dependencies ${artifact.mvnCoordinates(classifier)}")
-        val commandResult = mavenExecutor.mvn(
+        val commandResult = mvnExecutor.mvn(
             RepositoryTarget.SOURCE.getId(),
             "dependency:resolve",
             arrayListOf(
@@ -252,7 +328,7 @@ class MvnArtifactManagerImpl : ArtifactManager {
     override fun getArtifact(artifact: MvnArtifact, classifier: Classifier) {
         log.info("Get with dependencies ${artifact.mvnCoordinates(classifier)}")
         performance("Get artifact") {
-            mavenExecutor.mvn(
+            mvnExecutor.mvn(
                 RepositoryTarget.SOURCE.getId(),
                 "org.apache.maven.plugins:maven-dependency-plugin:3.1.1:get",
                 arrayListOf(

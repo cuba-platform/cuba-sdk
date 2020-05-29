@@ -34,7 +34,7 @@ import java.util.zip.ZipOutputStream
 
 class ImportExportServiceImpl : ImportExportService {
 
-    private val log: Logger = Logger.getLogger(MavenExecutorImpl::class.java.name)
+    private val log: Logger = Logger.getLogger(ImportExportServiceImpl::class.java.name)
     private val sdkSettings: SdkSettingsHolder by sdkKodein.instance<SdkSettingsHolder>()
     private val componentManager: ComponentManager by sdkKodein.instance<ComponentManager>()
     private val artifactManager: ArtifactManager by lazy { ArtifactManager.instance()}

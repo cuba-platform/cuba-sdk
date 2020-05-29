@@ -31,10 +31,7 @@ import com.haulmont.cuba.cli.plugin.sdk.utils.performance
 import org.apache.maven.model.Model
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
 import org.kodein.di.generic.instance
-import java.io.FileInputStream
-import java.io.FileReader
-import java.io.InputStreamReader
-import java.io.PrintWriter
+import java.io.*
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
@@ -55,6 +52,13 @@ class GradleArtifactManagerImpl : ArtifactManager {
 
     override fun init() {
         printWriter.println(messages["setup.downloadGradle"])
+
+        val pluginPropertyies =
+            readProperties(GradleResolverPlugin::class.java.getResourceAsStream("application.properties"))
+        for (entry in pluginPropertyies){
+            sdkSettings[entry.key as String] = entry.value as String?
+        }
+
         sdkSettings["gradle.home"] = sdkSettings.sdkHome().resolve("gradle").toString()
         sdkSettings["gradle.cache"] = sdkSettings.sdkHome().resolve(Path.of("gradle", "cache")).toString()
         sdkSettings.flushAppProperties()
@@ -72,6 +76,18 @@ class GradleArtifactManagerImpl : ArtifactManager {
         gradleBuild.toFile().copyInputStreamToFile(
             GradleArtifactManagerImpl::class.java.getResourceAsStream("build.gradle")
         )
+    }
+
+    private fun readProperties(
+        propertiesInputStream: InputStream,
+        defaultProperties: Properties = Properties()
+    ): Properties {
+        val properties = Properties(defaultProperties)
+        propertiesInputStream.use {
+            val inputStreamReader = InputStreamReader(propertiesInputStream, StandardCharsets.UTF_8)
+            properties.load(inputStreamReader)
+        }
+        return properties
     }
 
     override fun clean() {

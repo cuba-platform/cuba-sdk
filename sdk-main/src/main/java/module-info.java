@@ -43,7 +43,6 @@ module com.haulmont.cuba.cli.plugin.sdk {
     requires java.management;
     requires java.desktop;
     requires mapdb;
-    requires kotlin.xml.builder;
     requires velocity;
     requires jline;
     requires commons.lang;

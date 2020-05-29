@@ -1,0 +1,74 @@
+def moduleName = "com.haulmont.cuba.cli.plugin.sdk.maven"
+
+configurations {
+    // configuration that holds jars to include in the jar
+    extraLibs
+}
+
+task sourceJar(type: Jar) {
+    from file('src/main/java')
+    from file('src/main/kotlin')
+    from file('src/main/resources')
+    classifier = 'sources'
+}
+
+artifacts {
+    archives sourceJar
+}
+
+dependencies {
+    compile project(":sdk-main")
+
+    implementation("com.github.kittinunf.fuel:fuel:$versions.fuel") {
+        exclude(group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib')
+    }
+    implementation("org.apache.maven:maven-model:$versions.maven")
+
+    extraLibs("org.redundent:kotlin-xml-builder:$versions.kotlinXmlBuilder")
+
+    configurations.compile.extendsFrom(configurations.extraLibs)
+}
+
+compileJava {
+    inputs.property("moduleName", moduleName)
+    doFirst {
+        options.compilerArgs = [
+                '--module-path', classpath.asPath,
+                '--patch-module', "$moduleName=${compileKotlin.destinationDir}"
+        ]
+        classpath = files()
+    }
+}
+
+task bundle(group: 'distribution', dependsOn: ['jar', ':sdk-main:bundle'], type: Copy) {
+    inputs.files jar.outputs.files
+
+    def bundlePlatform = project.hasProperty('targetOsPlatform') ? '-' + project.property('targetOsPlatform') : '';
+
+    def bundleOutput = file("${rootProject.buildDir}/bundle" + bundlePlatform)
+
+    jar.outputs.files.each {
+        from it
+    }
+
+    configurations.extraLibs.each {
+        from it
+    }
+
+    def pluginsFolder = file("${bundleOutput}/plugins")
+    pluginsFolder.mkdir()
+
+    into pluginsFolder
+
+    if (bundleOutput.exists()) {
+        def osName = System.getProperty("os.name").toLowerCase()
+        if (osName.contains('nux')
+                || osName.contains('mac')) {
+            exec {
+                executable 'chmod'
+                args = ['u+w', '-R', pluginsFolder]
+            }
+        }
+    }
+
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Haulmont.
+ * Copyright (c) 2008-2020 Haulmont.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.services
+package com.haulmont.cli.plugin.sdk.maven
 
 import com.haulmont.cli.core.commands.CommonParameters
 import com.haulmont.cuba.cli.plugin.sdk.SdkPlugin
@@ -22,6 +22,8 @@ import com.haulmont.cuba.cli.plugin.sdk.commands.CommonSdkParameters
 import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.dto.OsType
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
+import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
+import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
 import com.haulmont.cuba.cli.plugin.sdk.utils.copyInputStreamToFile
 import com.haulmont.cuba.cli.plugin.sdk.utils.currentOsType
 import org.kodein.di.generic.instance
@@ -148,7 +150,7 @@ class MavenExecutorImpl : MavenExecutor {
         }
     }
 
-    private fun buildMavenSettingsFile() {
+    override fun buildMavenSettingsFile() {
         val settings = xml("settings") {
             "localRepository" {
                 -sdkSettings["maven.local.repo"]

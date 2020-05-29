@@ -15,10 +15,10 @@
  */
 
 import com.haulmont.cli.core.CliPlugin;
-import com.haulmont.cli.plugin.sdk.gradle.GradleResolverPlugin;
+import com.haulmont.cli.plugin.sdk.maven.MavenResolverPlugin;
 import com.haulmont.cuba.cli.plugin.sdk.services.ArtifactManager;
 
-module com.haulmont.cuba.cli.plugin.sdk.gradle {
+module com.haulmont.cuba.cli.plugin.sdk.maven {
     requires java.base;
 
     requires kotlin.stdlib;
@@ -32,16 +32,16 @@ module com.haulmont.cuba.cli.plugin.sdk.gradle {
     requires com.haulmont.cli.core;
     requires com.haulmont.cuba.cli.plugin.sdk;
     requires gson;
-    requires gradle.tooling.api;
-    requires org.slf4j;
     requires java.logging;
     requires fuel;
     requires maven.model;
+    requires kotlin.xml.builder;
 
-    opens com.haulmont.cli.plugin.sdk.gradle;
+    opens com.haulmont.cli.plugin.sdk.maven;
+    opens com.haulmont.cli.plugin.sdk.maven.di;
 
-    provides CliPlugin with GradleResolverPlugin;
+    provides CliPlugin with MavenResolverPlugin;
 
-    provides ArtifactManager with com.haulmont.cli.plugin.sdk.gradle.GradleArtifactManagerImpl;
+    provides ArtifactManager with com.haulmont.cli.plugin.sdk.maven.MvnArtifactManagerImpl;
     uses ArtifactManager;
 }
