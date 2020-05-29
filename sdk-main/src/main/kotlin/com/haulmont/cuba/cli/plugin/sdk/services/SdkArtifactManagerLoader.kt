@@ -37,7 +37,7 @@ class SdkArtifactManagerLoader {
 
     private val writer: PrintWriter by kodein.instance<PrintWriter>()
 
-    private val context: CliContext by kodein.instance<CliContext>()sdk
+    private val context: CliContext by kodein.instance<CliContext>()
 
     private val sdkSettings: SdkSettingsHolder by sdkKodein.instance<SdkSettingsHolder>()
 
