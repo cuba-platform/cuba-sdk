@@ -16,6 +16,7 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.services
 
+import com.google.common.eventbus.EventBus
 import com.haulmont.cli.core.CliContext
 import com.haulmont.cli.core.PluginLoader
 import com.haulmont.cli.core.bgRed
@@ -36,13 +37,19 @@ class SdkArtifactManagerLoader {
 
     private val writer: PrintWriter by kodein.instance<PrintWriter>()
 
-    private val context: CliContext by kodein.instance<CliContext>()
+    private val context: CliContext by kodein.instance<CliContext>()sdk
 
     private val sdkSettings: SdkSettingsHolder by sdkKodein.instance<SdkSettingsHolder>()
 
+    private val bus: EventBus by kodein.instance<EventBus>()
+
     fun instance(): ArtifactManager? {
         val managers = loadClassImplFromPlugins(ArtifactManager::class.java)
-        return managers.firstOrNull { it.name == sdkSettings["artifact.resolver"] }
+        val resolver = managers.firstOrNull { it.name == sdkSettings["artifact.resolver"] }
+        if (resolver != null) {
+            bus.register(resolver)
+        }
+        return resolver
     }
 
     fun instances(): Collection<ArtifactManager> {

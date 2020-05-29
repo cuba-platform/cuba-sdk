@@ -12,11 +12,12 @@ import com.haulmont.cuba.cli.plugin.sdk.services.ArtifactManager
 import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
 import org.kodein.di.generic.instance
 import java.nio.file.Files
+import java.nio.file.Path
 
 @Parameters(commandDescription = "Init SDK")
 class InitCommand : AbstractSdkCommand() {
 
-    private val artifactManager: ArtifactManager by lazy { ArtifactManager.instance()}
+    private val artifactManager: ArtifactManager by lazy { ArtifactManager.instance() }
 
     private val repositoryManager: RepositoryManager by sdkKodein.instance<RepositoryManager>()
 
@@ -36,7 +37,10 @@ class InitCommand : AbstractSdkCommand() {
     }
 
     private fun initLocalMavenRepo() {
-        val sdkLocalRepo = sdkSettings.sdkHome().resolve("m2").apply {
+        val m2Path =
+            if (sdkSettings.hasProperty("maven.local.repo")) Path.of(sdkSettings["maven.local.repo"]) else sdkSettings.sdkHome()
+                .resolve("m2")
+        val sdkLocalRepo = m2Path.apply {
             if (!Files.exists(this)) {
                 Files.createDirectories(this)
             }

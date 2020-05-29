@@ -16,6 +16,7 @@
 
 package com.haulmont.cli.plugin.sdk.maven
 
+import com.google.common.eventbus.Subscribe
 import com.haulmont.cli.core.green
 import com.haulmont.cli.core.localMessages
 import com.haulmont.cli.core.red
@@ -24,6 +25,7 @@ import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
 import com.haulmont.cuba.cli.plugin.sdk.commands.repository.ToolInstaller
 import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.dto.*
+import com.haulmont.cuba.cli.plugin.sdk.event.SdkEvent
 import com.haulmont.cuba.cli.plugin.sdk.services.ArtifactManager
 import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
 import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
@@ -67,11 +69,27 @@ class MvnArtifactManagerImpl : ArtifactManager {
             sdkSettings[entry.key as String] = entry.value as String?
         }
 
-        sdkSettings["maven.settings"] = sdkSettings.sdkHome().resolve("sdk-settings.xml").toString()
-        sdkSettings["maven.local.repo"] = sdkSettings.sdkHome().resolve(".m2").toString()
-        sdkSettings["maven.path"] = sdkSettings.sdkHome().resolve("mvn").toString()
+        val mavenHome = sdkSettings.sdkHome().resolve("maven").also {
+            if (!Files.exists(it)){
+                Files.createDirectories(it)
+            }
+        }
+        sdkSettings["maven.home"] = mavenHome.toString()
+        sdkSettings["maven.settings"] = mavenHome.resolve("maven-settings.xml").toString()
+        sdkSettings["maven.local.repo"] = sdkSettings.sdkHome().resolve("m2").toString()
+        sdkSettings["maven.path"] = mavenHome.resolve("mvn").toString()
         sdkSettings.flushAppProperties()
         downloadAndConfigureMaven()
+    }
+
+    @Subscribe
+    fun addRepository(event: SdkEvent.AfterAddRepositoryEvent) {
+        mvnExecutor.buildMavenSettingsFile()
+    }
+
+    @Subscribe
+    fun removeRepository(event: SdkEvent.AfterRemoveRepositoryEvent) {
+        mvnExecutor.buildMavenSettingsFile()
     }
 
     private fun readProperties(

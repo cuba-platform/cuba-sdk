@@ -22,7 +22,8 @@ import com.haulmont.cli.core.CliPlugin
 import com.haulmont.cli.core.event.DestroyPluginEvent
 import com.haulmont.cli.core.event.InitPluginEvent
 import com.haulmont.cli.plugin.sdk.maven.di.mavenSdkKodein
-import com.haulmont.cuba.cli.plugin.sdk.event.SdkEvent
+import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
+import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
 import org.kodein.di.generic.instance
 
 
@@ -30,6 +31,7 @@ class MavenResolverPlugin : CliPlugin {
     override val apiVersion = API_VERSION
 
     internal val mavenExecutor: MavenExecutor by mavenSdkKodein.instance<MavenExecutor>()
+    internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance<SdkSettingsHolder>()
 
     @Subscribe
     fun onInit(event: InitPluginEvent) {
@@ -40,13 +42,5 @@ class MavenResolverPlugin : CliPlugin {
     fun onDestroy(event: DestroyPluginEvent) {
     }
 
-    @Subscribe
-    fun addRepository(event: SdkEvent.AfterAddRepositoryEvent) {
-        mavenExecutor.buildMavenSettingsFile()
-    }
 
-    @Subscribe
-    fun removeRepository(event: SdkEvent.AfterRemoveRepositoryEvent) {
-        mavenExecutor.buildMavenSettingsFile()
-    }
 }
