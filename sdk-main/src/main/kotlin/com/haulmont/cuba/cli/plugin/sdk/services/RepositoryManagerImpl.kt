@@ -170,7 +170,7 @@ class RepositoryManagerImpl : RepositoryManager {
         if (RepositoryType.LOCAL == repository.type) {
             return Files.exists(Path.of(url))
         } else {
-            if (sdkSettings["repository.name"] == repository.name) {
+            if (sdkSettings.hasProperty("repository.name") && sdkSettings["repository.name"] == repository.name) {
                 url = sdkSettings["repository.url"]
             }
             val (_, response, _) =
