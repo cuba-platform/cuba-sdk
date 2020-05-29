@@ -78,12 +78,18 @@ class MetadataHolderImpl : MetadataHolder {
     }
 
     override fun removeResolved(component: Component) {
-        resolvedComponents.remove(component)
-        dbInstance().remove("resolved", component.toString())
+        val resolvedComponent = resolvedComponents.firstOrNull { it.isSame(component) }
+        if (resolvedComponent != null) {
+            resolvedComponents.remove(resolvedComponent)
+            dbInstance().remove("resolved", resolvedComponent.toString())
+        }
     }
 
     override fun removeInstalled(component: Component) {
-        installedComponents.remove(component)
-        dbInstance().remove("installed", component.toString())
+        val installedComponent = installedComponents.firstOrNull { it.isSame(component) }
+        if (installedComponent != null) {
+            installedComponents.remove(installedComponent)
+            dbInstance().remove("installed", installedComponent.toString())
+        }
     }
 }
