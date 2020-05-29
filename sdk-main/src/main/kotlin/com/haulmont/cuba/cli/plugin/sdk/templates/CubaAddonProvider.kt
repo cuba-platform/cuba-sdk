@@ -24,7 +24,6 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.MarketplaceAddon
 import com.haulmont.cuba.cli.plugin.sdk.dto.MvnArtifact
-import com.haulmont.cuba.cli.plugin.sdk.services.ArtifactManager
 import com.haulmont.cuba.cli.plugin.sdk.services.ComponentVersionManager
 import org.apache.maven.model.Dependency
 import org.kodein.di.generic.instance
@@ -33,7 +32,6 @@ import java.util.logging.Logger
 class CubaAddonProvider : CubaProvider() {
 
     internal val componentVersionsManager: ComponentVersionManager by sdkKodein.instance<ComponentVersionManager>()
-    internal val artifactManager: ArtifactManager by sdkKodein.instance<ArtifactManager>()
 
     internal val componentRegistry: ComponentRegistry by sdkKodein.instance<ComponentRegistry>()
 
@@ -43,7 +41,7 @@ class CubaAddonProvider : CubaProvider() {
 
     override fun getName() = "CUBA addon"
 
-    override fun getComponent(template: Component): Component {
+    override fun getComponent(template: Component): Component? {
         val mAddon = searchInMarketplace(
             id = template.id, groupId = template.groupId, artifactId = template.artifactId
         )?.let { initAddonTemplate(it, template.version) }
@@ -177,7 +175,7 @@ class CubaAddonProvider : CubaProvider() {
             model.dependencies.filter { it.artifactId.endsWith("-global") }
                 .forEach {
                     if (!it.artifactId.startsWith("cuba")) {
-                        cubaAddon(it).let {
+                        cubaAddon(it)?.let {
                             additionalComponentList.add(it)
                             additionalComponentList.addAll(searchAdditionalComponents(it))
                         }
@@ -187,7 +185,7 @@ class CubaAddonProvider : CubaProvider() {
         return additionalComponentList
     }
 
-    private fun cubaAddon(dependency: Dependency): Component {
+    private fun cubaAddon(dependency: Dependency): Component? {
         return getComponent(
             Component(
                 dependency.groupId,
@@ -195,17 +193,6 @@ class CubaAddonProvider : CubaProvider() {
                 dependency.version
             )
         )
-    }
-
-    private fun cubaFramework(it: Dependency): Component {
-        return componentRegistry.providerByName(CubaFrameworkProvider.CUBA_PLATFORM_PROVIDER)
-            .getComponent(
-                Component(
-                    it.groupId,
-                    it.artifactId.substringBeforeLast("-global"),
-                    it.version
-                )
-            )
     }
 
     override fun load() {

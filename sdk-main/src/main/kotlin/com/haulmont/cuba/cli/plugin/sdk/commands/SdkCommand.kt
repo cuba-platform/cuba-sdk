@@ -21,6 +21,7 @@ import com.haulmont.cli.core.green
 import com.haulmont.cli.core.red
 import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusManager
+import com.haulmont.cuba.cli.plugin.sdk.services.ArtifactManager
 import com.haulmont.cuba.cli.plugin.sdk.utils.doubleUnderline
 import org.kodein.di.generic.instance
 
@@ -28,6 +29,7 @@ import org.kodein.di.generic.instance
 class SdkCommand : AbstractSdkCommand() {
 
     private val nexusManager: NexusManager by sdkKodein.instance<NexusManager>()
+    private val artifactManager: ArtifactManager by lazy { ArtifactManager.instance()}
 
     override fun run() {
         if (!sdkSettings.sdkConfigured()){
@@ -43,8 +45,7 @@ class SdkCommand : AbstractSdkCommand() {
             printWriter.println("Repository URL: ${sdkSettings["repository.url"].green()}")
             printWriter.println("Repository install path: ${sdkSettings["repository.path"].green()}")
         }
-        printWriter.println("Gradle path: ${sdkSettings["gradle.home"].green()}")
-        printWriter.println("Gradle cache: ${sdkSettings["gradle.cache"].green()}")
+        artifactManager.printInfo()
     }
 
     override fun onlyForConfiguredSdk() = false

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.gradle
+package com.haulmont.cuba.cli.plugin.sdk.services
 
 import com.haulmont.cli.core.CliContext
 import com.haulmont.cli.core.PluginLoader
@@ -29,7 +29,7 @@ import java.util.*
 import java.util.logging.Level
 import java.util.logging.Logger
 
-class SdkGradleConnectorLoader {
+class SdkArtifactManagerLoader {
 
     private val log: Logger = Logger.getLogger(PluginLoader::class.java.name)
 
@@ -37,9 +37,9 @@ class SdkGradleConnectorLoader {
 
     private val context: CliContext by kodein.instance<CliContext>()
 
-    fun loadConnector(): SdkGradleConnector? {
-        val connectorsSet = loadClassImplFromPlugins(SdkGradleConnector::class.java)
-        return connectorsSet.lastOrNull()
+    fun instance(): ArtifactManager? {
+        val managers = loadClassImplFromPlugins(ArtifactManager::class.java)
+        return managers.firstOrNull { it.name == "gradle" }
     }
 
     private fun walkDirectory(rootDir: Path, action: (dir: Path) -> Unit) {

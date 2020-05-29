@@ -42,7 +42,7 @@ class ComponentManagerImpl : ComponentManager {
     private val componentTemplates: ComponentTemplates by sdkKodein.instance<ComponentTemplates>()
     private val metadataHolder: MetadataHolder by sdkKodein.instance<MetadataHolder>()
     private val repositoryManager: RepositoryManager by sdkKodein.instance<RepositoryManager>()
-    private val artifactManager: ArtifactManager by sdkKodein.instance<ArtifactManager>()
+    private val artifactManager: ArtifactManager by lazy { ArtifactManager.instance()}
     private val nexusManager: NexusManager by sdkKodein.instance<NexusManager>()
     private val nexusScriptManager: NexusScriptManager by sdkKodein.instance<NexusScriptManager>()
     private val sdkSettings: SdkSettingsHolder by sdkKodein.instance<SdkSettingsHolder>()

@@ -21,6 +21,12 @@ artifacts {
 
 dependencies {
     compile project(":sdk-main")
+
+    implementation("com.github.kittinunf.fuel:fuel:$versions.fuel") {
+        exclude(group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib')
+    }
+    implementation("org.apache.maven:maven-model:$versions.maven")
+
     extraLibs "org.gradle:gradle-tooling-api:$versions.toolingApi"
     // The tooling API need an SLF4J implementation available at runtime, replace this with any other implementation
     extraLibs 'org.slf4j:slf4j-simple:1.7.10'

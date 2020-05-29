@@ -17,27 +17,34 @@
 package com.haulmont.cuba.cli.plugin.sdk.templates
 
 import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
-import com.haulmont.cuba.cli.plugin.sdk.dto.Component
-import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
-import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
-import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryType
+import com.haulmont.cuba.cli.plugin.sdk.dto.*
 import com.haulmont.cuba.cli.plugin.sdk.search.*
+import com.haulmont.cuba.cli.plugin.sdk.services.ArtifactManager
 import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
 import org.kodein.di.generic.instance
 
 abstract class CubaProvider : BintraySearchComponentProvider() {
 
-    private val repositoryManager: RepositoryManager by sdkKodein.instance<RepositoryManager>()
+    internal val artifactManager: ArtifactManager by lazy { ArtifactManager.instance() }
+    internal val repositoryManager: RepositoryManager by sdkKodein.instance<RepositoryManager>()
 
-    fun search(component: Component): Component {
-        return searchInExternalRepo(component)?.let { resolved ->
+    fun search(component: Component): Component? {
+        searchInExternalRepo(component)?.let { resolved ->
             if (resolved.artifactId.isBlank()) {
                 resolved.components.find { it.artifactId.endsWith("-global") }?.let {
                     return resolved.copy(artifactId = it.artifactId.substringBefore("-global"))
                 }
             }
             return resolved
-        } ?: component
+        }
+        val model = artifactManager.readPom(component.globalModule().let {
+            MvnArtifact(
+                component.groupId,
+                component.artifactId,
+                component.version
+            )
+        })
+        return if (model != null) component else null
     }
 
     protected fun searchInExternalRepo(component: Component): Component? {

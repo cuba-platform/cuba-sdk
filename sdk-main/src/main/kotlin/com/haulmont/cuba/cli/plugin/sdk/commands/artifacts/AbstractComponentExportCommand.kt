@@ -32,9 +32,10 @@ abstract class AbstractComponentExportCommand : AbstractExportCommand() {
 
     var componentToExport: Component? = null
 
-    override fun componentsToExport(): List<Component>? = componentToExport(componentToExport?:createSearchContext())?.let { componentWithDependents(it) }
+    override fun componentsToExport(): List<Component>? =
+        componentToExport(componentToExport ?: createSearchContext())?.let { componentWithDependents(it) }
 
-    fun componentToExport(searchContext:Component?): Component? {
+    fun componentToExport(searchContext: Component?): Component? {
         componentToExport?.let { return it }
         searchContext?.let {
             componentToExport = searchInMetadata(it)
@@ -54,13 +55,13 @@ abstract class AbstractComponentExportCommand : AbstractExportCommand() {
 
     override fun run() {
         val searchContext = createSearchContext()
-        if (searchContext==null){
+        if (searchContext == null) {
             printWriter.println(messages["export.unknownComponent"].format(nameVersion).red())
             return
         }
         if (componentToExport(searchContext) == null) {
             val answers = Prompts.create {
-                confirmation("need-to-resolve", messages["export.needToResolve"].format(searchContext?:nameVersion)) {
+                confirmation("need-to-resolve", messages["export.needToResolve"].format(searchContext ?: nameVersion)) {
                     default(true)
                 }
             }.ask()
@@ -69,11 +70,11 @@ abstract class AbstractComponentExportCommand : AbstractExportCommand() {
                     val component = search(it)
                     component?.let {
                         resolve(componentWithDependents(component))
-                    }
-                    printWriter.println()
-                    printWriter.println(messages["resolved"].green())
-                    componentToExport(searchContext)
-                    super.run()
+                        printWriter.println()
+                        printWriter.println(messages["resolved"].green())
+                        componentToExport(searchContext)
+                        super.run()
+                    } ?: printWriter.println(messages["export.unknownComponent"].format(it).red())
                 }
             }
         } else {

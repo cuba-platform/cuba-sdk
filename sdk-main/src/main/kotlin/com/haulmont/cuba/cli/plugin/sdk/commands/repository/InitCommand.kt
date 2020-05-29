@@ -8,19 +8,15 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryType
 import com.haulmont.cuba.cli.plugin.sdk.event.SdkEvent
-import com.haulmont.cuba.cli.plugin.sdk.gradle.SdkGradleConnector
 import com.haulmont.cuba.cli.plugin.sdk.services.ArtifactManager
 import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
 import org.kodein.di.generic.instance
 import java.nio.file.Files
-import java.nio.file.Path
-import kotlin.concurrent.thread
-
 
 @Parameters(commandDescription = "Init SDK")
 class InitCommand : AbstractSdkCommand() {
 
-    private val artifactManager: ArtifactManager by sdkKodein.instance<ArtifactManager>()
+    private val artifactManager: ArtifactManager by lazy { ArtifactManager.instance()}
 
     private val repositoryManager: RepositoryManager by sdkKodein.instance<RepositoryManager>()
 
@@ -33,7 +29,7 @@ class InitCommand : AbstractSdkCommand() {
     private fun init() {
         createSdkDir()
         createSdkRepoSettingsFile()
-        downloadAndConfigureGradle()
+        configureArtifactManager()
         initLocalMavenRepo()
         bus.post(SdkEvent.SdkInitEvent())
         printWriter.println(messages["setup.sdkConfigured"].green())
@@ -58,22 +54,14 @@ class InitCommand : AbstractSdkCommand() {
 
     }
 
-    private fun downloadAndConfigureGradle() {
+    private fun configureArtifactManager() {
         artifactManager.init()
-        val thread = thread {
-            SdkGradleConnector.instance().runTask("wrapper")
-        }
-        waitTask(messages["setup.downloadGradle"]) {
-            thread.isAlive
-        }
     }
 
     private fun createSdkRepoSettingsFile() {
         sdkSettings["sdk.home"] = sdkSettings.sdkHome().toString()
         sdkSettings["sdk.export.path"] = sdkSettings.sdkHome().resolve("export").toString()
         sdkSettings["sdk.files"] = sdkSettings.sdkHome().resolve("files").toString()
-        sdkSettings["gradle.home"] = sdkSettings.sdkHome().resolve("gradle").toString()
-        sdkSettings["gradle.cache"] = sdkSettings.sdkHome().resolve(Path.of("gradle", "cache")).toString()
         if (!sdkSettings.hasProperty("repository.type")) {
             sdkSettings["repository.type"] = "none"
         }

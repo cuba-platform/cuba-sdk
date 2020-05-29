@@ -31,7 +31,7 @@ abstract class AbstractExportCommand : BaseComponentCommand() {
 
     override fun run() {
         val components = componentsToExport()
-        if (components == null) {
+        if (components == null || components.isEmpty()) {
             printWriter.println(messages["export.nothingToExport"].red())
             return
         }

@@ -55,7 +55,6 @@ module com.haulmont.cuba.cli.plugin.sdk {
     opens com.haulmont.cuba.cli.plugin.sdk.commands;
     opens com.haulmont.cuba.cli.plugin.sdk.commands.artifacts;
     opens com.haulmont.cuba.cli.plugin.sdk.commands.repository;
-    opens com.haulmont.cuba.cli.plugin.sdk.gradle;
     opens com.haulmont.cuba.cli.plugin.sdk.di;
     opens com.haulmont.cuba.cli.plugin.sdk.services;
     opens com.haulmont.cuba.cli.plugin.sdk.event;
@@ -67,13 +66,14 @@ module com.haulmont.cuba.cli.plugin.sdk {
     exports com.haulmont.cuba.cli.plugin.sdk.di;
     exports com.haulmont.cuba.cli.plugin.sdk.services;
     exports com.haulmont.cuba.cli.plugin.sdk;
-    exports com.haulmont.cuba.cli.plugin.sdk.gradle;
     exports com.haulmont.cuba.cli.plugin.sdk.event;
+    exports com.haulmont.cuba.cli.plugin.sdk.utils;
+    exports com.haulmont.cuba.cli.plugin.sdk.db;
 
     provides MainCliPlugin with SdkPlugin;
 
     uses com.haulmont.cuba.cli.plugin.sdk.SdkPlugin;
-    uses com.haulmont.cuba.cli.plugin.sdk.gradle.SdkGradleConnector;
+    uses com.haulmont.cuba.cli.plugin.sdk.services.ArtifactManager;
 
     //    jansi support workaround
     provides JansiSupport with com.haulmont.cuba.cli.plugin.sdk.JansiSupportWorkAround;

@@ -113,7 +113,9 @@ open class AddRepositoryCommand : AbstractSdkCommand() {
         }
         question("type", messages["repository.type"]) {
             validate {
-                listOf("bintray", "nexus2", "nexus3").contains(value.toLowerCase())
+                if (!listOf("bintray", "nexus2", "nexus3").contains(value.toLowerCase())){
+                    fail(messages["repository.typeValidation"])
+                }
             }
             askIf { isSearchRepository(it) && !isLocal(it) }
         }

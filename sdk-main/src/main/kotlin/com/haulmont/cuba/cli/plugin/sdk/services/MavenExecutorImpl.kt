@@ -84,7 +84,7 @@ class MavenExecutorImpl : MavenExecutor {
             cliCommandsList.add("-T 1C")
         }
 
-        CommonSdkParameters.gradleOptions?.let { cliCommandsList.addAll(it) }
+        CommonSdkParameters.resolverOptions?.let { cliCommandsList.addAll(it) }
 
         val cliCommands = arrayOfNulls<String>(cliCommandsList.size)
         cliCommandsList.toArray(cliCommands)

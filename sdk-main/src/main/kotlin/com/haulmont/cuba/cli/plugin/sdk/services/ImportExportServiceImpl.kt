@@ -37,7 +37,7 @@ class ImportExportServiceImpl : ImportExportService {
     private val log: Logger = Logger.getLogger(MavenExecutorImpl::class.java.name)
     private val sdkSettings: SdkSettingsHolder by sdkKodein.instance<SdkSettingsHolder>()
     private val componentManager: ComponentManager by sdkKodein.instance<ComponentManager>()
-    private val artifactManager: ArtifactManager by sdkKodein.instance<ArtifactManager>()
+    private val artifactManager: ArtifactManager by lazy { ArtifactManager.instance()}
     private val repositoryManager: RepositoryManager by sdkKodein.instance<RepositoryManager>()
 
     override fun export(fileName: String, components: Collection<Component>, progress: ExportProcessCallback?): Path {

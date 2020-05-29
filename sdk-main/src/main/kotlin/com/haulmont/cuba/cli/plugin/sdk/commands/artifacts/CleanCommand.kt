@@ -28,20 +28,19 @@ import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.event.SdkEvent
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusManager
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusScriptManager
+import com.haulmont.cuba.cli.plugin.sdk.services.ArtifactManager
 import com.haulmont.cuba.cli.plugin.sdk.services.ComponentManager
 import com.haulmont.cuba.cli.plugin.sdk.services.MetadataHolder
 import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
-import com.haulmont.cuba.cli.plugin.sdk.utils.FileUtils
 import org.json.JSONObject
 import org.kodein.di.generic.instance
-import java.nio.file.Files
-import java.nio.file.Path
 
 @Parameters(commandDescription = "Clean SDK")
 class CleanCommand : AbstractSdkCommand() {
 
     internal val nexusManager: NexusManager by sdkKodein.instance<NexusManager>()
     internal val repositoryManager: RepositoryManager by sdkKodein.instance<RepositoryManager>()
+    internal val artifactManager: ArtifactManager by lazy { ArtifactManager.instance()}
     internal val nexusScriptManager: NexusScriptManager by sdkKodein.instance<NexusScriptManager>()
     internal val componentManager: ComponentManager by sdkKodein.instance<ComponentManager>()
     private val metadataHolder: MetadataHolder by sdkKodein.instance<MetadataHolder>()
@@ -61,10 +60,7 @@ class CleanCommand : AbstractSdkCommand() {
             StartCommand().execute()
         }
         if (answers["confirmed"] as Boolean) {
-            Path.of(sdkSettings["gradle.cache"]).also {
-                FileUtils.deleteDirectory(it)
-                Files.createDirectories(it)
-            }
+            artifactManager.clean()
 
             metadataHolder.getResolved().forEach {
                 bus.post(SdkEvent.BeforeRemoveEvent(it, false))

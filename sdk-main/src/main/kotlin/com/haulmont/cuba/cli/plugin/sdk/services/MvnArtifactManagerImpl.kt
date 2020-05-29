@@ -40,7 +40,17 @@ class MvnArtifactManagerImpl : ArtifactManager {
     private val repositoryManager: RepositoryManager by sdkKodein.instance<RepositoryManager>()
     internal val mavenExecutor: MavenExecutor by sdkKodein.instance<MavenExecutor>()
 
+    override val name = "maven"
+
     override fun init() {
+
+    }
+
+    override fun clean() {
+
+    }
+
+    override fun printInfo() {
 
     }
 

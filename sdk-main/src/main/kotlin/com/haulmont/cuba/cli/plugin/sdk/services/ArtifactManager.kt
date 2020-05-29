@@ -25,7 +25,13 @@ import java.nio.file.Path
 
 interface ArtifactManager {
 
+    val name: String
+
     fun init()
+
+    fun clean()
+
+    fun printInfo()
 
     fun uploadComponentToLocalCache(component: Component): List<MvnArtifact>
 
@@ -44,4 +50,17 @@ interface ArtifactManager {
     fun checkClassifiers(artifact: MvnArtifact)
 
     fun remove(artifact: MvnArtifact)
+
+    companion object {
+        private var instance: ArtifactManager? = null
+        fun instance(): ArtifactManager {
+            if (instance == null) {
+                instance = SdkArtifactManagerLoader().instance()
+                if (instance == null) {
+                    throw RuntimeException("Artifact manager not found")
+                }
+            }
+            return instance!!
+        }
+    }
 }

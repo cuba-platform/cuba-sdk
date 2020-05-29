@@ -16,10 +16,11 @@
 
 import com.haulmont.cli.core.CliPlugin;
 import com.haulmont.cli.plugin.sdk.gradle.GradleConnectorPlugin;
-import com.haulmont.cuba.cli.plugin.sdk.gradle.SdkGradleConnector;
+import com.haulmont.cuba.cli.plugin.sdk.services.ArtifactManager;
 
 module com.haulmont.cuba.cli.plugin.sdk.gradle {
     requires java.base;
+
     requires kotlin.stdlib;
     requires kotlin.reflect;
 
@@ -33,11 +34,14 @@ module com.haulmont.cuba.cli.plugin.sdk.gradle {
     requires gson;
     requires gradle.tooling.api;
     requires org.slf4j;
+    requires java.logging;
+    requires fuel;
+    requires maven.model;
 
     opens com.haulmont.cli.plugin.sdk.gradle;
 
     provides CliPlugin with GradleConnectorPlugin;
 
-    provides SdkGradleConnector with com.haulmont.cli.plugin.sdk.gradle.SdkGradleConnectorImpl;
-    uses SdkGradleConnector;
+    provides ArtifactManager with com.haulmont.cli.plugin.sdk.gradle.GradleArtifactManagerImpl;
+    uses ArtifactManager;
 }

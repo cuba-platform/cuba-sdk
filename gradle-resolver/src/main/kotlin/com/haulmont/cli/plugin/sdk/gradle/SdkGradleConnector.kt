@@ -21,8 +21,6 @@ import com.google.gson.JsonElement
 import com.haulmont.cuba.cli.plugin.sdk.commands.CommonSdkParameters
 import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
-import com.haulmont.cuba.cli.plugin.sdk.gradle.ProgressCallback
-import com.haulmont.cuba.cli.plugin.sdk.gradle.SdkGradleConnector
 import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
 import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
 import org.gradle.tooling.GradleConnector
@@ -35,7 +33,15 @@ import java.io.PrintWriter
 import java.nio.file.Files
 import java.nio.file.Path
 
-class SdkGradleConnectorImpl : SdkGradleConnector {
+typealias ProgressCallback = (event: Any?) -> Unit
+
+class SdkGradleConnector {
+
+    companion object {
+        private var instance: SdkGradleConnector? = null
+        fun instance() = SdkGradleConnector()
+    }
+
     private val connector: GradleConnector = GradleConnector.newConnector()
     private val sdkSettings: SdkSettingsHolder by sdkKodein.instance<SdkSettingsHolder>()
     private val repositoryManager: RepositoryManager by sdkKodein.instance<RepositoryManager>()
@@ -53,9 +59,9 @@ class SdkGradleConnectorImpl : SdkGradleConnector {
         connector.forProjectDirectory(gradleHome)
     }
 
-    override fun runTask(
-        name: String, params: Map<String, Any?>,
-        progressFun: ProgressCallback?
+    fun runTask(
+        name: String, params: Map<String, Any?> = emptyMap(),
+        progressFun: ProgressCallback? = null
     ): JsonElement? {
         val connection = connector.connect()
         connection.model(GradleProject::class.java)
@@ -73,7 +79,7 @@ class SdkGradleConnectorImpl : SdkGradleConnector {
                 .forTasks(name)
                 .setStandardOutput(outputStream)
 
-            CommonSdkParameters.gradleOptions?.let { list ->
+            CommonSdkParameters.resolverOptions?.let { list ->
                 list.forEach {
                     buildLauncher.addArguments(it)
                 }

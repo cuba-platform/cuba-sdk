@@ -26,7 +26,7 @@ interface ComponentProvider {
 
     fun getType(): String
 
-    fun getComponent(template: Component): Component
+    fun getComponent(template: Component): Component?
 
     fun innerComponents(): List<Component>? = null
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Haulmont.
+ * Copyright (c) 2008-2020 Haulmont.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.services
+package com.haulmont.cli.plugin.sdk.gradle
 
 import com.google.gson.Gson
 import com.google.gson.JsonElement
-import com.haulmont.cuba.cli.plugin.sdk.SdkPlugin
+import com.haulmont.cli.core.green
+import com.haulmont.cli.core.localMessages
 import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.dto.*
-import com.haulmont.cuba.cli.plugin.sdk.gradle.SdkGradleConnector
+import com.haulmont.cuba.cli.plugin.sdk.services.ArtifactManager
+import com.haulmont.cuba.cli.plugin.sdk.services.DbProvider
+import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
 import com.haulmont.cuba.cli.plugin.sdk.utils.FileUtils
 import com.haulmont.cuba.cli.plugin.sdk.utils.copyInputStreamToFile
 import com.haulmont.cuba.cli.plugin.sdk.utils.performance
@@ -38,17 +41,26 @@ import java.nio.file.Path
 import java.util.*
 import java.util.logging.Logger
 
-
 class GradleArtifactManagerImpl : ArtifactManager {
 
     private val log: Logger = Logger.getLogger(GradleArtifactManagerImpl::class.java.name)
 
     internal val printWriter: PrintWriter by sdkKodein.instance<PrintWriter>()
+    internal val messages by localMessages()
     internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance<SdkSettingsHolder>()
-    internal val repositoryManager: RepositoryManager by sdkKodein.instance<RepositoryManager>()
     internal val dbProvider: DbProvider by sdkKodein.instance<DbProvider>()
+    internal val gradleConnector by lazy { SdkGradleConnector.instance() }
+
+    override val name = "gradle"
 
     override fun init() {
+        printWriter.println(messages["setup.downloadGradle"])
+        sdkSettings["gradle.home"] = sdkSettings.sdkHome().resolve("gradle").toString()
+        sdkSettings["gradle.cache"] = sdkSettings.sdkHome().resolve(Path.of("gradle", "cache")).toString()
+        sdkSettings.flushAppProperties()
+
+        gradleConnector.runTask("wrapper")
+
         val gradleBuild = Path.of(sdkSettings["gradle.home"]).resolve("build.gradle").also {
             if (!Files.exists(it)) {
                 Files.createDirectories(it.parent)
@@ -57,7 +69,22 @@ class GradleArtifactManagerImpl : ArtifactManager {
             }
             Files.createFile(it)
         }
-        gradleBuild.toFile().copyInputStreamToFile(SdkPlugin::class.java.getResourceAsStream("gradle/build.gradle"))
+        gradleBuild.toFile().copyInputStreamToFile(
+            GradleArtifactManagerImpl::class.java.getResourceAsStream("build.gradle")
+        )
+    }
+
+    override fun clean() {
+        gradleConnector.runTask("clean")
+        Path.of(sdkSettings["gradle.cache"]).also {
+            FileUtils.deleteDirectory(it)
+            Files.createDirectories(it)
+        }
+    }
+
+    override fun printInfo() {
+        printWriter.println("Gradle path: ${sdkSettings["gradle.home"].green()}")
+        printWriter.println("Gradle cache: ${sdkSettings["gradle.cache"].green()}")
     }
 
     override fun uploadComponentToLocalCache(component: Component): List<MvnArtifact> {
@@ -69,9 +96,10 @@ class GradleArtifactManagerImpl : ArtifactManager {
                 .resolve(component.version)
                 .resolve("${component.artifactId}-${component.version}.${classifier.extension}")
             Files.createDirectories(Path.of(sdkSettings["gradle.cache"]).resolve(componentPath).parent)
-            if (component.url != null) {
+
+            component.url?.let { url ->
                 val (_, response, _) = FileUtils.downloadFile(
-                    component.url,
+                    url,
                     Path.of(sdkSettings["gradle.cache"]).resolve(componentPath)
                 )
                 if (response.statusCode == 200) {
@@ -101,7 +129,7 @@ class GradleArtifactManagerImpl : ArtifactManager {
         if (pomFile == null || !Files.exists(pomFile)) {
             val pomJson = performance("Read POM") {
                 cacheResult(
-                    SdkGradleConnector.instance().runTask(
+                    gradleConnector.runTask(
                         "getArtifact", mapOf(
                             "toResolve" to gradleCoordinates,
                             "transitive" to false,
@@ -151,7 +179,7 @@ class GradleArtifactManagerImpl : ArtifactManager {
             pomDescriptor = getOrDownloadArtifactFile(artifact, Classifier.pom()).toString()
         }
         try {
-            SdkGradleConnector.instance().runTask(
+            gradleConnector.runTask(
                 "publish", mapOf(
                     "toUpload" to Gson().toJson(artifact),
                     "descriptors" to Gson().toJson(descriptors),
@@ -166,7 +194,7 @@ class GradleArtifactManagerImpl : ArtifactManager {
 
     override fun getArtifact(artifact: MvnArtifact, classifier: Classifier) {
         cacheResult(
-            SdkGradleConnector.instance().runTask(
+            gradleConnector.runTask(
                 "getArtifact", mapOf(
                     "toResolve" to artifact.gradleCoordinates(classifier),
                     "transitive" to false,
@@ -231,7 +259,7 @@ class GradleArtifactManagerImpl : ArtifactManager {
         }
         if (componentsToResolve.isNotEmpty()) {
             cacheResult(
-                SdkGradleConnector.instance().runTask(
+                gradleConnector.runTask(
                     "getArtifact", mapOf(
                         "toResolve" to componentsToResolve.joinToString(separator = ";"),
                         "transitive" to false,
@@ -244,7 +272,7 @@ class GradleArtifactManagerImpl : ArtifactManager {
 
     override fun resolve(artifact: MvnArtifact, classifier: Classifier): List<MvnArtifact> {
         val result = cacheResult(
-            SdkGradleConnector.instance().runTask(
+            gradleConnector.runTask(
                 "resolve", mapOf(
                     "toResolve" to artifact.gradleCoordinates(classifier)
                 )

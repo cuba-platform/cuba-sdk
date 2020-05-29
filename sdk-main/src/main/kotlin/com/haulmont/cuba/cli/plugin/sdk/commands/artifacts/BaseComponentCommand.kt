@@ -81,12 +81,12 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
         private set
 
     @Parameter(
-        names = ["--go", "--gradle-option"],
-        description = "Gradle option",
+        names = ["--ro", "--resolver-option"],
+        description = "Artifact resolver option",
         hidden = true,
         variableArity = true
     )
-    internal var gradleOpts: List<String>? = null
+    internal var resolverOpts: List<String>? = null
 
     override fun postExecute() {
         super.postExecute()
@@ -97,7 +97,7 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
         super.preExecute()
         CommonSdkParameters.info = info
         CommonSdkParameters.singleThread = info || single
-        CommonSdkParameters.gradleOptions = gradleOpts
+        CommonSdkParameters.resolverOptions = resolverOpts
     }
 
     abstract fun createSearchContext(): Component?
@@ -237,7 +237,11 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
         while (installNext) {
             val providerNames = componentRegistry.providers().map { it.getType() }.joinToString(separator = "/")
             val nameVersionAnswer = Prompts.create {
-                question("nameVersion", messages["base.askComponentCoordinates"].format(providerNames))
+                question("nameVersion", messages["base.askComponentCoordinates"].format(providerNames)) {
+                    validate {
+                        notEmpty(value)
+                    }
+                }
             }.ask()
             val componentCoordinates = nameVersionAnswer["nameVersion"] as String
             componentCoordinates.split(" ").let {
@@ -300,7 +304,11 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
                 question(
                     "version",
                     messages["ask.question.version"].format(displayName)
-                )
+                ) {
+                    validate {
+                        notEmpty(value)
+                    }
+                }
             }.ask()["version"] as String
         } else {
             return Prompts.create {
@@ -319,7 +327,11 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
                 question(
                     "name",
                     messages["ask.question.name"].format(msgPrefix)
-                )
+                ) {
+                    validate {
+                        notEmpty(value)
+                    }
+                }
             }.ask()["name"] as String, null)
         } else {
             if (innerComponents.map { it.category }.distinct().filterNotNull().isEmpty()) {
@@ -403,6 +415,12 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
                     .map { versions.getOrElse(it) { Option(it, it, it) } }
                     .toList()
             })
+    }
+
+    internal fun notEmpty(value: String) {
+        if (value.isEmpty()) {
+            fail(messages["validation.notEmpty"])
+        }
     }
 
     internal fun force(component: Component): Boolean =

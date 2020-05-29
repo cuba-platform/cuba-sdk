@@ -34,10 +34,6 @@ val sdkModule = Kodein.Module {
         SdkSettingsHolderImpl()
     }
 
-    bind<ArtifactManager>() with singleton {
-        GradleArtifactManagerImpl()
-    }
-
     bind<MavenExecutor>() with singleton {
         MavenExecutorImpl()
     }
@@ -78,7 +74,7 @@ val sdkModule = Kodein.Module {
         DbProviderImpl()
     }
 
-    bind< ComponentRegistry>() with singleton {
+    bind<ComponentRegistry>() with singleton {
         ComponentRegistryImpl()
     }
 }

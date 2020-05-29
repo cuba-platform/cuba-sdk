@@ -26,13 +26,11 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier.Companion.sdk
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier.Companion.sources
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.MvnArtifact
-import com.haulmont.cuba.cli.plugin.sdk.services.ArtifactManager
 import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
 import org.kodein.di.generic.instance
 
 class CubaFrameworkProvider : CubaProvider() {
 
-    internal val artifactManager: ArtifactManager by sdkKodein.instance<ArtifactManager>()
     internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance<SdkSettingsHolder>()
 
     companion object {
