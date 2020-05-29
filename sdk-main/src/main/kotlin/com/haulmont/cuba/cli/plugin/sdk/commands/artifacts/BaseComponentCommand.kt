@@ -81,7 +81,7 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
         private set
 
     @Parameter(
-        names = ["--ro", "--resolver-option"],
+        names = ["--o", "--option"],
         description = "Artifact resolver option",
         hidden = true,
         variableArity = true
