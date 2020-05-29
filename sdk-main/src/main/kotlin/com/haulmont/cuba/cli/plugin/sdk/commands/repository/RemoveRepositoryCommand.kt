@@ -46,6 +46,10 @@ open class RemoveRepositoryCommand : AbstractSdkCommand() {
         if (name == null) {
             val repositories = repositoryManager.getRepositories(target!!)
                 .map { it.name }.sorted()
+            if (repositories.isEmpty()){
+                printWriter.println(messages["repository.emptyList"].format(target.toString().toLowerCase().capitalize()))
+                return
+            }
             val nameAnswers = Prompts.create {
                 textOptions("name", messages["repository.name"], repositories)
             }.ask()
