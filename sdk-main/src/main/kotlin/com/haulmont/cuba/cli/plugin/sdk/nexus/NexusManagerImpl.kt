@@ -52,7 +52,18 @@ class NexusManagerImpl : NexusManager {
     }
 
     private fun stopInternal() {
-        process?.destroy()
+        if (process != null) {
+            process?.destroy()
+        } else {
+            ProcessHandle.allProcesses()
+                .filter { p ->
+                    p.info().commandLine()
+                        .map { it.contains("nexus") }
+                        .orElse(false)
+                }
+                .findFirst()
+                .ifPresent { it.destroy() }
+        }
     }
 
     override fun isStarted(): Boolean {

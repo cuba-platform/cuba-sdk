@@ -141,10 +141,8 @@ class SdkPlugin : MainCliPlugin {
             InitCommand().execute()
         }
 
-        Runtime.getRuntime().addShutdownHook(object : Thread() {
-            override fun run() {
+        Runtime.getRuntime().addShutdownHook(thread (isDaemon = true){
                 StopCommand().apply { checkState = false }.execute()
-            }
         })
     }
 

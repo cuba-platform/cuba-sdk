@@ -21,16 +21,15 @@ import com.haulmont.cli.core.API_VERSION
 import com.haulmont.cli.core.CliPlugin
 import com.haulmont.cli.core.event.DestroyPluginEvent
 import com.haulmont.cli.core.event.InitPluginEvent
+import kotlin.concurrent.thread
 
 class GradleResolverPlugin : CliPlugin {
     override val apiVersion = API_VERSION
 
     @Subscribe
     fun onInit(event: InitPluginEvent) {
-        Runtime.getRuntime().addShutdownHook(object : Thread() {
-            override fun run() {
-//                ConnectorServices.reset()
-            }
+        Runtime.getRuntime().addShutdownHook(thread {
+//            ConnectorServices.reset()
         })
     }
 
