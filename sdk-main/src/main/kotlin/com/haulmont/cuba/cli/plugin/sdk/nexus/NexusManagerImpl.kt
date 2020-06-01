@@ -30,7 +30,7 @@ class NexusManagerImpl : NexusManager {
     internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance<SdkSettingsHolder>()
     internal var process: Process? = null
 
-    override fun isLocal(): Boolean = sdkSettings["repository.type"] == "local"
+    override fun isLocal(): Boolean = sdkSettings.getIfExists("repository.type") == "local"
 
     override fun startRepository() {
         thread {
@@ -52,18 +52,11 @@ class NexusManagerImpl : NexusManager {
     }
 
     private fun stopInternal() {
-        val currentProcess = process
-        if (currentProcess != null) {
-            currentProcess.destroy()
-        }
+        process?.destroy()
     }
 
     override fun isStarted(): Boolean {
-        val currentProcess = process
-        if (currentProcess != null) {
-            return currentProcess.isAlive
-        }
-        return false
+        return process?.isAlive ?: false
     }
 
 }

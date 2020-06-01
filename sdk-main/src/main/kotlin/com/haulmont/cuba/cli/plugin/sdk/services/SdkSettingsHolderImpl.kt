@@ -102,6 +102,10 @@ class SdkSettingsHolderImpl : SdkSettingsHolder {
         return sdkProperties.getProperty(property)
     }
 
+    override fun getIfExists(property: String): String? {
+        return sdkProperties.getProperty(property)
+    }
+
     override fun hasProperty(property: String): Boolean {
         return sdkProperties[property] != null
     }

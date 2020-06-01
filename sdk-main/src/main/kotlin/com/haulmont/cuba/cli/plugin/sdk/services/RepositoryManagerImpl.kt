@@ -145,7 +145,9 @@ class RepositoryManagerImpl : RepositoryManager {
     }
 
     override fun removeRepository(name: String, target: RepositoryTarget, force: Boolean) {
-        if (!force && RepositoryTarget.TARGET == target && name == sdkSettings["repository.name"]) {
+        if (!force && RepositoryTarget.TARGET == target
+            && name == sdkSettings.getIfExists("repository.name")
+        ) {
             throw ValidationException("Unable to delete configured local SDK repository")
         }
 
@@ -170,7 +172,7 @@ class RepositoryManagerImpl : RepositoryManager {
         if (RepositoryType.LOCAL == repository.type) {
             return Files.exists(Path.of(url))
         } else {
-            if (sdkSettings.hasProperty("repository.name") && sdkSettings["repository.name"] == repository.name) {
+            if (sdkSettings.getIfExists("repository.name") == repository.name) {
                 url = sdkSettings["repository.url"]
             }
             val (_, response, _) =

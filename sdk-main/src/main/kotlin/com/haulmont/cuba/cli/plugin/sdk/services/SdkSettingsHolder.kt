@@ -26,6 +26,8 @@ interface SdkSettingsHolder {
 
     fun getProperty(property: String): String
 
+    fun getIfExists(property: String): String?
+
     fun hasProperty(property: String): Boolean
 
     fun setProperty(property: String, value: String?)
