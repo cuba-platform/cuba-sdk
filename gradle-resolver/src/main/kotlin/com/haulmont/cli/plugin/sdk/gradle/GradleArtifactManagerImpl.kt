@@ -31,7 +31,10 @@ import com.haulmont.cuba.cli.plugin.sdk.utils.performance
 import org.apache.maven.model.Model
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
 import org.kodein.di.generic.instance
-import java.io.*
+import java.io.FileReader
+import java.io.InputStream
+import java.io.InputStreamReader
+import java.io.PrintWriter
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
@@ -55,7 +58,7 @@ class GradleArtifactManagerImpl : ArtifactManager {
 
         val pluginPropertyies =
             readProperties(GradleResolverPlugin::class.java.getResourceAsStream("application.properties"))
-        for (entry in pluginPropertyies){
+        for (entry in pluginPropertyies) {
             sdkSettings[entry.key as String] = entry.value as String?
         }
 
@@ -106,7 +109,8 @@ class GradleArtifactManagerImpl : ArtifactManager {
     override fun uploadComponentToLocalCache(component: Component): List<MvnArtifact> {
         val dependencies = mutableListOf<MvnArtifact>()
         for (classifier in component.classifiers) {
-            val componentPath = Path.of("raw")
+            val componentPath = Path.of(sdkSettings["gradle.home"])
+                .resolve("raw")
                 .resolve(component.groupId)
                 .resolve(component.artifactId)
                 .resolve(component.version)
@@ -122,7 +126,7 @@ class GradleArtifactManagerImpl : ArtifactManager {
 
                     val mvnArtifact = MvnArtifact(
                         component.groupId,
-                        component.artifactId!!,
+                        component.artifactId,
                         component.version,
                         classifiers = component.classifiers
                     )
@@ -241,15 +245,6 @@ class GradleArtifactManagerImpl : ArtifactManager {
             }
         }
         return result
-    }
-
-    private fun readProperties(path: Path): Properties {
-        val properties = Properties()
-        FileInputStream(path.toFile()).use {
-            val inputStreamReader = InputStreamReader(it, StandardCharsets.UTF_8)
-            properties.load(inputStreamReader)
-        }
-        return properties
     }
 
     override fun getOrDownloadArtifactFile(artifact: MvnArtifact, classifier: Classifier): Path {
