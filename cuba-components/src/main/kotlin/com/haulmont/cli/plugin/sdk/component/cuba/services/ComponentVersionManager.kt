@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.services
+package com.haulmont.cli.plugin.sdk.component.cuba.services
 
 import com.haulmont.cuba.cli.plugin.sdk.dto.MarketplaceAddon
 

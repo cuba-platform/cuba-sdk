@@ -16,4 +16,4 @@
 
 rootProject.name = 'cuba-sdk'
 
-include 'sdk-main', 'gradle-resolver', 'maven-resolver'
+include 'sdk-main', 'gradle-resolver', 'maven-resolver', 'cuba-components'

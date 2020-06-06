@@ -65,7 +65,7 @@ class SdkGradleConnector {
     ): JsonElement? {
         val connection = connector.connect()
         connection.model(GradleProject::class.java)
-        try {
+        connection.use { connection ->
             val outputStream = ByteArrayOutputStream()
             if (CommonSdkParameters.info) {
                 printWriter.println()
@@ -107,9 +107,6 @@ class SdkGradleConnector {
             } else {
                 return null
             }
-
-        } finally {
-            connection.close()
         }
     }
 }

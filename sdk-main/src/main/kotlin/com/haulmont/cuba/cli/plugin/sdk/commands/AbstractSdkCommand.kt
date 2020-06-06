@@ -34,7 +34,7 @@ import java.nio.file.Path
 abstract class AbstractSdkCommand : AbstractCommand() {
 
     companion object{
-        internal val PROGRESS_LINE_LENGHT = 110
+        internal const val PROGRESS_LINE_LENGHT = 110
         internal val rootMessages = Messages(AbstractSdkCommand::class.java)
         internal val printWriter: PrintWriter by sdkKodein.instance<PrintWriter>()
 

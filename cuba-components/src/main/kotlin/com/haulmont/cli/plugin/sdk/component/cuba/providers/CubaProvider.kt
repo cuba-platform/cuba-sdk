@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.templates
+package com.haulmont.cli.plugin.sdk.component.cuba.providers
 
+import com.haulmont.cli.plugin.sdk.component.cuba.search.*
 import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.dto.*
-import com.haulmont.cuba.cli.plugin.sdk.search.*
 import com.haulmont.cuba.cli.plugin.sdk.services.ArtifactManager
 import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
+import com.haulmont.cuba.cli.plugin.sdk.templates.BintraySearchComponentProvider
 import org.kodein.di.generic.instance
 
 abstract class CubaProvider : BintraySearchComponentProvider() {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.search
+package com.haulmont.cli.plugin.sdk.component.cuba.search
 
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
@@ -23,16 +23,12 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 
-class Nexus3Search(repository: Repository) : AbstractRepositorySearch(repository) {
-
-    override fun searchParameters(component: Component): List<Pair<String, String>> {
-        return listOf(
-            "group" to component.groupId,
-            "name" to if (component.globalModule() != null) component.globalModule()!!.artifactId.substringBefore("-global") + "*" else "*",
-            "version" to component.version,
-            "repository" to repository.repositoryName
-        )
-    }
+class Nexus2Search(repository: Repository) : AbstractRepositorySearch(repository) {
+    override fun searchParameters(component: Component): List<Pair<String, String>> = listOf(
+        "g" to component.groupId,
+        "a" to if (component.globalModule() != null) component.globalModule()!!.artifactId.substringBefore("-global") else "",
+        "v" to component.version
+    )
 
     override fun handleResultJson(it: JsonElement, component: Component): Component? {
         if (!it.isJsonArray) return null
@@ -42,33 +38,36 @@ class Nexus3Search(repository: Repository) : AbstractRepositorySearch(repository
             return null
         }
         val json = array.get(0) as JsonObject
-        val itemsArray = json.getAsJsonArray("items")
-        if (itemsArray.size() == 0) {
+        val dataArray = json.get("data") as JsonArray
+        if (dataArray.size() == 0) {
             log.info("Unknown version: ${component.version}")
             return null
         }
         val components = mutableListOf<Component>()
         val copy = component.copy()
-        itemsArray.map { it as JsonObject }
+        dataArray
+            .map { it as JsonObject }
             .map { dataObj ->
-                val groupId = dataObj.get("group").asString
-                val artifactId = dataObj.get("name").asString
+                val groupId = dataObj.get("groupId").asString
+                val artifactId = dataObj.get("artifactId").asString
                 if (component.globalModule() != null) {
                     val prefix = component.globalModule()!!.artifactId.substringBefore("-global")
                     if (!artifactId.startsWith(prefix)) {
                         return@map null
                     }
                 }
-                val version = dataObj.get("version").asString
-                val classifiers = dataObj.getAsJsonArray("assets")
+                val version = dataObj.get("latestRelease").asString
+                val classifiers = dataObj.getAsJsonArray("artifactHits")
                     .map { it as JsonObject }
-                    .map { asset ->
-                        val path = asset.get("path").asString
-                        val classifierAndExtension = path.substringAfterLast("${groupId}-${version}")
-                        val classifier = if (classifierAndExtension.isNotEmpty())
-                            classifierAndExtension.substringAfter("-").substringBefore(".") else ""
-                        val extension = classifierAndExtension.substringAfter(".")
-                        Classifier(classifier, extension)
+                    .flatMap { artifactHit ->
+                        return@flatMap artifactHit.getAsJsonArray("artifactLinks")
+                            .map { it as JsonObject }
+                            .map { classifier ->
+                                Classifier(
+                                    classifier.get("classifier").asString,
+                                    classifier.get("extension").asString
+                                )
+                            }
                     }
                     .toMutableList()
                 return@map Component(groupId, artifactId, version, classifiers = classifiers)
@@ -76,10 +75,11 @@ class Nexus3Search(repository: Repository) : AbstractRepositorySearch(repository
             .filter { it != null }
             .map { it as Component }
             .forEach {
-                if (componentAlreadyExists(copy.components, it) == null) {
+                if (componentAlreadyExists(copy.components,it)==null) {
                     copy.components.add(it)
                 }
             }
+
         log.info("Component found in ${repository}: ${copy}")
         return copy
     }

@@ -2,6 +2,9 @@ package com.haulmont.cuba.cli.plugin.sdk.commands.repository
 
 import com.beust.jcommander.Parameters
 import com.haulmont.cli.core.green
+import com.haulmont.cli.core.prompting.Answers
+import com.haulmont.cli.core.prompting.Prompts
+import com.haulmont.cli.core.prompting.QuestionsList
 import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
 import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
@@ -24,12 +27,21 @@ class InitCommand : AbstractSdkCommand() {
     override fun onlyForConfiguredSdk(): Boolean = false
 
     override fun run() {
-        init();
+        Prompts.create(kodein) { askInitSettings() }
+            .let(Prompts::ask)
+            .let(this::init)
     }
 
-    private fun init() {
-        createSdkDir()
-        createSdkRepoSettingsFile()
+    private fun QuestionsList.askInitSettings() {
+        question("sdk-home", messages["init.sdk-home"]) {
+            default(sdkSettings.sdkHome().toString())
+        }
+    }
+
+    private fun init(answers: Answers) {
+        val sdkHome = Path.of(answers["sdk-home"] as String)
+        createSdkDir(sdkHome)
+        createSdkRepoSettingsFile(sdkHome)
         configureArtifactManager()
         initLocalMavenRepo()
         bus.post(SdkEvent.SdkInitEvent())
@@ -38,8 +50,10 @@ class InitCommand : AbstractSdkCommand() {
 
     private fun initLocalMavenRepo() {
         val m2Path =
-            if (sdkSettings.hasProperty("maven.local.repo")) Path.of(sdkSettings["maven.local.repo"]) else sdkSettings.sdkHome()
-                .resolve("m2")
+            if (sdkSettings.hasProperty("maven.local.repo"))
+                Path.of(sdkSettings["maven.local.repo"])
+            else
+                sdkSettings.sdkHome().resolve("m2")
         val sdkLocalRepo = m2Path.apply {
             if (!Files.exists(this)) {
                 Files.createDirectories(this)
@@ -62,7 +76,7 @@ class InitCommand : AbstractSdkCommand() {
         artifactManager.init()
     }
 
-    private fun createSdkRepoSettingsFile() {
+    private fun createSdkRepoSettingsFile(sdkHome: Path) {
         sdkSettings["sdk.home"] = sdkSettings.sdkHome().toString()
         sdkSettings["sdk.export.path"] = sdkSettings.sdkHome().resolve("export").toString()
         sdkSettings["sdk.files"] = sdkSettings.sdkHome().resolve("files").toString()
@@ -72,9 +86,9 @@ class InitCommand : AbstractSdkCommand() {
         sdkSettings.flushAppProperties()
     }
 
-    private fun createSdkDir() {
-        if (!Files.exists(sdkSettings.sdkHome())) {
-            Files.createDirectories(sdkSettings.sdkHome())
+    private fun createSdkDir(sdkHome: Path) {
+        if (!Files.exists(sdkHome)) {
+            Files.createDirectories(sdkHome)
         }
     }
 }

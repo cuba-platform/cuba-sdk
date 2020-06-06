@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.search
+package com.haulmont.cli.plugin.sdk.component.cuba.search
 
 import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.httpGet
@@ -75,5 +75,5 @@ abstract class AbstractRepositorySearch : RepositorySearch {
     }
 
     internal fun componentAlreadyExists(componentsList: Collection<Component>, toAdd: Component): Component? =
-        componentsList.filter { it.isSame(toAdd) }.firstOrNull()
+        componentsList.firstOrNull { it.isSame(toAdd) }
 }

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.templates
+package com.haulmont.cli.plugin.sdk.component.cuba.providers
 
+import com.haulmont.cli.plugin.sdk.component.cuba.di.cubaComponentKodein
 import com.haulmont.cuba.cli.plugin.sdk.commands.artifacts.NameVersion
-import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier.Companion.default
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier.Companion.javadoc
@@ -31,10 +31,10 @@ import org.kodein.di.generic.instance
 
 class CubaFrameworkProvider : CubaProvider() {
 
-    internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance<SdkSettingsHolder>()
+    internal val sdkSettings: SdkSettingsHolder by cubaComponentKodein.instance<SdkSettingsHolder>()
 
     companion object {
-        val CUBA_PLATFORM_PROVIDER = "cuba"
+        const val CUBA_PLATFORM_PROVIDER = "cuba"
     }
 
     override fun getType() = CUBA_PLATFORM_PROVIDER

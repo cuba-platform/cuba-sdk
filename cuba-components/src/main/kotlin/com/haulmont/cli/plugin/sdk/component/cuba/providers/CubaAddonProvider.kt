@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.templates
+package com.haulmont.cli.plugin.sdk.component.cuba.providers
 
+import com.haulmont.cli.core.localMessages
 import com.haulmont.cli.core.prompting.Option
-import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
+import com.haulmont.cli.plugin.sdk.component.cuba.di.cubaComponentKodein
+import com.haulmont.cli.plugin.sdk.component.cuba.services.ComponentVersionManager
 import com.haulmont.cuba.cli.plugin.sdk.commands.artifacts.NameVersion
-import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.MarketplaceAddon
 import com.haulmont.cuba.cli.plugin.sdk.dto.MvnArtifact
-import com.haulmont.cuba.cli.plugin.sdk.services.ComponentVersionManager
 import org.apache.maven.model.Dependency
 import org.kodein.di.generic.instance
 import java.util.logging.Logger
 
 class CubaAddonProvider : CubaProvider() {
 
-    internal val componentVersionsManager: ComponentVersionManager by sdkKodein.instance<ComponentVersionManager>()
+    internal val componentVersionsManager: ComponentVersionManager by cubaComponentKodein.instance<ComponentVersionManager>()
 
-    internal val componentRegistry: ComponentRegistry by sdkKodein.instance<ComponentRegistry>()
+    internal val messages by localMessages()
 
     private val log: Logger = Logger.getLogger(CubaAddonProvider::class.java.name)
 
@@ -113,7 +113,7 @@ class CubaAddonProvider : CubaProvider() {
             it.artifactVersions.map { version ->
                 Option(
                     version,
-                    AbstractSdkCommand.rootMessages["framework.cuba.version"].format(version, it.platformRequirement),
+                    "%s [CUBA %s]".format(version, it.platformRequirement),
                     version
                 )
             }

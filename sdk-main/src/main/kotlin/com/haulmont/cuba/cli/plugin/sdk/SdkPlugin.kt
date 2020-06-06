@@ -27,8 +27,6 @@ import com.haulmont.cuba.cli.plugin.sdk.commands.repository.*
 import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.perf.SdkPerformance.sdkSettings
 import com.haulmont.cuba.cli.plugin.sdk.templates.ComponentRegistry
-import com.haulmont.cuba.cli.plugin.sdk.templates.CubaAddonProvider
-import com.haulmont.cuba.cli.plugin.sdk.templates.CubaFrameworkProvider
 import com.haulmont.cuba.cli.plugin.sdk.templates.LibProvider
 import org.jline.terminal.Terminal
 import org.kodein.di.generic.instance
@@ -60,13 +58,7 @@ class SdkPlugin : MainCliPlugin {
     @Subscribe
     fun onInit(event: InitPluginEvent) {
 
-        registerProviders()
-
-        componentRegistry.providers().forEach {
-            thread {
-                it.load()
-            }
-        }
+        componentRegistry.addProviders(LibProvider())
 
         event.commandsRegistry {
             command("sdk", SdkCommand())
@@ -144,13 +136,6 @@ class SdkPlugin : MainCliPlugin {
         Runtime.getRuntime().addShutdownHook(thread (isDaemon = true){
                 StopCommand().apply { checkState = false }.execute()
         })
-    }
-
-    private fun registerProviders() {
-        componentRegistry.addProviders(
-            CubaAddonProvider(), CubaFrameworkProvider(), LibProvider()
-            //    , SpringBootProvider()
-        )
     }
 
     @Subscribe

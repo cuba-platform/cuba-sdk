@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.search
+package com.haulmont.cli.plugin.sdk.component.cuba.search
 
 import com.google.gson.JsonElement
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier

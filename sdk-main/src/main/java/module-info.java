@@ -57,6 +57,7 @@ module com.haulmont.cuba.cli.plugin.sdk {
     opens com.haulmont.cuba.cli.plugin.sdk.di;
     opens com.haulmont.cuba.cli.plugin.sdk.services;
     opens com.haulmont.cuba.cli.plugin.sdk.event;
+    opens com.haulmont.cuba.cli.plugin.sdk.templates;
 
     exports com.haulmont.cuba.cli.plugin.sdk.dto;
     exports com.haulmont.cuba.cli.plugin.sdk.commands;
@@ -68,6 +69,7 @@ module com.haulmont.cuba.cli.plugin.sdk {
     exports com.haulmont.cuba.cli.plugin.sdk.event;
     exports com.haulmont.cuba.cli.plugin.sdk.utils;
     exports com.haulmont.cuba.cli.plugin.sdk.db;
+    exports com.haulmont.cuba.cli.plugin.sdk.templates;
 
     provides MainCliPlugin with SdkPlugin;
 

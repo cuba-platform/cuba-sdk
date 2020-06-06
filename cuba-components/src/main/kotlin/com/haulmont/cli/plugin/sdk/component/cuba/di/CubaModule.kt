@@ -14,15 +14,22 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.commands.repository
+package com.haulmont.cli.plugin.sdk.component.cuba.di
 
-import com.beust.jcommander.Parameters
-import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
+import com.haulmont.cli.plugin.sdk.component.cuba.services.ComponentVersionManager
+import com.haulmont.cli.plugin.sdk.component.cuba.services.ComponentVersionManagerImpl
+import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
+import org.kodein.di.Kodein
+import org.kodein.di.generic.bind
+import org.kodein.di.generic.singleton
 
-@Parameters(commandDescription = "Build docker SDK image")
-class DockerCommand : AbstractSdkCommand() {
-
-    override fun run() {
-
+val cubaComponentModule = Kodein.Module {
+    bind<ComponentVersionManager>() with singleton {
+        ComponentVersionManagerImpl()
     }
+}
+
+val cubaComponentKodein = Kodein {
+    extend(sdkKodein)
+    import(cubaComponentModule)
 }

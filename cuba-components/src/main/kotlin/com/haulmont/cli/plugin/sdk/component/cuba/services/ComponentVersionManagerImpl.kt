@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.services
+package com.haulmont.cli.plugin.sdk.component.cuba.services
 
 import com.github.kittinunf.fuel.Fuel
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.haulmont.cli.core.commands.LaunchOptions
+import com.haulmont.cli.plugin.sdk.component.cuba.providers.CubaFrameworkProvider
 import com.haulmont.cuba.cli.plugin.sdk.SdkPlugin
 import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.dto.MarketplaceAddon
 import com.haulmont.cuba.cli.plugin.sdk.dto.MarketplaceAddonCompatibility
+import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
 import com.haulmont.cuba.cli.plugin.sdk.templates.ComponentRegistry
-import com.haulmont.cuba.cli.plugin.sdk.templates.CubaFrameworkProvider
 import org.kodein.di.generic.instance
 import java.nio.charset.StandardCharsets
 import java.nio.file.Path

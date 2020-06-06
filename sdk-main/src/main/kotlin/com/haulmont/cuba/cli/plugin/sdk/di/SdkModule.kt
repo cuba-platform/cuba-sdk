@@ -50,10 +50,6 @@ val sdkModule = Kodein.Module {
         RepositoryManagerImpl()
     }
 
-    bind<ComponentVersionManager>() with singleton {
-        ComponentVersionManagerImpl()
-    }
-
     bind<NexusManager>() with singleton {
         NexusManagerImpl()
     }
