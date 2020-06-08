@@ -56,9 +56,9 @@ class GradleArtifactManagerImpl : ArtifactManager {
     override fun init() {
         printWriter.println(messages["setup.downloadGradle"])
 
-        val pluginPropertyies =
+        val pluginProperties =
             readProperties(GradleResolverPlugin::class.java.getResourceAsStream("application.properties"))
-        for (entry in pluginPropertyies) {
+        for (entry in pluginProperties) {
             sdkSettings[entry.key as String] = entry.value as String?
         }
 
