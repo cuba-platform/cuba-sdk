@@ -68,39 +68,31 @@ SDK should be configured before the first usage. To configure SDK run the `init`
 ## 4.3. Manage Repositories <a name="manage-repositories"></a>
 
 SDK tool has three repository scopes:
-- **search** - repository to search components for CUBA frameworks and add-ons. 
 - **source** - source repository for components. Dependencies will be downloaded from these repositories.  
 - **target** - target repository to upload components with dependencies.
 
 By default the following repositories are configured:
-- **search scope:**
-  - Local `m2` repository
-  - CUBA Bintray
-  - CUBA Nexus
 - **source scope:**
   - Local `m2`
   - Jcenter
   - Maven central
   - CUBA Bintray
   - CUBA Nexus   
-- **sdk scope:**
+- **target scope:**
   - repository configured in `setup` command 
     
 **Commands:**
 - `repository list` - prints list of configured repositories.
 - `repository list target` - prints list of configured target repositories.
 - `repository list source` - prints list of configured source repositories.
-- `repository list search` - prints list of configured search repositories.
 
 - `repository add` - configures new repository.
 - `repository add target` - configures new target repository.
 - `repository add source` - configures new source repository.
-- `repository add search` - configures new search repository.
 
 - `repository remove` - removes repository.
 - `repository remove target` - removes target repository.
 - `repository remove source` - removes source repository.
-- `repository remove search` - removes search repository.
 
 ## 4.4. Manage Components <a name="manage-components"></a>
 

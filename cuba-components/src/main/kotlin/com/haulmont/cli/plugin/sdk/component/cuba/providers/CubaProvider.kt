@@ -23,8 +23,31 @@ import com.haulmont.cuba.cli.plugin.sdk.services.ArtifactManager
 import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
 import com.haulmont.cuba.cli.plugin.sdk.templates.BintraySearchComponentProvider
 import org.kodein.di.generic.instance
+import java.nio.file.Paths
 
 abstract class CubaProvider : BintraySearchComponentProvider() {
+
+    companion object{
+        val SEARCH_REPOS = listOf(
+            Repository(
+                name = "local",
+                type = RepositoryType.LOCAL,
+                url = Paths.get(System.getProperty("user.home")).resolve(".m2").resolve("repository").toString()
+            ),
+            Repository(
+                name = "cuba-nexus",
+                type = RepositoryType.NEXUS2,
+                url = "https://repo.cuba-platform.com/service/local/lucene/search",
+                authentication = Authentication(login = "cuba", password = "cuba123")
+            ),
+            Repository(
+                name = "cuba-bintray",
+                type = RepositoryType.BINTRAY,
+                url = "https://api.bintray.com/search/packages/maven?",
+                repositoryName = "cuba-platform"
+            )
+        )
+    }
 
     internal val artifactManager: ArtifactManager by lazy { ArtifactManager.instance() }
     internal val repositoryManager: RepositoryManager by sdkKodein.instance<RepositoryManager>()
@@ -49,7 +72,7 @@ abstract class CubaProvider : BintraySearchComponentProvider() {
     }
 
     protected fun searchInExternalRepo(component: Component): Component? {
-        for (searchContext in repositoryManager.getRepositories(RepositoryTarget.SEARCH)) {
+        for (searchContext in SEARCH_REPOS) {
             initSearch(searchContext).search(component)?.let { return it }
         }
         return null

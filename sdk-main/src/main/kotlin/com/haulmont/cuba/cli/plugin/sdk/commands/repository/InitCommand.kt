@@ -65,11 +65,7 @@ class InitCommand : AbstractSdkCommand() {
             url = sdkLocalRepo.toString()
         )
         repositoryManager.removeRepository(repository.name, RepositoryTarget.SOURCE)
-        repositoryManager.removeRepository(repository.name, RepositoryTarget.SEARCH)
-
         repositoryManager.addRepository(repository.copy(), RepositoryTarget.SOURCE)
-        repositoryManager.addRepository(repository.copy(), RepositoryTarget.SEARCH)
-
     }
 
     private fun configureArtifactManager() {

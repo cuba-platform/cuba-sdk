@@ -42,11 +42,9 @@ open class ListRepositoryCommand : AbstractSdkCommand() {
                 } else {
                     printWriter.println("Path: ${repository.url}")
                 }
-                if (RepositoryTarget.SEARCH != target) {
-                    val repositoryStatus =
-                        if (repositoryManager.isOnline(repository)) messages["repository.online"].green() else messages["repository.offline"].red()
-                    printWriter.println("Status: $repositoryStatus")
-                }
+                val repositoryStatus =
+                    if (repositoryManager.isOnline(repository)) messages["repository.online"].green() else messages["repository.offline"].red()
+                printWriter.println("Status: $repositoryStatus")
                 printWriter.println("Type: ${messages["repository.${repository.type}"]}")
                 if (repository.authentication != null) {
                     printWriter.println("Login: ${repository.authentication.login}")

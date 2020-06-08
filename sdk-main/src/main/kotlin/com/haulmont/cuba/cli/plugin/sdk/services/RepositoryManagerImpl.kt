@@ -75,25 +75,6 @@ class RepositoryManagerImpl : RepositoryManager {
 
     private fun defaultRepositories(): Map<RepositoryTarget, MutableList<Repository>> {
         return mapOf(
-            RepositoryTarget.SEARCH to mutableListOf(
-                Repository(
-                    name = "local",
-                    type = RepositoryType.LOCAL,
-                    url = Paths.get(System.getProperty("user.home")).resolve(".m2").resolve("repository").toString()
-                ),
-                Repository(
-                    name = "cuba-nexus",
-                    type = RepositoryType.NEXUS2,
-                    url = "https://repo.cuba-platform.com/service/local/lucene/search",
-                    authentication = Authentication(login = "cuba", password = "cuba123")
-                ),
-                Repository(
-                    name = "cuba-bintray",
-                    type = RepositoryType.BINTRAY,
-                    url = "https://api.bintray.com/search/packages/maven?",
-                    repositoryName = "cuba-platform"
-                )
-            ),
             RepositoryTarget.SOURCE to mutableListOf(
                 Repository(
                     name = "local",

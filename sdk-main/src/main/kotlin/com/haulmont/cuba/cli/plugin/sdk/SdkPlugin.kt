@@ -75,17 +75,14 @@ class SdkPlugin : MainCliPlugin {
                 command("list", ListRepositoryCommand()) {
                     command("target", ListTargetRepositoryCommand())
                     command("source", ListSourceRepositoryCommand())
-                    command("search", ListSearchRepositoryCommand())
                 }
                 command("add", AddRepositoryCommand()) {
                     command("target", AddTargetRepositoryCommand())
                     command("source", AddSourceRepositoryCommand())
-                    command("search", AddSearchRepositoryCommand())
                 }
                 command("remove", RemoveRepositoryCommand()) {
                     command("target", RemoveTargetRepositoryCommand())
                     command("source", RemoveSourceRepositoryCommand())
-                    command("search", RemoveSearchRepositoryCommand())
                 }
             }
 

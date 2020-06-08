@@ -69,26 +69,6 @@ class LicenseCommand : AbstractSdkCommand() {
             val login = it[0]
             val password = it[1]
 
-            repositoryManager.removeRepository("cuba-bintray-premium",RepositoryTarget.SEARCH)
-            repositoryManager.addRepository(
-                Repository(
-                    name = "cuba-bintray-premium",
-                    type = RepositoryType.BINTRAY,
-                    url = "https://api.bintray.com/search/packages/maven?",
-                    authentication = Authentication("$login@cuba-platform", password),
-                    repositoryName = "cuba-platform"
-                ), RepositoryTarget.SEARCH
-            )
-            repositoryManager.removeRepository("cuba-nexus-premium",RepositoryTarget.SEARCH)
-            repositoryManager.addRepository(
-                Repository(
-                    name = "cuba-nexus-premium",
-                    type = RepositoryType.NEXUS2,
-                    url = "https://repo.cuba-platform.com/service/local/lucene/search",
-                    authentication = Authentication(login, password)
-                ), RepositoryTarget.SEARCH
-            )
-
             repositoryManager.removeRepository("cuba-bintray-premium",RepositoryTarget.SOURCE)
             repositoryManager.addRepository(
                 Repository(

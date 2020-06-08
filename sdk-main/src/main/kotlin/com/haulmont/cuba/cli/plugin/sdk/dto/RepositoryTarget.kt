@@ -17,7 +17,6 @@
 package com.haulmont.cuba.cli.plugin.sdk.dto
 
 enum class RepositoryTarget {
-    SEARCH,
     SOURCE,
     TARGET;
 
@@ -29,7 +28,6 @@ enum class RepositoryTarget {
         fun getTarget(target: String): RepositoryTarget = when (target) {
             "source" -> SOURCE
             "target" -> TARGET
-            "search" -> SEARCH
             else -> throw IllegalStateException("Unsupported repository target ${target}")
         }
     }
