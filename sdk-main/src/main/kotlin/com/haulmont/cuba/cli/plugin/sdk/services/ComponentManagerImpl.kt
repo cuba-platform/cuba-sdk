@@ -42,7 +42,7 @@ class ComponentManagerImpl : ComponentManager {
     private val componentTemplates: ComponentTemplates by sdkKodein.instance<ComponentTemplates>()
     private val metadataHolder: MetadataHolder by sdkKodein.instance<MetadataHolder>()
     private val repositoryManager: RepositoryManager by sdkKodein.instance<RepositoryManager>()
-    private val artifactManager: ArtifactManager by lazy { ArtifactManager.instance()}
+    private val artifactManager: ArtifactManager by lazy { ArtifactManager.instance() }
     private val nexusManager: NexusManager by sdkKodein.instance<NexusManager>()
     private val nexusScriptManager: NexusScriptManager by sdkKodein.instance<NexusScriptManager>()
     private val sdkSettings: SdkSettingsHolder by sdkKodein.instance<SdkSettingsHolder>()
@@ -161,12 +161,11 @@ class ComponentManagerImpl : ComponentManager {
             progress?.let { it(artifact, uploaded.incrementAndGet(), total) }
         }
 
-        metadataHolder.addInstalled(
-            component.copy(
-                dependencies = HashSet(),
-                components = HashSet()
-            )
-        )
+
+        val copy = component.clone()
+        copy.dependencies = HashSet()
+        copy.components = HashSet()
+        metadataHolder.addInstalled(copy)
     }
 
     override fun remove(componentToRemove: Component, removeFromRepo: Boolean, progress: RemoveProcessCallback?) {

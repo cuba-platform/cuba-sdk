@@ -336,7 +336,8 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
         } else {
             if (innerComponents.map { it.category }.distinct().filterNotNull().isEmpty()) {
                 val components = innerComponents
-                    .map { Option(it.id!!, it.name ?: it.id, it.id) }
+                    .filter { it.id != null }
+                    .map { Option(it.id!!, it.name ?: it.id, it.id!!) }
                     .toList()
                 val id = Prompts.create {
                     options("name", messages["ask.name"].format(msgPrefix), components)
@@ -356,8 +357,9 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
                     options("category", messages["ask.category"].format(msgPrefix), categories)
                 }.ask()["category"] as String
                 val components = innerComponents
+                    .filter { it.id != null }
                     .filter { it.category == if (category == "Others") null else category }
-                    .map { Option(it.id!!, it.name ?: it.id, it.id) }
+                    .map { Option(it.id!!, it.name ?: it.id, it.id!!) }
                     .toList()
                 val id = Prompts.create {
                     options("name", messages["ask.name"].format(msgPrefix), components)

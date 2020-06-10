@@ -19,6 +19,7 @@ package com.haulmont.cli.plugin.sdk.component.cuba.providers
 import com.haulmont.cli.core.localMessages
 import com.haulmont.cli.core.prompting.Option
 import com.haulmont.cli.plugin.sdk.component.cuba.di.cubaComponentKodein
+import com.haulmont.cli.plugin.sdk.component.cuba.dto.CubaComponent
 import com.haulmont.cli.plugin.sdk.component.cuba.services.ComponentVersionManager
 import com.haulmont.cuba.cli.plugin.sdk.commands.artifacts.NameVersion
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
@@ -46,10 +47,13 @@ class CubaAddonProvider : CubaProvider() {
             id = template.id, groupId = template.groupId, artifactId = template.artifactId
         )?.let { initAddonTemplate(it, template.version) }
         return search(
-            mAddon ?: template.copy(
+            mAddon ?: CubaComponent(template.groupId,
+                template.artifactId,
+                template.version,
+                id = template.id,
+                name = template.name,
                 type = getType(),
-                components = addonComponents(template.groupId, template.artifactId, template.version)
-            )
+                components = addonComponents(template.groupId, template.artifactId, template.version))
         )
     }
 
@@ -63,7 +67,7 @@ class CubaAddonProvider : CubaProvider() {
         val packageName = addon.groupId
         val name = addon.artifactId.substringBefore("-global")
         val componentName = addon.id
-        return Component(
+        return CubaComponent(
             groupId = addon.groupId,
             artifactId = name,
             version = version,
@@ -129,7 +133,7 @@ class CubaAddonProvider : CubaProvider() {
                     if (mAddon != null) {
                         return initAddonTemplate(mAddon, it[2])
                     } else {
-                        return Component(
+                        return CubaComponent(
                             groupId = it[0],
                             artifactId = it[1].substringBefore("-global"),
                             version = it[2],
@@ -158,7 +162,7 @@ class CubaAddonProvider : CubaProvider() {
 
     override fun searchAdditionalComponents(component: Component): Set<Component> {
         val additionalComponentList = mutableSetOf<Component>()
-        component.globalModule()?.let { global ->
+        (component as CubaComponent).globalModule()?.let { global ->
             val model = artifactManager.readPom(
                 MvnArtifact(
                     global.groupId,

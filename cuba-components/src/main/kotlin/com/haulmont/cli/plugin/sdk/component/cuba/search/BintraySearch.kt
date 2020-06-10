@@ -19,13 +19,14 @@ package com.haulmont.cli.plugin.sdk.component.cuba.search
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
+import com.haulmont.cli.plugin.sdk.component.cuba.dto.CubaComponent
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 
 class BintraySearch(repository: Repository) : AbstractRepositorySearch(repository) {
     override fun searchParameters(component: Component): List<Pair<String, String>> = listOf(
         "g" to component.groupId,
-        "a" to if (component.globalModule() != null) component.globalModule()!!.artifactId.substringBefore("-global") + "*" else "*",
+        "a" to((component as CubaComponent).globalModule()?.artifactId?.substringBefore("-global") ?: "") + "*",
         "subject" to repository.repositoryName
     )
 
@@ -42,15 +43,13 @@ class BintraySearch(repository: Repository) : AbstractRepositorySearch(repositor
             log.info("Unknown version: ${component.version}")
             return null
         }
-        val copy = component.copy()
         val systemIds = json.getAsJsonArray("system_ids")
-        val components = mutableListOf<Component>()
         systemIds.toList().stream()
             .map { it.asString }
             .map {
                 val split = it.split(":")
                 val name = split[1]
-                if (component.globalModule() != null) {
+                if ((component as CubaComponent).globalModule() != null) {
                     val prefix = component.globalModule()!!.artifactId.substringBefore("-global")
                     if (!name.startsWith(prefix)) {
                         return@map null
@@ -61,16 +60,14 @@ class BintraySearch(repository: Repository) : AbstractRepositorySearch(repositor
             .filter { it != null }
             .map { it as Component }
             .forEach {
-                if (componentAlreadyExists(copy.components, it) == null) {
-                    copy.components.add(it)
+                if (componentAlreadyExists(component.components, it) == null) {
+                    component.components.add(it)
                 }
             }
 
-        log.info("Component found in ${repository}: ${copy}")
-        return copy
+        log.info("Component found in ${repository}: $component")
+        return component
     }
-
-
 
 
 }

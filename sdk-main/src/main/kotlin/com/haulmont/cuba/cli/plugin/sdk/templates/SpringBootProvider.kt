@@ -35,7 +35,7 @@ class SpringBootProvider : BintraySearchComponentProvider() {
     override fun getName() = "Spring boot"
 
     override fun getComponent(template: Component): Component {
-        return template.copy(type = getType())
+        return template
     }
 
     override fun resolveCoordinates(nameVersion: NameVersion): Component? {
@@ -51,7 +51,9 @@ class SpringBootProvider : BintraySearchComponentProvider() {
                     val mAddon = innerComponents()
                         ?.find { addon -> addon.id == it[0] }
                     if (mAddon != null) {
-                        return mAddon.copy(version = it[1])
+                        val copy = mAddon.clone()
+                        copy.version = it[1]
+                        return copy
                     }
                     return null
                 }

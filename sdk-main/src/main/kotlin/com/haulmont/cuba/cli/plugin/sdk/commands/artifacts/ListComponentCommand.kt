@@ -31,12 +31,12 @@ class ListComponentCommand(val provider: ComponentProvider) : AbstractSdkCommand
 
     override fun run() {
         printWriter.println(messages["list.resolved"].format(provider.getName()).doubleUnderline())
-        for (component in metadataHolder.getResolved().filter { it.type == provider.getType() }) {
+        for (component in metadataHolder.getResolved().filter { it.type == provider.getType() }.sortedBy { it.toString() }) {
             printWriter.println("$component")
         }
         printWriter.println()
         printWriter.println(messages["list.installed"].format(provider.getName()).doubleUnderline())
-        for (component in metadataHolder.getInstalled().filter { it.type == provider.getType() }) {
+        for (component in metadataHolder.getInstalled().filter { it.type == provider.getType() }.sortedBy { it.toString() }) {
             printWriter.println("$component")
         }
         printWriter.println()

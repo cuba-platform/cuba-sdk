@@ -45,7 +45,7 @@ abstract class AbstractRepositorySearch : RepositorySearch {
         val (data, error) = result
 
         if (error != null) {
-            log.severe("error: ${error}")
+            log.severe("error: $error")
             return null
         }
 

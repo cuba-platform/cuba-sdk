@@ -38,10 +38,8 @@ class LocalRepositorySearch(repository: Repository) : AbstractRepositorySearch(r
         }
         val baseDir = baseSearchPath.toFile()
         val componentsList = mutableListOf<Component>()
-        val copy = component.copy()
-        if (baseDir.listFiles() != null) {
-            baseDir.listFiles()
-                .filter { it.isDirectory }
+        baseDir.listFiles()?.let { list ->
+            list.filter { it.isDirectory }
                 .forEach { componentDir ->
                     val componentName = componentDir.name
                     val componentPrefix = "$componentName-${component.version}"
@@ -59,8 +57,8 @@ class LocalRepositorySearch(repository: Repository) : AbstractRepositorySearch(r
                                         Classifier(split.get(0).substringAfter("-"), split.get(1))
                                     }
                                     .toMutableList())
-                            if (componentAlreadyExists(copy.components, componentToResolve) == null) {
-                                copy.components.add(componentToResolve)
+                            if (componentAlreadyExists(component.components, componentToResolve) == null) {
+                                component.components.add(componentToResolve)
                             }
                         }
 
@@ -68,7 +66,7 @@ class LocalRepositorySearch(repository: Repository) : AbstractRepositorySearch(r
         }
 
         if (componentsList.isNotEmpty()) {
-            return copy
+            return component
         }
         return null
     }

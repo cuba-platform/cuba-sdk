@@ -19,6 +19,7 @@ package com.haulmont.cli.plugin.sdk.component.cuba.search
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
+import com.haulmont.cli.plugin.sdk.component.cuba.dto.CubaComponent
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
@@ -28,7 +29,7 @@ class Nexus3Search(repository: Repository) : AbstractRepositorySearch(repository
     override fun searchParameters(component: Component): List<Pair<String, String>> {
         return listOf(
             "group" to component.groupId,
-            "name" to if (component.globalModule() != null) component.globalModule()!!.artifactId.substringBefore("-global") + "*" else "*",
+            "name" to  ((component as CubaComponent).globalModule()?.artifactId?.substringBefore("-global") ?: "") + "*",
             "version" to component.version,
             "repository" to repository.repositoryName
         )
@@ -47,14 +48,12 @@ class Nexus3Search(repository: Repository) : AbstractRepositorySearch(repository
             log.info("Unknown version: ${component.version}")
             return null
         }
-        val components = mutableListOf<Component>()
-        val copy = component.copy()
         itemsArray.map { it as JsonObject }
             .map { dataObj ->
                 val groupId = dataObj.get("group").asString
                 val artifactId = dataObj.get("name").asString
-                if (component.globalModule() != null) {
-                    val prefix = component.globalModule()!!.artifactId.substringBefore("-global")
+                (component as CubaComponent).globalModule()?.let {
+                    val prefix = it.artifactId.substringBefore("-global")
                     if (!artifactId.startsWith(prefix)) {
                         return@map null
                     }
@@ -73,14 +72,13 @@ class Nexus3Search(repository: Repository) : AbstractRepositorySearch(repository
                     .toMutableList()
                 return@map Component(groupId, artifactId, version, classifiers = classifiers)
             }
-            .filter { it != null }
-            .map { it as Component }
+            .filterNotNull()
             .forEach {
-                if (componentAlreadyExists(copy.components, it) == null) {
-                    copy.components.add(it)
+                if (componentAlreadyExists(component.components, it) == null) {
+                    component.components.add(it)
                 }
             }
-        log.info("Component found in ${repository}: ${copy}")
-        return copy
+        log.info("Component found in ${repository}: $component")
+        return component
     }
 }

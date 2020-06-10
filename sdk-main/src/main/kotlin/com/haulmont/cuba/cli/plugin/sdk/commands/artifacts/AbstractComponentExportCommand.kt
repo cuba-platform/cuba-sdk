@@ -47,7 +47,7 @@ abstract class AbstractComponentExportCommand : AbstractExportCommand() {
         (componentToExport ?: createSearchContext())?.let {
             val component = searchInMetadata(it)
             component?.let {
-                return "${it.toString().replace(":", "-")}_${it.type.toLowerCase()}_sdk"
+                return "${it.toString().replace(":", "-")}_${it.type}_sdk".toLowerCase()
             }
         }
         return "export"
@@ -61,12 +61,12 @@ abstract class AbstractComponentExportCommand : AbstractExportCommand() {
         }
         if (componentToExport(searchContext) == null) {
             val answers = Prompts.create {
-                confirmation("need-to-resolve", messages["export.needToResolve"].format(searchContext ?: nameVersion)) {
+                confirmation("need-to-resolve", messages["export.needToResolve"].format(searchContext)) {
                     default(true)
                 }
             }.ask()
             if (answers["need-to-resolve"] as Boolean) {
-                searchContext?.let {
+                searchContext.let {
                     val component = search(it)
                     component?.let {
                         resolve(componentWithDependents(component))

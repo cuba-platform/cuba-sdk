@@ -17,6 +17,7 @@
 package com.haulmont.cli.plugin.sdk.component.cuba.providers
 
 import com.haulmont.cli.plugin.sdk.component.cuba.di.cubaComponentKodein
+import com.haulmont.cli.plugin.sdk.component.cuba.dto.CubaComponent
 import com.haulmont.cuba.cli.plugin.sdk.commands.artifacts.NameVersion
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier.Companion.default
@@ -46,14 +47,14 @@ class CubaFrameworkProvider : CubaProvider() {
     override fun resolveCoordinates(nameVersion: NameVersion): Component? {
         nameVersion.split(":").let {
             when (it.size) {
-                1 -> return Component(
+                1 -> return CubaComponent(
                     groupId = "com.haulmont.cuba",
                     artifactId = "cuba",
                     version = it[0],
                     type = getType(),
                     name = getName()
                 )
-                2 -> return Component(
+                2 -> return CubaComponent(
                     groupId = "com.haulmont.cuba",
                     artifactId = "cuba",
                     version = it[1],
@@ -69,7 +70,7 @@ class CubaFrameworkProvider : CubaProvider() {
 
     }
 
-    override fun getComponent(template: Component) = search(Component(
+    override fun getComponent(template: Component) = search(CubaComponent(
         "com.haulmont.cuba",
         "cuba",
         template.version,

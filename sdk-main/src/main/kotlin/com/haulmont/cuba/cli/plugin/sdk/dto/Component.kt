@@ -16,24 +16,27 @@
 
 package com.haulmont.cuba.cli.plugin.sdk.dto
 
-data class Component(
-    val groupId: String,
-    val artifactId: String,
-    val version: String,
-    val classifiers: MutableList<Classifier> = mutableListOf(
+import com.google.gson.Gson
+
+open class Component(
+    var groupId: String,
+    var artifactId: String,
+    var version: String,
+    var classifiers: MutableList<Classifier> = mutableListOf(
         Classifier.default(),
         Classifier.pom(),
         Classifier.sources()
     ),
-    val url: String? = null,
-    var frameworkVersion: String? = null,
-    val components: MutableSet<Component> = HashSet(),
-    val dependencies: MutableSet<MvnArtifact> = HashSet(),
-    val type: String = "",
-    val id: String? = null,
-    val name: String? = null,
-    val description: String? = null,
-    val category: String? = null
+
+    var id: String? = null,
+    var type: String = "",
+    var name: String? = null,
+    var description: String? = null,
+    var category: String? = null,
+
+    var url: String? = null,
+    var components: MutableSet<Component> = HashSet(),
+    var dependencies: MutableSet<MvnArtifact> = HashSet()
 ) {
     override fun toString(): String {
         name?.let {
@@ -54,11 +57,13 @@ data class Component(
         return list
     }
 
-    fun globalModule() =
-        components.filter { it.artifactId.endsWith("-global") }.firstOrNull()
-
     fun isSame(component: Component) = type == component.type &&
             artifactId == component.artifactId &&
             groupId == component.groupId &&
             version == component.version
+
+    fun clone(): Component {
+        val stringProject = Gson().toJson(this, javaClass)
+        return Gson().fromJson(stringProject, javaClass)
+    }
 }
