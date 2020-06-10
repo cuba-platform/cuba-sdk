@@ -42,6 +42,7 @@ class InitCommand : AbstractSdkCommand() {
         val sdkHome = Path.of(answers["sdk-home"] as String)
         createSdkDir(sdkHome)
         createSdkRepoSettingsFile(sdkHome)
+        sdkSettings.resetProperties()
         configureArtifactManager()
         initLocalMavenRepo()
         bus.post(SdkEvent.SdkInitEvent())
@@ -73,9 +74,9 @@ class InitCommand : AbstractSdkCommand() {
     }
 
     private fun createSdkRepoSettingsFile(sdkHome: Path) {
-        sdkSettings["sdk.home"] = sdkSettings.sdkHome().toString()
-        sdkSettings["sdk.export.path"] = sdkSettings.sdkHome().resolve("export").toString()
-        sdkSettings["sdk.files"] = sdkSettings.sdkHome().resolve("files").toString()
+        sdkSettings["sdk.home"] = sdkHome.toString()
+        sdkSettings["sdk.export.path"] = sdkHome.resolve("export").toString()
+        sdkSettings["sdk.files"] = sdkHome.resolve("files").toString()
         if (!sdkSettings.hasProperty("repository.type")) {
             sdkSettings["repository.type"] = "none"
         }

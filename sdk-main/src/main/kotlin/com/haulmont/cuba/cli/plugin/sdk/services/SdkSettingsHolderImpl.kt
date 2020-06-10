@@ -33,13 +33,7 @@ class SdkSettingsHolderImpl : SdkSettingsHolder {
 
     internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance<SdkSettingsHolder>()
 
-    val SDK_PROPERTIES_PATH by lazy {
-        Paths.get(
-            System.getProperty(
-                "user.home"
-            ), ".haulmont", "cli", "sdk"
-        ).resolve("sdk.properties")
-    }
+    private val SDK_PROPERTIES_PATH = "sdk.properties"
 
     private var sdkProperties: Properties
     private var userProperties = Properties()
@@ -49,12 +43,13 @@ class SdkSettingsHolderImpl : SdkSettingsHolder {
     }
 
     private fun readDefaultProperties(): Properties {
-        if (Files.exists(SDK_PROPERTIES_PATH)) {
+        val propertiesPath = getSdkPath().resolve(SDK_PROPERTIES_PATH)
+        if (Files.exists(propertiesPath)) {
             userProperties = readProperties(
-                FileInputStream(SDK_PROPERTIES_PATH.toString())
+                FileInputStream(propertiesPath.toString())
             )
             return readProperties(
-                FileInputStream(SDK_PROPERTIES_PATH.toString()),
+                FileInputStream(propertiesPath.toString()),
                 readApplicationProperties()
             )
         } else {
@@ -89,13 +84,17 @@ class SdkSettingsHolderImpl : SdkSettingsHolder {
         .resolve("nexus")
 
     private fun getSdkPath() =
-        if (sdkProperties.contains("sdk.home"))
+        if (sdkProperties != null && sdkProperties.get("sdk.home") != null)
             Path.of(getProperty("sdk.home"))
-        else Paths.get(
+        else defaultPath()
+
+    private fun defaultPath(): Path {
+        return Paths.get(
             System.getProperty(
                 "user.home"
             ), ".haulmont", "cli", "sdk"
         )
+    }
 
 
     override fun getProperty(property: String): String {
@@ -112,21 +111,21 @@ class SdkSettingsHolderImpl : SdkSettingsHolder {
 
     override fun setProperty(property: String, value: String?) {
         if (value != null) {
-            sdkProperties.put(property, value)
-            userProperties.put(property,value)
+            sdkProperties[property] = value
+            userProperties[property] = value
         }
     }
 
     override fun flushAppProperties() {
         createSdkPropertiesFileIfNotExists()
 
-        FileWriter(SDK_PROPERTIES_PATH.toString()).use {
+        FileWriter(getSdkPath().resolve(SDK_PROPERTIES_PATH).toString()).use {
             userProperties.store(it, "SDK properties")
         }
     }
 
     override fun sdkConfigured(): Boolean {
-        return Files.exists(SDK_PROPERTIES_PATH)
+        return Files.exists(getSdkPath().resolve(SDK_PROPERTIES_PATH))
     }
 
     override fun setExternalProperties(file: Path) {
@@ -145,8 +144,8 @@ class SdkSettingsHolderImpl : SdkSettingsHolder {
     }
 
     private fun createSdkPropertiesFileIfNotExists() {
-        if (!Files.exists(SDK_PROPERTIES_PATH)) {
-            Files.createFile(SDK_PROPERTIES_PATH)
+        if (!Files.exists(getSdkPath().resolve(SDK_PROPERTIES_PATH))) {
+            Files.createFile(getSdkPath().resolve(SDK_PROPERTIES_PATH))
         }
     }
 
