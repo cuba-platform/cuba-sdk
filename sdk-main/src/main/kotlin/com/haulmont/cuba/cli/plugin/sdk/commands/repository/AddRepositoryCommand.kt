@@ -125,6 +125,9 @@ open class AddRepositoryCommand : AbstractSdkCommand() {
     }
 
     private fun validateRepositoryName(target: RepositoryTarget, repositoryName: String) {
+        if (repositoryName.isEmpty()) {
+            fail(messages["validation.notEmpty"])
+        }
         if (repositoryManager.getRepository(repositoryName, target) != null) {
             throw ValidationException("Repository with name ${repositoryName} already exist")
         }
