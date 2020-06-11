@@ -126,15 +126,15 @@ class SdkPlugin : MainCliPlugin {
             }
         }
 
-        if (!sdkSettings.sdkConfigured()){
+        if (!sdkSettings.sdkConfigured()) {
             writer.println(messages["setup.initSdk"].green())
             InitCommand().execute()
         }
 
-        writer.println(messages["sdk.currentHome"].format(sdkSettings.sdkHome()).green())
+        writer.println("${messages["sdk.currentHome"]} ${sdkSettings.sdkHome().toString().green()}")
 
-        Runtime.getRuntime().addShutdownHook(thread (isDaemon = true){
-                StopCommand().apply { checkState = false }.execute()
+        Runtime.getRuntime().addShutdownHook(thread(isDaemon = true) {
+            StopCommand().apply { checkState = false }.execute()
         })
     }
 

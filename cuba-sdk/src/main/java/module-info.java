@@ -50,7 +50,6 @@ module com.haulmont.cuba.cli.plugin.sdk {
 
     opens com.haulmont.cuba.cli.plugin.sdk;
     opens com.haulmont.cuba.cli.plugin.sdk.dto;
-    opens com.haulmont.cuba.cli.plugin.sdk.dto.spring;
     opens com.haulmont.cuba.cli.plugin.sdk.commands;
     opens com.haulmont.cuba.cli.plugin.sdk.commands.artifacts;
     opens com.haulmont.cuba.cli.plugin.sdk.commands.repository;
