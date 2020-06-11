@@ -64,6 +64,7 @@ class SdkPlugin : MainCliPlugin {
             command("sdk", SdkCommand())
             command("properties", PrintPropertiesCommand())
             command("setup-nexus", SetupNexusCommand())
+            command("sdk-home", SdkHomeCommand())
             command("init", InitCommand())
             command("start", StartCommand())
             command("stop", StopCommand())
@@ -129,6 +130,8 @@ class SdkPlugin : MainCliPlugin {
             writer.println(messages["setup.initSdk"].green())
             InitCommand().execute()
         }
+
+        writer.println(messages["sdk.currentHome"].format(sdkSettings.sdkHome()).green())
 
         Runtime.getRuntime().addShutdownHook(thread (isDaemon = true){
                 StopCommand().apply { checkState = false }.execute()

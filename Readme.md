@@ -55,6 +55,7 @@ SDK should be configured before the first usage. To configure SDK run the `init`
 - `sdk` - prints current SDK status.
 - `properties` - prints configured SDK properties. Specific properties can be printed with `--n` or `--name` additional parameters, for example,  `properties --n sdk.export.path`
 - `init` - inits SDK. This command configures SDK properties and downloads, installs and configures *Gradle*. For the already configured SDK, this command does not clean up current SDK metadata.
+- `sdk-home` - change current SDK home directory
 - `setup-nexus` - sets up embedded Nexus repository. This command downloads, installs and configures Nexus repository.
 - `cleanup` - cleans up SDK metadata and remove all artifacts from the local *m2* repository and the embedded Nexus repository. If `--local-only` flag is provided, then only the local *m2* repository will be cleaned.
 - `set-license` - sets the license key and configures Premium repositories for the *source* repository. 
@@ -134,7 +135,7 @@ Remove command removes the component with dependencies from the local *m2* repos
 - `remove addon`
 - `remove lib`
 
-Component coordinates for bulk commands can be passed with ','. For example: `install -c framework-cuba:7.2.1,addon-dashboard:3.2.1`.
+Component coordinates for bulk commands can be passed with ','. For example: `install --c cuba-7.2.1,addon-dashboard:3.2.1`.
 
 Export command exports the component with dependencies as an archive to the `sdkproperties[sdk.export.home]` directory. If the component is not resolved yet, then SDK will ask to resolve the component.  
 - `export` - exports all resolved SDK components.

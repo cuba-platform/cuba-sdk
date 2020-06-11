@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2008-2020 Haulmont.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.haulmont.cuba.cli.plugin.sdk.commands.repository
 
 import com.beust.jcommander.Parameters
@@ -10,7 +26,6 @@ import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryType
-import com.haulmont.cuba.cli.plugin.sdk.event.SdkEvent
 import com.haulmont.cuba.cli.plugin.sdk.services.ArtifactManager
 import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
 import org.kodein.di.generic.instance
@@ -18,7 +33,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 @Parameters(commandDescription = "Init SDK")
-class InitCommand : AbstractSdkCommand() {
+class SdkHomeCommand : AbstractSdkCommand() {
 
     private val artifactManager: ArtifactManager by lazy { ArtifactManager.instance() }
 
@@ -35,18 +50,22 @@ class InitCommand : AbstractSdkCommand() {
     private fun QuestionsList.askInitSettings() {
         question("sdk-home", messages["init.sdk-home"]) {
             default(sdkSettings.sdkHome().toString())
+            validate {
+                if (!Files.exists(Path.of(value))){
+                    fail(messages["init.directoryIsNotExists"])
+                }
+                if (!Files.exists(Path.of(value).resolve("sdk.properties"))){
+                    fail(messages["init.sdkSettingsIsNotExists"])
+                }
+            }
         }
     }
 
     private fun init(answers: Answers) {
         val sdkHome = Path.of(answers["sdk-home"] as String)
-        createSdkDir(sdkHome)
-        createSdkRepoSettingsFile(sdkHome)
-
-        configureArtifactManager()
-        initLocalMavenRepo()
-        bus.post(SdkEvent.SdkInitEvent())
-        printWriter.println(messages["setup.sdkConfigured"].green())
+        sdkSettings["sdk.home"] = sdkHome.toString()
+        sdkSettings.resetProperties()
+        printWriter.println(messages["init.sdkHomeChanged"].format(sdkHome).green())
     }
 
     private fun initLocalMavenRepo() {
@@ -89,4 +108,3 @@ class InitCommand : AbstractSdkCommand() {
         }
     }
 }
-
