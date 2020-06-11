@@ -17,7 +17,7 @@ artifacts {
 }
 
 dependencies {
-    compile project(":sdk-main")
+    compile project(":cuba-sdk")
 
     implementation("com.github.kittinunf.fuel:fuel:$versions.fuel") {
         exclude(group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib')
@@ -40,7 +40,7 @@ compileJava {
     }
 }
 
-task bundle(group: 'distribution', dependsOn: ['jar', ':sdk-main:bundle'], type: Copy) {
+task bundle(group: 'distribution', dependsOn: ['jar', ':cuba-sdk:bundle'], type: Copy) {
     inputs.files jar.outputs.files
 
     def bundlePlatform = project.hasProperty('targetOsPlatform') ? '-' + project.property('targetOsPlatform') : '';

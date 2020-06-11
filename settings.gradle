@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-rootProject.name = 'cuba-sdk'
+rootProject.name = 'cuba-sdk-project'
 
-include 'sdk-main', 'gradle-resolver', 'maven-resolver', 'cuba-components'
+include 'cuba-sdk', 'gradle-resolver', 'maven-resolver', 'cuba-components'

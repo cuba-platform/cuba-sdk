@@ -14,8 +14,4 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.dto.spring
-
-data class SpringInitializr(
-    val dependencies: List<SpringComponentCategory>
-)
+rootProject.name = 'cuba-sdk'
