@@ -30,6 +30,7 @@ import com.haulmont.cuba.cli.plugin.sdk.services.ArtifactManager
 import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
 import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
 import com.haulmont.cuba.cli.plugin.sdk.utils.FileUtils
+import com.haulmont.cuba.cli.plugin.sdk.utils.currentOsType
 import com.haulmont.cuba.cli.plugin.sdk.utils.performance
 import org.apache.maven.model.Model
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
@@ -112,6 +113,7 @@ class MvnArtifactManagerImpl : ArtifactManager {
             true
         ).downloadAndConfigure(
             configure = {
+                setMavenExecutable()
                 mvnExecutor.buildMavenSettingsFile()
                 val thread = thread {
                     mvnExecutor.init()
@@ -128,6 +130,17 @@ class MvnArtifactManagerImpl : ArtifactManager {
         )
 
 
+    }
+
+    private fun setMavenExecutable() {
+        if (currentOsType() != OsType.WINDOWS) {
+            val mavenExecutable = Path.of(
+                sdkSettings["maven.path"],
+                "bin",
+                "mvn"
+            )
+            mavenExecutable.toFile().setExecutable(true)
+        }
     }
 
     private fun mavenDownloadLink() = sdkSettings["maven.downloadLink"]

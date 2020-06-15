@@ -113,6 +113,7 @@ class SetupNexusCommand : AbstractSdkCommand() {
         installer.downloadAndConfigure(
             configure = {
                 configureNexusProperties(answers)
+                makeNexusExecutable()
                 StartCommand().execute()
                 configureNexus(answers)
             },
@@ -123,6 +124,13 @@ class SetupNexusCommand : AbstractSdkCommand() {
             }
         )
         return result
+    }
+
+    private fun makeNexusExecutable() {
+        if (currentOsType()!= OsType.WINDOWS) {
+            val nexusExecutable:Path = Path.of(sdkSettings["repository.path"],  "nexus3", "bin", "nexus")
+            nexusExecutable.toFile().setExecutable(true)
+        }
     }
 
     private fun addTargetSdkRepository(answers: Answers) {
