@@ -170,8 +170,6 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
         return componentRegistry.providerByName(component.type).getComponent(component)
     }
 
-    fun fail(cause: String): Nothing = throw ValidationException(cause)
-
     fun parseComponents(nameVersions: String): Set<Component> {
         val components = mutableSetOf<Component>()
         val searchThread = thread {

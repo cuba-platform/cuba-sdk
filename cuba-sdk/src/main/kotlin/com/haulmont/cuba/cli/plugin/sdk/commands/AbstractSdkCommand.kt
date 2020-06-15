@@ -139,7 +139,7 @@ abstract class AbstractSdkCommand : AbstractCommand() {
         }
     }
 
-
+    fun fail(cause: String): Nothing = throw ValidationException(cause)
 
     internal fun password(password: String) = "*****"
 

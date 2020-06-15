@@ -39,7 +39,7 @@ open class RemoveRepositoryCommand : AbstractSdkCommand() {
     override fun run() {
         if (target == null) {
             val targetAnswers = Prompts.create {
-                textOptions("target", messages["repository.target"], listOf("source", "target", "search"))
+                textOptions("target", messages["repository.target"], listOf("source", "target"))
             }.ask()
             target = RepositoryTarget.getTarget(targetAnswers["target"] as String)
         }

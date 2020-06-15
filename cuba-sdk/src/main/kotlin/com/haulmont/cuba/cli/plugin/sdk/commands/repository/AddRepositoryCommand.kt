@@ -78,7 +78,7 @@ open class AddRepositoryCommand : AbstractSdkCommand() {
 
     private fun QuestionsList.askRepositorySettings() {
         if (target == null) {
-            textOptions("target", messages["repository.target"], listOf("source", "target", "search"))
+            textOptions("target", messages["repository.target"], listOf("source", "target"))
         }
         if (repositoryName == null) {
             question("name", messages["repository.name"]) {
@@ -96,10 +96,12 @@ open class AddRepositoryCommand : AbstractSdkCommand() {
         }
         question("url", messages["repository.url"]) {
             askIf { !isLocal(it) }
+            validate { checkIsNotBlank() }
         }
         question("path", messages["repository.path"]) {
             default(Paths.get(System.getProperty("user.home")).resolve(".m2").resolve("repository").toString())
             askIf { isLocal(it) }
+            validate { checkIsNotBlank() }
         }
         confirmation("auth", messages["repository.authRequired"]) {
             default(false)
@@ -107,9 +109,11 @@ open class AddRepositoryCommand : AbstractSdkCommand() {
         }
         question("login", messages["repository.login"]) {
             askIf { it["auth"] != null && it["auth"] as Boolean }
+            validate { checkIsNotBlank() }
         }
         question("password", messages["repository.password"]) {
             askIf { it["auth"] != null && it["auth"] as Boolean }
+            validate { checkIsNotBlank() }
         }
         question("type", messages["repository.type"]) {
             validate {
