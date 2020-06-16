@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.commands.repository
+package com.haulmont.cli.plugin.sdk.component.cuba.commands
 
 import com.beust.jcommander.Parameter
 import com.beust.jcommander.Parameters
@@ -55,7 +55,7 @@ class LicenseCommand : AbstractSdkCommand() {
             checkRegex(licenseKey!!)
             activate(licenseKey!!)
 
-            printWriter.println(messages["license.licenseKeyconfigured"].green())
+            printWriter.println(messages["license.licenseKeyConfigured"].green())
         }
     }
 

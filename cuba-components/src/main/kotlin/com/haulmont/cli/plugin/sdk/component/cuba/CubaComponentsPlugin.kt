@@ -20,6 +20,7 @@ import com.google.common.eventbus.Subscribe
 import com.haulmont.cli.core.API_VERSION
 import com.haulmont.cli.core.CliPlugin
 import com.haulmont.cli.core.event.InitPluginEvent
+import com.haulmont.cli.plugin.sdk.component.cuba.commands.LicenseCommand
 import com.haulmont.cli.plugin.sdk.component.cuba.providers.CubaAddonProvider
 import com.haulmont.cli.plugin.sdk.component.cuba.providers.CubaFrameworkProvider
 import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
@@ -42,6 +43,10 @@ class CubaComponentsPlugin : CliPlugin {
             thread {
                 it.load()
             }
+        }
+
+        event.commandsRegistry {
+            command("set-license", LicenseCommand())
         }
     }
 

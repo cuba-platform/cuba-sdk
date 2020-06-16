@@ -37,6 +37,7 @@ module com.haulmont.cuba.cli.plugin.sdk.components.cuba {
     requires result;
 
     opens com.haulmont.cli.plugin.sdk.component.cuba;
+    opens com.haulmont.cli.plugin.sdk.component.cuba.commands;
     opens com.haulmont.cli.plugin.sdk.component.cuba.dto;
 
     provides CliPlugin with CubaComponentsPlugin;

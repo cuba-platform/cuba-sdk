@@ -34,9 +34,9 @@ import java.nio.file.Path
 abstract class AbstractSdkCommand : AbstractCommand() {
 
     companion object{
-        internal const val PROGRESS_LINE_LENGHT = 110
-        internal val rootMessages = Messages(AbstractSdkCommand::class.java)
-        internal val printWriter: PrintWriter by sdkKodein.instance<PrintWriter>()
+        protected const val PROGRESS_LINE_LENGHT = 110
+        protected val rootMessages = Messages(AbstractSdkCommand::class.java)
+        protected val printWriter: PrintWriter by sdkKodein.instance<PrintWriter>()
 
         fun printProgress(message: String, progress: Float) {
             val progressStr = rootMessages["progress"].format(progress).green()
@@ -80,10 +80,12 @@ abstract class AbstractSdkCommand : AbstractCommand() {
         }
     }
 
-    internal val messages by localMessages()
-    internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance<SdkSettingsHolder>()
-    internal val bus: EventBus by com.haulmont.cli.core.kodein.instance<EventBus>()
-    internal val workingDirectoryManager: WorkingDirectoryManager by sdkKodein.instance<WorkingDirectoryManager>()
+    protected val rootMessages = Messages(AbstractSdkCommand::class.java)
+    protected val messages by localMessages()
+    protected val printWriter: PrintWriter by sdkKodein.instance<PrintWriter>()
+    protected val sdkSettings: SdkSettingsHolder by sdkKodein.instance<SdkSettingsHolder>()
+    protected val bus: EventBus by com.haulmont.cli.core.kodein.instance<EventBus>()
+    protected val workingDirectoryManager: WorkingDirectoryManager by sdkKodein.instance<WorkingDirectoryManager>()
 
     @Parameter(
         names = ["--s", "--settings"],

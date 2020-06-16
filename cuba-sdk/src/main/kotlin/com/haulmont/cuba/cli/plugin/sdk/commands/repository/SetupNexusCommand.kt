@@ -89,7 +89,7 @@ class SetupNexusCommand : AbstractSdkCommand() {
         val installer =
             object : ToolInstaller("Nexus", nexusDownloadLink(), Path.of(answers["repository-path"] as String)) {
                 override fun beforeUnzip(zipFilePath: Path): Path {
-                    Companion.printWriter.println(messages["setup.unzipRepositoryCaption"].format(answers["repository-path"]))
+                    printWriter.println(messages["setup.unzipRepositoryCaption"].format(answers["repository-path"]))
                     return zipFilePath
                 }
 

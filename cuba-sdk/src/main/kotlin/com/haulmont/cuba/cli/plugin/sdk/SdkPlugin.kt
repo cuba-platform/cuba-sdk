@@ -68,7 +68,6 @@ class SdkPlugin : MainCliPlugin {
             command("init", InitCommand())
             command("start", StartCommand())
             command("stop", StopCommand())
-            command("set-license", LicenseCommand())
             command("cleanup", CleanCommand())
             command("check-updates", CheckForMinorUpdatesCommand())
 

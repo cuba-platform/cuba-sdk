@@ -67,7 +67,7 @@ open class ToolInstaller(
         val zipFilePath = beforeUnzip(zipFilePath)
         FileUtils.unzip(zipFilePath, installPath, skipFirstZipEntry) { count, total ->
             printProgress(
-                AbstractSdkCommand.rootMessages["unzipProgress"],
+                rootMessages["unzipProgress"],
                 calculateProgress(count, total)
             )
         }

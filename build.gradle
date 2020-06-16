@@ -40,6 +40,7 @@ buildscript {
 
     repositories {
         mavenLocal()
+        mavenCentral()
         maven {
             credentials {
                 username System.getenv('HAULMONT_REPOSITORY_USER') ?: 'cuba'
@@ -47,7 +48,6 @@ buildscript {
             }
             url System.getenv('HAULMONT_REPOSITORY_URL') ?: 'https://repo.cuba-platform.com/content/groups/work'
         }
-        mavenCentral()
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$versions.kotlin"
