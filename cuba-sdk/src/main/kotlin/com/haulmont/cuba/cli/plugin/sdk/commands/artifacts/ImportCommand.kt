@@ -52,6 +52,11 @@ class ImportCommand : BaseComponentCommand() {
     override fun createSearchContext(): Component? = null
 
     override fun run() {
+        if (importFile == null) {
+            printWriter.println(messages["import.emptyPath"].red())
+            return
+        }
+
         var importFilePath = Path.of(importFile)
         if (!importFilePath.isAbsolute) {
             importFilePath = workingDirectoryManager.workingDirectory.resolve(importFilePath)
