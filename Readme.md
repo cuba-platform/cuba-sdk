@@ -38,7 +38,7 @@ CUBA SDK is a useful tool if it is required to develop applications with limited
 - Can install and setup embedded Nexus OSS repository.
 - Import/Export resolved artifacts with dependencies.
 - Integrated with CUBA addons marketplace. 
-- Supports difeerent profiles for one CUBA SDK instance. 
+- Supports different profiles for one CUBA SDK instance. 
 
 # 2. Installation <a name="installation"></a>
 

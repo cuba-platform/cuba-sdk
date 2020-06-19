@@ -96,7 +96,8 @@ open class AddRepositoryCommand : AbstractSdkCommand() {
         }
         question("url", messages["repository.url"]) {
             askIf { !isLocal(it) }
-            validate { checkIsNotBlank() }
+            validate { checkIsNotBlank()
+                checkRegex("^(https?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]", messages["repository.url.invalid"])}
         }
         question("path", messages["repository.path"]) {
             default(Paths.get(System.getProperty("user.home")).resolve(".m2").resolve("repository").toString())
