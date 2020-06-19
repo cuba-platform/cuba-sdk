@@ -19,10 +19,7 @@ package com.haulmont.cuba.cli.plugin.sdk.services
 import com.github.kittinunf.fuel.Fuel
 import com.haulmont.cuba.cli.plugin.sdk.commands.CommonSdkParameters
 import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
-import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
-import com.haulmont.cuba.cli.plugin.sdk.dto.Component
-import com.haulmont.cuba.cli.plugin.sdk.dto.MvnArtifact
-import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
+import com.haulmont.cuba.cli.plugin.sdk.dto.*
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusManager
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusScriptManager
 import com.haulmont.cuba.cli.plugin.sdk.templates.ComponentRegistry
@@ -31,6 +28,8 @@ import com.haulmont.cuba.cli.plugin.sdk.utils.authorizeIfRequired
 import com.haulmont.cuba.cli.plugin.sdk.utils.performance
 import org.json.JSONObject
 import org.kodein.di.generic.instance
+import java.nio.file.Files
+import java.nio.file.Path
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.logging.Logger
 import java.util.stream.Collectors
@@ -137,11 +136,15 @@ class ComponentManagerImpl : ComponentManager {
         artifact: MvnArtifact,
         classifier: Classifier
     ): Boolean {
-        val (_, response, _) =
-            Fuel.head(repoUrl(repository, componentUrl(artifact, classifier)))
-                .authorizeIfRequired(repository)
-                .response()
-        return response.statusCode == 200
+        if (repository.type == RepositoryType.LOCAL) {
+            return Files.exists(artifact.localPath(Path.of(repository.url), classifier))
+        } else {
+            val (_, response, _) =
+                Fuel.head(repoUrl(repository, componentUrl(artifact, classifier)))
+                    .authorizeIfRequired(repository)
+                    .response()
+            return response.statusCode == 200
+        }
     }
 
 
