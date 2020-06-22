@@ -160,7 +160,7 @@ class RepositoryManagerImpl : RepositoryManager {
                 Fuel.head(url)
                     .authorizeIfRequired(repository)
                     .response()
-            return response.statusCode != 404
+            return response.statusCode == 200 || response.statusCode == 403
         }
     }
 
