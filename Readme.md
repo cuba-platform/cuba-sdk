@@ -17,9 +17,8 @@
 
 # 1. Overview <a name="overview"></a>
 
-CUBA SDK is a command-line tool that provides an ability to resolve and export all dependencies 
-for CUBA framework, add-ons or any external library and then use SDK as an embedded repository with 
-few simple commands. This tool has a built-in [Nexus 3 repository](https://www.sonatype.com/nexus-repository-oss). 
+CUBA SDK is a command-line tool that provides an ability to resolve, export and upload to external repository all dependencies 
+for CUBA framework, add-ons or any external library with few simple commands. SDK can be used as an embedded repository. This tool has a built-in [Nexus 3 repository](https://www.sonatype.com/nexus-repository-oss). 
 
 CUBA SDK is a useful tool if it is required to develop applications with limited network environment. 
 
