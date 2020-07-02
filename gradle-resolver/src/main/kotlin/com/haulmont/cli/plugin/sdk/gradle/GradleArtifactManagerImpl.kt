@@ -109,8 +109,7 @@ class GradleArtifactManagerImpl : ArtifactManager {
     override fun uploadComponentToLocalCache(component: Component): List<MvnArtifact> {
         val dependencies = mutableListOf<MvnArtifact>()
         for (classifier in component.classifiers) {
-            val componentPath = Path.of(sdkSettings["gradle.home"])
-                .resolve("raw")
+            val componentPath = Path.of("raw")
                 .resolve(component.groupId)
                 .resolve(component.artifactId)
                 .resolve(component.version)
