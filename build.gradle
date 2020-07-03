@@ -82,8 +82,8 @@ subprojects {
     sourceCompatibility = 11f
     targetCompatibility = 11
 
-    group 'com.haulmont.cli.core.plugin'
-    version '0.3-SNAPSHOT'
+    group 'com.haulmont.cli.sdk'
+    version rootProject.hasProperty('buildVersion') ? rootProject['buildVersion'] : '1.0-SNAPSHOT'
 
     dependencies {
         implementation "org.jetbrains.kotlin:kotlin-reflect:$versions.kotlin"
