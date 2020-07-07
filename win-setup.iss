@@ -1,6 +1,6 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
-#define AppName "CUBA CLI"
+#define AppName "CUBA SDK"
 ; #define AppVersion - specify this value through iscc.exe "/D" parameter
 ; #define AppSrc - specify this value through iscc.exe "/D" parameter
 #define AppPublisher "Haulmont"
