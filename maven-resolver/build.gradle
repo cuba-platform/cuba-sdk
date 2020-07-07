@@ -72,3 +72,30 @@ task bundle(group: 'distribution', dependsOn: ['jar', ':cuba-sdk:bundle'], type:
     }
 
 }
+
+task generatePom(group: 'distribution', description: 'Generates POM file for uploading to repository') {
+    doLast {
+        def mavenPomDir = new File(project.buildDir, 'maven-pom')
+        mavenPomDir.mkdirs()
+
+        pom {
+            project {
+                name project.name
+                description 'CUBA Platform Development SDK Maven resolver plugin'
+                inceptionYear '2018'
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                organization {
+                    name 'CUBA Platform'
+                    url 'https://www.cuba-platform.com'
+                }
+            }
+        }.writeTo(new File(mavenPomDir, project.name + '-' + project.version + '.pom'))
+    }
+}
+
+assemble.dependsOn(generatePom)
