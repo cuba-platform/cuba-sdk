@@ -41,7 +41,61 @@ CUBA SDK is a useful tool if it is required to develop applications with limited
 
 # 2. Installation <a name="installation"></a>
 
-Tool will be available in SDK MAN repository soon. 
+## Download links:
+
+- [Windows installer](https://cuba-platform.bintray.com/tools/cuba-sdk/1.0.0/cuba-sdk-1.0.0.exe)
+- [Windows](https://cuba-platform.bintray.com/tools/cuba-sdk/1.0.0/cuba-sdk-1.0.0-windows.zip)
+- [Linux](https://cuba-platform.bintray.com/tools/cuba-sdk/1.0.0/cuba-sdk-1.0.0-linux.zip)
+- [MacOS](https://cuba-platform.bintray.com/tools/cuba-sdk/1.0.0/cuba-sdk-1.0.0-macos.zip)
+
+### Windows
+
+1. Use [EXE installer](https://cuba-platform.bintray.com/tools/cuba-sdk/1.0.0/cuba-sdk-1.0.0.exe). It will automatically register `cuba-sdk` in the PATH environment variable.
+2. Open a terminal and run the `cuba-sdk` command to start cuba-sdk.
+
+### Mac OS
+
+1. Install the CUBA CLI via Homebrew:
+    ```
+    $ brew install cuba-platform/tools/cuba-sdk
+    ```
+2. Run the `cuba-sdk` command to start cuba-sdk
+
+### Linux
+
+1. Unpack the [`cuba-sdk-1.0.0-linux.zip`](https://cuba-platform.bintray.com/tools/cuba-sdk/1.0.0/cuba-sdk-1.0.0-linux.zip) archive
+```
+unzip cuba-sdk-1.0.0-linux.zip
+mv ./cuba-sdk-1.0.0 ~/cuba-sdk-1.0.0
+```
+
+2. Create local `~/.haulmont/bin` folder if not exists
+```
+mkdir -p ~/.haulmont/bin
+```
+
+4. Add the path to the `~/.haulmont/bin/` folder to the `PATH` variable and to your `~/.bashrc` file:
+```
+nano ~/.bashrc
+```
+Add to the end of file:
+```
+PATH="$PATH:/home/$USER/.haulmont/bin/"
+```
+
+In order to update the path variable for the current session, run:
+```
+source ~/.bashrc
+```
+
+5. Add symlink to `cuba-sdk`
+```
+ln -sf ~/cuba-sdk-1.0.0/bin/cuba-sdk ~/.haulmont/bin/cuba-sdk
+```
+
+6. Run the `cuba-sdk` command to start cuba-sdk.
+
+Now you can use `cuba-sdk` from any directory.
 
 # 3. Configuration <a name="configuration"></a>
 
