@@ -42,7 +42,7 @@ class CubaFrameworkProvider : CubaProvider() {
 
     override fun getName() = "CUBA"
 
-    override fun availableVersions(componentId: String?) = super.availableVersions("com.haulmont.cuba:cuba-global")
+    override fun versions(componentId: String?) = super.versions("com.haulmont.cuba:cuba-global")
 
     override fun resolveCoordinates(nameVersion: NameVersion): Component? {
         nameVersion.split(":").let {
@@ -70,7 +70,7 @@ class CubaFrameworkProvider : CubaProvider() {
 
     }
 
-    override fun getComponent(template: Component) = search(CubaComponent(
+    override fun createFromTemplate(template: Component) = search(CubaComponent(
         "com.haulmont.cuba",
         "cuba",
         template.version,

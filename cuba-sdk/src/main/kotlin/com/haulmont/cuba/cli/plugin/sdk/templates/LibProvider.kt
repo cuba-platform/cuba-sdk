@@ -26,7 +26,7 @@ open class LibProvider : BintraySearchComponentProvider() {
 
     override fun getName() = "Library"
 
-    override fun getComponent(template: Component): Component {
+    override fun createFromTemplate(template: Component): Component {
         return Component(
             id = "${template.groupId}:${template.artifactId}",
             groupId = template.groupId,
@@ -36,7 +36,7 @@ open class LibProvider : BintraySearchComponentProvider() {
         )
     }
 
-    override fun innerComponents(): List<Component>? = emptyList()
+    override fun components(): List<Component>? = emptyList()
 
     override fun resolveCoordinates(nameVersion: NameVersion): Component? =
         nameVersion.split(":").let {

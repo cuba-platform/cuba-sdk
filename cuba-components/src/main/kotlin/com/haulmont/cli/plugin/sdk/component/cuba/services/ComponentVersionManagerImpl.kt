@@ -80,7 +80,7 @@ class ComponentVersionManagerImpl : ComponentVersionManager {
     private fun readAddons(json: String): List<MarketplaceAddon> {
         val array = Gson().fromJson(json, JsonObject::class.java) ?: return emptyList()
         val platformVersions =
-            componentRegistry.providerByName(CubaFrameworkProvider.CUBA_PLATFORM_PROVIDER).availableVersions(null)
+            componentRegistry.providerByName(CubaFrameworkProvider.CUBA_PLATFORM_PROVIDER).versions(null)
         return array.getAsJsonArray("appComponents")
             .map { it as JsonObject }
             .map { Gson().fromJson(it, MarketplaceAddon::class.java) }

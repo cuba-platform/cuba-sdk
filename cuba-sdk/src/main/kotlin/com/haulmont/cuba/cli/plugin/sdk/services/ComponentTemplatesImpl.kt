@@ -26,5 +26,5 @@ class ComponentTemplatesImpl : ComponentTemplates {
     private val componentRegistry: ComponentRegistry by sdkKodein.instance<ComponentRegistry>()
 
     override fun findTemplate(component: Component): Component? =
-        componentRegistry.providerByName(component.type).getComponent(component)
+        componentRegistry.providerByName(component.type).createFromTemplate(component)
 }

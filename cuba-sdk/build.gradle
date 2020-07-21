@@ -37,7 +37,13 @@ dependencies {
         exclude(group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib')
         exclude(group: 'com.google.errorprone', module: 'error_prone_annotations')
         exclude(group: 'com.google.guava', module: 'guava')
+        exclude(group: 'org.eclipse.collections', module: 'eclipse-collections-api')
+        exclude(group: 'org.eclipse.collections', module: 'eclipse-collections')
+        exclude(group: 'org.eclipse.collections', module: 'eclipse-collections-forkjoin')
     }
+
+    implementation("org.eclipse.collections:eclipse-collections:$versions.eclipseCollections")
+    implementation("org.eclipse.collections:eclipse-collections-forkjoin:$versions.eclipseCollections")
 
     //Uncomment for repository script dev
 //    compileOnly group: 'org.sonatype.nexus', name: 'nexus-core', version: versions.nxrm3

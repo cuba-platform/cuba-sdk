@@ -42,7 +42,7 @@ class CubaAddonProvider : CubaProvider() {
 
     override fun getName() = "CUBA addon"
 
-    override fun getComponent(template: Component): Component? {
+    override fun createFromTemplate(template: Component): Component? {
         val mAddon = searchInMarketplace(
             id = template.id, groupId = template.groupId, artifactId = template.artifactId
         )?.let { initAddonTemplate(it, template.version) }
@@ -57,7 +57,7 @@ class CubaAddonProvider : CubaProvider() {
         )
     }
 
-    override fun innerComponents() = componentVersionsManager
+    override fun components() = componentVersionsManager
         .addons()
         .sortedBy { it.id }
         .map { initAddonTemplate(it, "\${version}") }
@@ -108,7 +108,7 @@ class CubaAddonProvider : CubaProvider() {
         )
     }
 
-    override fun availableVersions(componentId: String?) = componentVersionsManager.addons()
+    override fun versions(componentId: String?) = componentVersionsManager.addons()
         .filter {
             it.id == componentId
         }
@@ -190,7 +190,7 @@ class CubaAddonProvider : CubaProvider() {
     }
 
     private fun cubaAddon(dependency: Dependency): Component? {
-        return getComponent(
+        return createFromTemplate(
             Component(
                 dependency.groupId,
                 dependency.artifactId.substringBeforeLast("-global"),

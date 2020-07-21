@@ -167,7 +167,7 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
     }
 
     open fun search(component: Component): Component? {
-        return componentRegistry.providerByName(component.type).getComponent(component)
+        return componentRegistry.providerByName(component.type).createFromTemplate(component)
     }
 
     fun parseComponents(nameVersions: String): Set<Component> {
@@ -388,9 +388,9 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
             askNameVersion(
                 nameVersion,
                 provider,
-                provider.innerComponents()
+                provider.components()
             ) { name ->
-                return@askNameVersion provider.availableVersions(name)
+                return@askNameVersion provider.versions(name)
             })
     }
 
@@ -399,10 +399,10 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
             askNameVersion(
                 nameVersion,
                 provider,
-                provider.innerComponents()
+                provider.components()
                     ?.let { metadataHolder.getResolved().filter { it.type == provider.getType() }.toList() }
             ) { name ->
-                val versions = ArrayList(provider.availableVersions(name))
+                val versions = ArrayList(provider.versions(name))
                     .map { it.id to it }
                     .toMap()
 

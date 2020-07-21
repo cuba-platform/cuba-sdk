@@ -42,7 +42,7 @@ abstract class BintraySearchComponentProvider : ComponentProvider {
                 }
             })
 
-    override fun availableVersions(componentId: String?): List<Option<String>> {
+    override fun versions(componentId: String?): List<Option<String>> {
         componentId?.let {
             return versionsCache.getUnchecked(componentId)
         }

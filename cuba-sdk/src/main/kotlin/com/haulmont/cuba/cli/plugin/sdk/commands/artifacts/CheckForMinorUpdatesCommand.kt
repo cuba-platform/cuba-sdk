@@ -127,7 +127,7 @@ class CheckForMinorUpdatesCommand : BaseComponentCommand() {
                 val majorVersion = version.major
                 val minorVersion = version.minor
                 if (minorVersion != null && version.qualifier?.toLowerCase() != "snapshot") {
-                    val newVersions = provider.availableVersions(component.id)
+                    val newVersions = provider.versions(component.id)
                         .mapNotNull { it.value.splitVersion() }
                         .filter { versionSplit ->
                             return@filter versionSplit.major == majorVersion

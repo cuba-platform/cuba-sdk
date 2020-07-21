@@ -26,7 +26,7 @@ buildscript {
             mvnrepo              : "1.1.0",
             mapdb                : "3.0.8",
             slf4j                : "1.7.10",
-            eclipseCollections   : "10.2.0",
+            eclipseCollections   : "7.0.0",
             elsa                 : "3.0.0-M5",
             j2objcAnnotations    : "1.3",
             failureaccess        : "1.0.1",
