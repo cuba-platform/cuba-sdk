@@ -38,6 +38,8 @@ class SdkPlugin : MainCliPlugin {
 
     override val pluginsDir: Path? =
         java.nio.file.Paths.get(System.getProperty("user.home"), ".haulmont", "sdk", "plugins")
+    override val systemPluginsDirs: List<Path>?
+        get() = listOf(Path.of(System.getProperty("java.home")).toAbsolutePath().parent.resolve("plugins"))
     override val priority: Int = 900
     override val prompt: String = "sdk>"
 

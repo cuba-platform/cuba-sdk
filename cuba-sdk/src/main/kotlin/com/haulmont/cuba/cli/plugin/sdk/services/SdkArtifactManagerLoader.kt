@@ -68,7 +68,7 @@ class SdkArtifactManagerLoader {
 
     fun <T> loadClassImplFromPlugins(clazz: Class<T>): Collection<T> {
         val classImpls = linkedSetOf<T>()
-        PluginLoader().systemPluginsPaths().forEach { pluginsDir ->
+        context.mainPlugin()?.systemPluginsDirs?.forEach { pluginsDir ->
             walkDirectory(pluginsDir) {
                 classImpls.addAll(findClassImpls(pluginsDir, clazz))
             }
