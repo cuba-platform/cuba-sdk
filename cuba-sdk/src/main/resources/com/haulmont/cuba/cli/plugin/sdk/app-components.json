@@ -10,7 +10,7 @@
         "Localization"
       ],
       "vendor":"Sorin Federiga",
-      "updateDateTime":1571856716012,
+      "updateDateTime":1588342201220,
       "groupId":"ro.infoexpert.cuba.translationro",
       "artifactId":"translationro-global",
       "compatibilityList":[
@@ -31,6 +31,12 @@
           "artifactVersions":[
             "7.1.1"
           ]
+        },
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "7.2.1"
+          ]
         }
       ],
       "commercial":false,
@@ -46,7 +52,7 @@
         "System"
       ],
       "vendor":"BALVI GmbH",
-      "updateDateTime":1568873796263,
+      "updateDateTime":1583910414590,
       "groupId":"de.balvi.cuba.declarativecontrollers",
       "artifactId":"declarativecontrollers-global",
       "compatibilityList":[
@@ -97,6 +103,12 @@
           "artifactVersions":[
             "0.9.0"
           ]
+        },
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "0.10.0"
+          ]
         }
       ],
       "commercial":false,
@@ -106,13 +118,13 @@
       "id":"full-text-search",
       "name":"Full Text Search",
       "about":"Key features: adding full text search capabilities to your project in minutes, search within database and uploaded files,  seamless FTS integration with generic filter.",
-      "description":"## Overview\nThis add-on provides an unstructured search within the values of entity attributes and content of uploaded files. Search results include not only the entities that directly contain the search string but also the related entities which use this attribute when being displayed.\n\n## Features\n- Adding full-text search capabilities to your project in minutes.\n- Search within a database and uploaded files.\n- Seamless FTS integration with a generic filter to improve data filtering capabilities and limit the search to a certain screen.\n- Security restrictions control for search results.\n\n## Links\n- [Documentation](https://doc.cuba-platform.com/fts-latest/?_ga=2.217983637.268896658.1569827131-1089555325.1544690132)\n",
+      "description":"## Overview\nThis add-on provides an unstructured search within the values of entity attributes and content of uploaded files. Search results include not only the entities that directly contain the search string but also the related entities which use this attribute when being displayed.\n\n## Features\n- Adding full-text search capabilities to your project in minutes.\n- Search within a database and uploaded files.\n- Seamless FTS integration with a generic filter to improve data filtering capabilities and limit the search to a certain screen.\n- Security restrictions control for search results.\n\n## Links\n- [Documentation](https://doc.cuba-platform.com/fts-latest/)\n",
       "category":"Add-on",
       "tags":[
         "Features"
       ],
       "vendor":"Haulmont",
-      "updateDateTime":1579597580527,
+      "updateDateTime":1595604107124,
       "groupId":"com.haulmont.fts",
       "artifactId":"fts-global",
       "compatibilityList":[
@@ -130,13 +142,13 @@
       "id":"charts-and-maps",
       "name":"Charts",
       "about":"The Charts component of the add-on provides over 20 types of dynamic charts.",
-      "description":"## Overview\nThis add-on provides two functional modules: charts and geographic maps which can be both included in your application.\n\nCharts module is based on the [amCharts](http://www.amcharts.com) library and includes various types of dynamic charts. Basic charts such as pie chart, bar chart, serial chart, funnel, etc as well as advanced charts -  stock chart and Gantt chart.\n\n## Chart Features\n- CUBA data model entities and data sources support.\n- A table component with drag-and-drop functionality based on [PivotTable.js](https://github.com/nicolaskruchten/pivottable).\n- Access to charts API  and server side Java code from XML.\n- Incremental chart data updating. \n- The Map module enables integrating Google Maps into the visual part of your application.\n\n## Map Features\n- Straightforward embedding in CUBA UI with server-side Java API.\n- Support for markers, lines, polygons, circles and heatmaps.\n- Overlay editing.\n\n## Links\n- [Documentation](https://doc.cuba-platform.com/charts-latest/?_ga=2.183421605.268896658.1569827131-1089555325.1544690132)\n- [Online demo](https://demo10.cuba-platform.com/sampler/#main)",
+      "description":"## Overview\nThis add-on provides two functional modules: charts and geographic maps which can be both included in your application.\n\nCharts module is based on the [amCharts](http://www.amcharts.com) library and includes various types of dynamic charts. Basic charts such as pie chart, bar chart, serial chart, funnel, etc as well as advanced charts -  stock chart and Gantt chart.\n\n## Chart Features\n- CUBA data model entities and data sources support.\n- A table component with drag-and-drop functionality based on [PivotTable.js](https://github.com/nicolaskruchten/pivottable).\n- Access to charts API  and server side Java code from XML.\n- Incremental chart data updating. \n- The Map module enables integrating Google Maps into the visual part of your application.\n\n## Map Features\n- Straightforward embedding in CUBA UI with server-side Java API.\n- Support for markers, lines, polygons, circles and heatmaps.\n- Overlay editing.\n\n## Links\n- [Documentation](https://doc.cuba-platform.com/charts-latest/)\n- [Online demo](https://demo10.cuba-platform.com/sampler/#main)",
       "category":"Add-on",
       "tags":[
         "UI"
       ],
       "vendor":"Haulmont",
-      "updateDateTime":1579597608325,
+      "updateDateTime":1595604150344,
       "groupId":"com.haulmont.charts",
       "artifactId":"charts-global",
       "compatibilityList":[
@@ -160,7 +172,7 @@
         "Features"
       ],
       "vendor":"Haulmont",
-      "updateDateTime":1579597587056,
+      "updateDateTime":1595604139027,
       "groupId":"com.haulmont.bpm",
       "artifactId":"bpm-global",
       "compatibilityList":[
@@ -184,7 +196,7 @@
         "Features"
       ],
       "vendor":"Haulmont",
-      "updateDateTime":1579597610084,
+      "updateDateTime":1595604156758,
       "groupId":"com.haulmont.reports",
       "artifactId":"reports-global",
       "compatibilityList":[
@@ -208,7 +220,7 @@
         "UI"
       ],
       "vendor":"Yuriy Artamonov",
-      "updateDateTime":1567587820628,
+      "updateDateTime":1583773067893,
       "groupId":"org.strangeway.responsive",
       "artifactId":"sw-responsive-global",
       "compatibilityList":[
@@ -241,6 +253,12 @@
           "artifactVersions":[
             "1.2.0"
           ]
+        },
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "1.5.0"
+          ]
         }
       ],
       "commercial":false,
@@ -256,7 +274,7 @@
         "UI"
       ],
       "vendor":"Mario David",
-      "updateDateTime":1569776485160,
+      "updateDateTime":1597044342226,
       "groupId":"de.diedavids.cuba.wizard",
       "artifactId":"wizard-global",
       "compatibilityList":[
@@ -288,6 +306,12 @@
           "platformRequirement":"6.9",
           "artifactVersions":[
             "0.2.0"
+          ]
+        },
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "0.8.1"
           ]
         }
       ],
@@ -363,14 +387,14 @@
     {
       "id":"drag-drop",
       "name":"Drag & Drop",
-      "about":"The add-on contains visual components with Drag & Drop capabilities:",
+      "about":"The add-on contains visual components with Drag & Drop capabilities",
       "description":"## Overview\n\nThe add-on enables using drag and drop features in your application. You can make UI elements draggable and droppable in the code and then move the elements in your application screens with the mouse.\n\nA set of layouts helps you to compose UI components in a selected way: horizontally, vertically, in grid cells or using CSS.\n\n## Features\n\n- A range of layouts for placing components on the screen.\n- An ability to make UI components draggable and droppable.\n- An ability to operate with UI components that simplifies manipulation with data.\n\n## Links\n\n- [Demo project](https://github.com/cuba-platform/sample-components-dragdrop)\n- [Documentation](https://github.com/cuba-platform/cuba-dnd/blob/master/README.md)\n",
       "category":"Add-on",
       "tags":[
         "UI"
       ],
       "vendor":"Haulmont",
-      "updateDateTime":1567582114464,
+      "updateDateTime":1584459742754,
       "groupId":"com.haulmont.addon.dnd",
       "artifactId":"cuba-dnd-global",
       "compatibilityList":[
@@ -415,6 +439,12 @@
           "artifactVersions":[
             "1.2.0"
           ]
+        },
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "1.7.0"
+          ]
         }
       ],
       "commercial":false,
@@ -430,7 +460,7 @@
         "System"
       ],
       "vendor":"Haulmont",
-      "updateDateTime":1569324478325,
+      "updateDateTime":1588758987847,
       "groupId":"com.haulmont.addon.globalevents",
       "artifactId":"cubaglevt-global",
       "compatibilityList":[
@@ -463,6 +493,12 @@
           "artifactVersions":[
             "0.5.1"
           ]
+        },
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "0.6.1"
+          ]
         }
       ],
       "commercial":false,
@@ -478,7 +514,7 @@
         "Features"
       ],
       "vendor":"Haulmont",
-      "updateDateTime":1567423609777,
+      "updateDateTime":1588751874935,
       "groupId":"com.haulmont.addon.zookeeper",
       "artifactId":"cubazk-global",
       "compatibilityList":[
@@ -529,6 +565,12 @@
           "artifactVersions":[
             "1.7.0"
           ]
+        },
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "1.8.1"
+          ]
         }
       ],
       "commercial":false,
@@ -544,7 +586,7 @@
         "Security"
       ],
       "vendor":"Haulmont",
-      "updateDateTime":1567498499663,
+      "updateDateTime":1584364509748,
       "groupId":"com.haulmont.addon.idp",
       "artifactId":"idp-global",
       "compatibilityList":[
@@ -558,6 +600,12 @@
           "platformRequirement":"7.1",
           "artifactVersions":[
             "0.2.0"
+          ]
+        },
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "0.3.0"
           ]
         }
       ],
@@ -574,7 +622,7 @@
         "Maintenance"
       ],
       "vendor":"Haulmont",
-      "updateDateTime":1567488963339,
+      "updateDateTime":1588758994259,
       "groupId":"com.haulmont.addon.cubajm",
       "artifactId":"cuba-jm-global",
       "compatibilityList":[
@@ -607,6 +655,12 @@
           "artifactVersions":[
             "0.6.0"
           ]
+        },
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "0.7.1"
+          ]
         }
       ],
       "commercial":false,
@@ -622,7 +676,7 @@
         "Tools"
       ],
       "vendor":"Haulmont",
-      "updateDateTime":1548748800000,
+      "updateDateTime":1580198400000,
       "groupId":"",
       "artifactId":"",
       "compatibilityList":[
@@ -630,36 +684,6 @@
       ],
       "commercial":false,
       "weight":860
-    },
-    {
-      "id":"business-iIntelligence",
-      "name":"Business Intelligence",
-      "about":"The BI Add-on integrates CUBA applications with Pentaho Platform and provides the following functionality:",
-      "description":"## Overview\nThe BI Add-on integrates CUBA applications with Pentaho Platform and provides the following functionality:\n\n*   Generic screens for registering and running Pentaho reports. The access to registered reports can be restricted using CUBA security roles.\n*   A visual component for embedding Pentaho reports to any application screen.\n*   Single Sign-On between your CUBA application and Pentaho.\n\n[Documentation »](https://doc.cuba-platform.com/bi-latest/)",
-      "category":"Add-on",
-      "tags":[
-        "Features"
-      ],
-      "vendor":"Haulmont",
-      "updateDateTime":1567505490072,
-      "groupId":"com.haulmont.addon.bi",
-      "artifactId":"cuba-bi-global",
-      "compatibilityList":[
-        {
-          "platformRequirement":"7.1",
-          "artifactVersions":[
-            "1.6.0"
-          ]
-        },
-        {
-          "platformRequirement":"7.0",
-          "artifactVersions":[
-            "1.5.0"
-          ]
-        }
-      ],
-      "commercial":false,
-      "weight":870
     },
     {
       "id":"dynamic-columns",
@@ -706,14 +730,14 @@
     {
       "id":"taggable",
       "name":"Taggable",
-      "about":"This application component let's you enhance your entities with a generic tagging functionality.",
-      "description":"## Overview\nThis application component let's you enhance your entities with a generic tagging functionality.\n\n### Example usage\n\nTo see this application component in action, check out this example: [cuba-example-using-taggable](https://github.com/mariodavid/cuba-example-using-taggable).",
+      "about":"This application component lets you enhance your entities with a generic tagging functionality.",
+      "description":"## Overview\nThis application component lets you enhance your entities with a generic tagging functionality.\n\n### Example usage\n\nTo see this application component in action, check out this example: [cuba-example-using-taggable](https://github.com/mariodavid/cuba-example-using-taggable).",
       "category":"Add-on",
       "tags":[
         "UI"
       ],
       "vendor":"Mario David",
-      "updateDateTime":1571419889070,
+      "updateDateTime":1585205004332,
       "groupId":"de.diedavids.cuba.taggable",
       "artifactId":"taggable-global",
       "compatibilityList":[
@@ -740,6 +764,12 @@
           "artifactVersions":[
             "0.5.3"
           ]
+        },
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "0.6.0"
+          ]
         }
       ],
       "commercial":false,
@@ -755,7 +785,7 @@
         "Features"
       ],
       "vendor":"Mario David",
-      "updateDateTime":1562066265623,
+      "updateDateTime":1584602626557,
       "groupId":"de.diedavids.cuba.instantlauncher",
       "artifactId":"instantlauncher-global",
       "compatibilityList":[
@@ -769,6 +799,18 @@
           "platformRequirement":"6.10",
           "artifactVersions":[
             "0.1.0"
+          ]
+        },
+        {
+          "platformRequirement":"7.1",
+          "artifactVersions":[
+            "0.4.2"
+          ]
+        },
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "0.5.0"
           ]
         }
       ],
@@ -815,7 +857,7 @@
         "Localization"
       ],
       "vendor":"Paolo Furini",
-      "updateDateTime":1569186640792,
+      "updateDateTime":1588669149890,
       "groupId":"it.nexbit.cuba.translationit",
       "artifactId":"translationit-global",
       "compatibilityList":[
@@ -835,6 +877,12 @@
           "platformRequirement":"7.0",
           "artifactVersions":[
             "7.0.0"
+          ]
+        },
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "7.2.1"
           ]
         }
       ],
@@ -899,26 +947,26 @@
       "id":"dashboard",
       "name":"Dashboards",
       "about":"Component enables creating and embedding dashboards into your application screens. Dashboards allow visualizing summarized information, data sets, charts.",
-      "description":"## Overview\nThis component enables creating and embedding dashboards into your application screens. Dashboards allow visualizing summarized information, data sets, charts and can be accessible only by authorized users. \n\nA dashboard consists of widgets — individual elements based on a frame.  An integrated set of layouts allows positioning widgets on a dashboard according to your needs. Use responsive layouts to adapt your dashboards to different displays.\n\nYou can add chart widgets based on data from reports using [Dashboard Chart Add-on](https://github.com/cuba-platform/dashboard-chart-addon).\n\n## Features\n- Setting dashboard visibility for different users. \n- Responsive layouts to display on different devices.\n- Creating and storing widget templates.\n- User interface for configuring and managing dashboards and widgets.\n\n## Links\n- [Demo project](https://github.com/cuba-platform/dashboard-addon-demo)\n- [Documentation](https://github.com/cuba-platform/dashboard-addon/blob/master/README.md)\n- [Dashboard Chart Add-on](https://github.com/cuba-platform/dashboard-chart-addon)\n\n## Video Tutorial\n<div class=\"video\">\n    <iframe width=\"770\" height=\"433\" src=\"https://www.youtube.com/embed/nl-wsnC9K4A\" frameborder=\"0\" allow=\"accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen></iframe>\n</div>",
+      "description":"## Overview\r\nThis component enables creating and embedding dashboards into your application screens. Dashboards allow visualizing summarized information, data sets, charts and can be accessible only by authorized users. \r\n\r\nA dashboard consists of widgets — individual elements based on a frame.  An integrated set of layouts allows positioning widgets on a dashboard according to your needs. Use responsive layouts to adapt your dashboards to different displays.\r\n\r\nYou can add chart widgets based on data from reports using [Dashboard Chart Add-on](https://github.com/cuba-platform/dashboard-chart-addon).\r\n\r\n## Features\r\n- Setting dashboard visibility for different users. \r\n- Responsive layouts to display on different devices.\r\n- Creating and storing widget templates.\r\n- User interface for configuring and managing dashboards and widgets.\r\n\r\n## Links\r\n- [Demo project](https://github.com/cuba-platform/dashboard-addon-demo)\r\n- [Documentation](https://github.com/cuba-platform/dashboard-addon/blob/master/README.md)\r\n- [Dashboard Chart Add-on](https://github.com/cuba-platform/dashboard-chart-addon)\r\n\r\n## Video Tutorial\r\n<div class=\"video\">\r\n    <iframe width=\"770\" height=\"433\" src=\"https://www.youtube.com/embed/nl-wsnC9K4A\" frameborder=\"0\" allow=\"accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen></iframe>\r\n</div>",
       "category":"Add-on",
       "tags":[
         "UI"
       ],
       "vendor":"Haulmont",
-      "updateDateTime":1567512806857,
+      "updateDateTime":1587647963569,
       "groupId":"com.haulmont.addon.dashboard",
       "artifactId":"dashboard-global",
       "compatibilityList":[
         {
-          "platformRequirement":"6.10",
+          "platformRequirement":"7.2",
           "artifactVersions":[
-            "2.0.1"
+            "3.2.2"
           ]
         },
         {
-          "platformRequirement":"7.0",
+          "platformRequirement":"6.10",
           "artifactVersions":[
-            "3.0.4"
+            "2.0.1"
           ]
         },
         {
@@ -930,7 +978,13 @@
         {
           "platformRequirement":"7.1",
           "artifactVersions":[
-            "3.1.1"
+            "3.1.3"
+          ]
+        },
+        {
+          "platformRequirement":"7.0",
+          "artifactVersions":[
+            "3.0.4"
           ]
         }
       ],
@@ -941,13 +995,13 @@
       "id":"webdav",
       "name":"WebDAV",
       "about":"CUBA WebDAV add-on provides your CUBA application with powerful functionality for collaborative work on documents in various formats.",
-      "description":"## Overview\n\nCUBA WebDAV add-on provides your CUBA application with powerful functionality for collaborative work on documents in various formats.\n\nThe add-on enables the WebDAV protocol over the standard CUBA file storage API. It also provides UI components that expose WebDAV functions to the GUI level as well as REST API that allows users to manipulate with file storage from third-party clients.\n\n## Features\n\n- Operating with documents in applications that support WebDAV (MS Office, for example) straight from the server. No need in saving manually to the local disk and uploading back to the server.\n- Visual components to work with files and versions for the generic CUBA UI.\n- Full support for collaborative work and file versioning, manageable both from the client application and CUBA UI.\n- Configurable conflict resolution policies.\n- Simple management of file access control via full integration with CUBA Platform security subsystem.\n- Access to files from external systems using static links.\n- REST API.\n\nFiles and versions are stored on top of the standard CUBA file storage, so there is no need for an external WebDAV server.\n\n## Automated migration\n\nIf you already have a file storage application and want to enhance it, use the migration tool included in the add-on. It enables or disables WebDAV support for existing file descriptors in your data model.\n\n## Installation\nPlease note that to install the add-on you must have the WebDAV add-on [subscription](https://www.cuba-platform.com/store/#/store/studio). \n\nFollow the [documentation](https://doc.cuba-platform.com/webdav-2.4/#_installation_via_cuba_studio) for installation instructions.\n\n## License\n\nThe add-on is licensed per company and includes:\n- Unlimited number of developers, servers, and projects.\n- Access to the source code repository.\n- The right to distribute the add-on as part of your applications without restrictions.\n- All upgrades during the subscription period.\n- The right to continue using previously downloaded versions after subscription expiry.\n\nThe pricing is reduced for individual developers. You can use Individual pricing if you are developing a project on your own (e.g. as a freelancer) and you are paying for Studio with personal funds. Individuals can acquire only one license key per account. \n\n## Links\n- [Documentation](https://doc.cuba-platform.com/webdav-2.4)\n- [Demo project](https://github.com/cuba-platform/webdav-demo)",
+      "description":"## Overview\r\n\r\nCUBA WebDAV add-on provides your CUBA application with powerful functionality for collaborative work on documents in various formats.\r\n\r\nThe add-on enables the WebDAV protocol over the standard CUBA file storage API. It also provides UI components that expose WebDAV functions to the GUI level as well as REST API that allows users to manipulate with file storage from third-party clients.\r\n\r\n## Features\r\n\r\n- Operating with documents in applications that support WebDAV (MS Office, for example) straight from the server. No need in saving manually to the local disk and uploading back to the server.\r\n- Visual components to work with files and versions for the generic CUBA UI.\r\n- Full support for collaborative work and file versioning, manageable both from the client application and CUBA UI.\r\n- Configurable conflict resolution policies.\r\n- Simple management of file access control via full integration with CUBA Platform security subsystem.\r\n- Access to files from external systems using static links.\r\n- REST API.\r\n\r\nFiles and versions are stored on top of the standard CUBA file storage, so there is no need for an external WebDAV server.\r\n\r\n## Automated migration\r\n\r\nIf you already have a file storage application and want to enhance it, use the migration tool included in the add-on. It enables or disables WebDAV support for existing file descriptors in your data model.\r\n\r\n## Installation\r\nPlease note that to install the add-on you must have the WebDAV add-on [subscription](https://www.cuba-platform.com/store/#/store/studio). \r\n\r\nFollow the [documentation](https://doc.cuba-platform.com/webdav-2.5/#_installation_via_cuba_studio) for installation instructions.\r\n\r\n## License\r\n\r\nThe add-on is licensed per company and includes:\r\n- Unlimited number of developers, servers, and projects.\r\n- Access to the source code repository.\r\n- The right to distribute the add-on as part of your applications without restrictions.\r\n- All upgrades during the subscription period.\r\n- The right to continue using previously downloaded versions after subscription expiry.\r\n\r\nThe pricing is reduced for individual developers. You can use Individual pricing if you are developing a project on your own (e.g. as a freelancer) and you are paying for Studio with personal funds. Individuals can acquire only one license key per account. \r\n\r\n## Links\r\n- [Documentation](https://doc.cuba-platform.com/webdav-2.5)\r\n- [Demo project](https://github.com/cuba-platform/webdav-demo)",
       "category":"Add-on",
       "tags":[
         "Features"
       ],
       "vendor":"Haulmont",
-      "updateDateTime":1572230700000,
+      "updateDateTime":1592793900000,
       "groupId":"com.haulmont.webdav",
       "artifactId":"webdav-global",
       "compatibilityList":[
@@ -980,6 +1034,12 @@
           "artifactVersions":[
             "2.0.0"
           ]
+        },
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "2.5.3"
+          ]
         }
       ],
       "commercial":true,
@@ -995,7 +1055,7 @@
         "Integration"
       ],
       "vendor":"Haulmont",
-      "updateDateTime":1569320834520,
+      "updateDateTime":1587456656397,
       "groupId":"com.haulmont.addon.imap",
       "artifactId":"imap-global",
       "compatibilityList":[
@@ -1028,6 +1088,12 @@
           "artifactVersions":[
             "1.4.0"
           ]
+        },
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "1.5.1"
+          ]
         }
       ],
       "commercial":false,
@@ -1043,7 +1109,7 @@
         "Maintenance"
       ],
       "vendor":"Mario David",
-      "updateDateTime":1568141837212,
+      "updateDateTime":1583849110092,
       "groupId":"de.diedavids.cuba.runtimediagnose",
       "artifactId":"runtime-diagnose-global",
       "compatibilityList":[
@@ -1088,6 +1154,12 @@
           "artifactVersions":[
             "1.4.1"
           ]
+        },
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "1.5.0"
+          ]
         }
       ],
       "commercial":false,
@@ -1103,7 +1175,7 @@
         "Integration"
       ],
       "vendor":"Mario David",
-      "updateDateTime":1575670433840,
+      "updateDateTime":1595103667387,
       "groupId":"de.diedavids.cuba.dataimport",
       "artifactId":"dataimport-global",
       "compatibilityList":[
@@ -1136,6 +1208,12 @@
           "artifactVersions":[
             "0.11.1"
           ]
+        },
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "0.14.1"
+          ]
         }
       ],
       "commercial":false,
@@ -1145,16 +1223,22 @@
       "id":"ldap",
       "name":"LDAP",
       "about":"The LDAP integration CUBA component provides readily available instruments for employing features of a directory server, e.g. Active Directory, in any CUBA-based application.",
-      "description":"## Overview\nThe add-on provides readily available instruments for using features of a directory server, e.g. Microsoft Active Directory, in any CUBA-based application. LDAP provides a central place to store usernames and passwords, that allows different applications to connect to the LDAP server to validate users.\n\nYou can use the component in CUBA application of any complexity and don’t need any additional third-party frameworks or libraries to be installed.\n\n## Features\n\n- Authentication in CUBA applications using LDAP credentials.\n- Configuration of rules for assigning roles and user access groups.\n- Filling in LDAP server with user data.\n- Logging LDAP synchronization details.\n\n## Links\n- [Demo project](https://github.com/cuba-platform/ldap-addon/blob/master/README.md)\n- [Documentation](https://github.com/cuba-platform/ldap-addon/blob/master/README.md)\n",
+      "description":"## Overview\r\nThe add-on provides readily available instruments for using features of a directory server, e.g. Microsoft Active Directory, in any CUBA-based application. LDAP provides a central place to store usernames and passwords, that allows different applications to connect to the LDAP server to validate users.\r\n\r\nYou can use the component in CUBA application of any complexity and don’t need any additional third-party frameworks or libraries to be installed.\r\n\r\n## Features\r\n\r\n- Authentication in CUBA applications using LDAP credentials.\r\n- Configuration of rules for assigning roles and user access groups.\r\n- Filling in LDAP server with user data.\r\n- Logging LDAP synchronization details.\r\n\r\n## Links\r\n- [Demo project](https://github.com/cuba-platform/ldap-addon-demo)\r\n- [Documentation](https://github.com/cuba-platform/ldap-addon/blob/master/README.md)\r\n",
       "category":"Add-on",
       "tags":[
         "Security"
       ],
       "vendor":"Haulmont",
-      "updateDateTime":1573473912221,
+      "updateDateTime":1595337755012,
       "groupId":"com.haulmont.addon.ldap",
       "artifactId":"ldap-global",
       "compatibilityList":[
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "1.5.2"
+          ]
+        },
         {
           "platformRequirement":"6.8",
           "artifactVersions":[
@@ -1170,13 +1254,13 @@
         {
           "platformRequirement":"6.10",
           "artifactVersions":[
-            "1.2.1"
+            "1.2.2"
           ]
         },
         {
           "platformRequirement":"7.1",
           "artifactVersions":[
-            "1.4.1"
+            "1.4.2"
           ]
         },
         {
@@ -1199,7 +1283,7 @@
         "Maintenance"
       ],
       "vendor":"Haulmont",
-      "updateDateTime":1567768943523,
+      "updateDateTime":1589543727148,
       "groupId":"com.haulmont.addon.admintools",
       "artifactId":"cuba-at-global",
       "compatibilityList":[
@@ -1232,6 +1316,12 @@
           "artifactVersions":[
             "1.4.0"
           ]
+        },
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "1.5.1"
+          ]
         }
       ],
       "commercial":false,
@@ -1247,7 +1337,7 @@
         "System"
       ],
       "vendor":"Haulmont",
-      "updateDateTime":1567680152459,
+      "updateDateTime":1589801014892,
       "groupId":"com.haulmont.addon.sdbmt",
       "artifactId":"sdbmt-global",
       "compatibilityList":[
@@ -1280,6 +1370,12 @@
           "artifactVersions":[
             "1.4.0"
           ]
+        },
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "2.0.2"
+          ]
         }
       ],
       "commercial":false,
@@ -1295,7 +1391,7 @@
         "UI"
       ],
       "vendor":"Haulmont",
-      "updateDateTime":1569239235803,
+      "updateDateTime":1583933714169,
       "groupId":"com.haulmont.addon.search",
       "artifactId":"search-global",
       "compatibilityList":[
@@ -1327,6 +1423,12 @@
           "platformRequirement":"7.0",
           "artifactVersions":[
             "1.4.0"
+          ]
+        },
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "1.6.0"
           ]
         }
       ],
@@ -1439,7 +1541,7 @@
         "System"
       ],
       "vendor":"Mario David",
-      "updateDateTime":1571499802317,
+      "updateDateTime":1585230276549,
       "groupId":"de.diedavids.cuba.attachable",
       "artifactId":"attachable-global",
       "compatibilityList":[
@@ -1470,7 +1572,13 @@
         {
           "platformRequirement":"7.1",
           "artifactVersions":[
-            "0.7.0"
+            "0.8.0"
+          ]
+        },
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "0.9.0"
           ]
         }
       ],
@@ -1480,14 +1588,14 @@
     {
       "id":"user-inbox",
       "name":"User Inbox",
-      "about":"The Addon gives users a mailbox for user-to-user and system-to-user messages.",
-      "description":"## Overview\nThe Addon gives users a mailbox for user-to-user and system-to-user messages. Such internal communication can be preferable over email in certain cases, e.g. for system messages, messages related to certain entities in the system, or requiring audit or response. A logged in user will see a menu entry called \"Messages\" which will show the incoming messages. There are two options to send a message: manually from one user to another or programmatically.\n\nThe addon comes with two default options for the main screen with horizontal and vertical menus. For more information, please refer to [README](https://github.com/mariodavid/cuba-component-user-inbox#using-the-inbox-as-a-user) on GitHub.",
+      "about":"The add-on gives users a mailbox for user-to-user and system-to-user messages.",
+      "description":"## Overview\n\nThis CUBA component gives users a mailbox for user-to-user and system-to-user messages. Using this add-on allows you to notify users about certain events that happened within the application. Also, it is possible to let users send messages/notifications to other users. Using context-based messages, the user can link to particular business objects when sending messages.\n\n## Features\n- Direct user to user messaging\n- Context-based messages\n- System notifications\n\n## Supported DBMS\n- HSQLDB\n- PostgreSQL\n- MySQL\n\nAll other DBMS systems are also possible to work with by the fact that CUBA Studio generates the corresponding init/update scripts within the application.\n\n## Links\n- [Demo project](https://github.com/mariodavid/cuba-example-using-user-inbox)\n\nFor more information, please refer to [README](https://github.com/mariodavid/cuba-component-user-inbox#using-the-inbox-as-a-user) on GitHub.",
       "category":"Add-on",
       "tags":[
         "Features"
       ],
       "vendor":"Mario David",
-      "updateDateTime":1557914400000,
+      "updateDateTime":1585149966096,
       "groupId":"de.diedavids.cuba.userinbox",
       "artifactId":"user-inbox-global",
       "compatibilityList":[
@@ -1514,6 +1622,18 @@
           "artifactVersions":[
             "0.6.0"
           ]
+        },
+        {
+          "platformRequirement":"7.1",
+          "artifactVersions":[
+            "0.7.0"
+          ]
+        },
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "0.8.0"
+          ]
         }
       ],
       "commercial":false,
@@ -1529,7 +1649,7 @@
         "Tools"
       ],
       "vendor":"Haulmont",
-      "updateDateTime":1529424000000,
+      "updateDateTime":1574265600000,
       "groupId":"",
       "artifactId":"",
       "compatibilityList":[
@@ -1548,7 +1668,7 @@
         "Localization"
       ],
       "vendor":"Community",
-      "updateDateTime":1527782400000,
+      "updateDateTime":1588867200000,
       "groupId":"",
       "artifactId":"",
       "compatibilityList":[
@@ -1609,7 +1729,7 @@
         "Localization"
       ],
       "vendor":"Matthias Hamann",
-      "updateDateTime":1573738341409,
+      "updateDateTime":1589897357393,
       "groupId":"de.balvi.cuba.translationde",
       "artifactId":"translation-de-global",
       "compatibilityList":[
@@ -1646,7 +1766,7 @@
         {
           "platformRequirement":"7.1",
           "artifactVersions":[
-            "1.6.0"
+            "1.6.2"
           ]
         }
       ],
@@ -1693,7 +1813,7 @@
         "Localization"
       ],
       "vendor":"CUBA Platform China",
-      "updateDateTime":1570111445190,
+      "updateDateTime":1584522896144,
       "groupId":"cn.cuba.trans",
       "artifactId":"transcn-global",
       "compatibilityList":[
@@ -1712,7 +1832,13 @@
         {
           "platformRequirement":"7.1",
           "artifactVersions":[
-            "7.1.0"
+            "7.1.1"
+          ]
+        },
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "7.2.0"
           ]
         }
       ],
@@ -1738,6 +1864,12 @@
           "artifactVersions":[
             "1.07"
           ]
+        },
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "1.1.0"
+          ]
         }
       ],
       "commercial":false,
@@ -1747,13 +1879,13 @@
       "id":"maps",
       "name":"Maps",
       "about":"CUBA Maps gives you an easy way to enrich your application with visual representation and intuitive manipulation for spatial data.",
-      "description":"## Overview\nCUBA Maps gives you an easy way to enrich your application with visual representation and intuitive manipulation for spatial data. It provides all required features to build a comprehensive geographical information system on CUBA. \n\nThe add-on supports the traditional multi-layer structure, so it gives full freedom to create well-structured maps of any content.\n\n## Features\n- Integrates spatial types (point, polyline, polygon) from Java Topology Suite - the most popular Java library for working with spatial data.\n- Introduces a visual component for Generic UI with rich and clear API.\n- Supports drawing and interactive editing of geo-entities - entities with geometry attributes.\n- Compatible with the Web Map Service protocol as well as XYZ tile services.\n- Provides features for geoanalysis: heatmaps and clustering.\n- Has no runtime licensing.\n\n## Installation\nPlease note that to install the add-on you must have the Maps add-on [subscription](https://www.cuba-platform.com/store/#/store/studio). \n\nFollow the [documentation](https://doc.cuba-platform.com/maps-1.1/#_installation) for installation instructions.\n\n## License\n\nThe add-on is licensed per company and includes:\n- Unlimited number of developers, servers, and projects.\n- Access to the source code repository.\n- The right to distribute the add-on as part of your applications without restrictions.\n- All upgrades during the subscription period.\n- The right to continue using previously downloaded versions after subscription expiry.\n\nThe pricing is reduced for individual developers. You can use Individual pricing if you are developing a project on your own (e.g. as a freelancer) and you are paying for Studio with personal funds. Individuals can acquire only one license key per account. \n\n## Links\n- [Documentation](https://doc.cuba-platform.com/maps-1.1/)\n- [Demo project](https://github.com/cuba-platform/maps-addon-demo)\n- [Article](https://www.cuba-platform.com/blog/new-maps-for-cuba/)\n\n## Video Tutorial\n<iframe width=\"770\" height=\"433\" src=\"https://youtube.com/embed/mJsmpIXzcbU\" frameborder=\"0\" allow=\"accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen></iframe>\n",
+      "description":"## Overview\nCUBA Maps gives you an easy way to enrich your application with visual representation and intuitive manipulation for spatial data. It provides all required features to build a comprehensive geographical information system on CUBA. \n\nThe add-on supports the traditional multi-layer structure, so it gives full freedom to create well-structured maps of any content.\n\n## Features\n- Integrates spatial types (point, polyline, polygon) from Java Topology Suite - the most popular Java library for working with spatial data.\n- Introduces a visual component for Generic UI with rich and clear API.\n- Supports drawing and interactive editing of geo-entities - entities with geometry attributes.\n- Compatible with the Web Map Service protocol as well as XYZ tile services.\n- Provides features for geoanalysis: heatmaps and clustering.\n- Has no runtime licensing.\n\n## Installation\nPlease note that to install the add-on you must have the Maps add-on [subscription](https://www.cuba-platform.com/store/#/store/studio). \n\nFollow the [documentation](https://doc.cuba-platform.com/maps-1.3/#_installation) for installation instructions.\n\n## License\n\nThe add-on is licensed per company and includes:\n- Unlimited number of developers, servers, and projects.\n- Access to the source code repository.\n- The right to distribute the add-on as part of your applications without restrictions.\n- All upgrades during the subscription period.\n- The right to continue using previously downloaded versions after subscription expiry.\n\nThe pricing is reduced for individual developers. You can use Individual pricing if you are developing a project on your own (e.g. as a freelancer) and you are paying for Studio with personal funds. Individuals can acquire only one license key per account. \n\n## Links\n- [Documentation](https://doc.cuba-platform.com/maps-1.3/)\n- [Demo project](https://github.com/cuba-platform/maps-addon-demo)\n- [Article](https://www.cuba-platform.com/blog/new-maps-for-cuba/)\n\n## Video Tutorial\n<iframe width=\"770\" height=\"433\" src=\"https://youtube.com/embed/mJsmpIXzcbU\" frameborder=\"0\" allow=\"accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen></iframe>\n",
       "category":"Add-on",
       "tags":[
         "UI"
       ],
       "vendor":"Haulmont",
-      "updateDateTime":1567555200000,
+      "updateDateTime":1589846400000,
       "groupId":"com.haulmont.addon.maps",
       "artifactId":"maps-global",
       "compatibilityList":[
@@ -1767,6 +1899,12 @@
           "platformRequirement":"7.1",
           "artifactVersions":[
             "1.1.0"
+          ]
+        },
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "1.3.0"
           ]
         }
       ],
@@ -1783,20 +1921,26 @@
         "Security"
       ],
       "vendor":"Haulmont",
-      "updateDateTime":1570019214339,
+      "updateDateTime":1589545243062,
       "groupId":"com.haulmont.addon.saml",
       "artifactId":"saml-addon-global",
       "compatibilityList":[
         {
-          "platformRequirement":"6.10",
+          "platformRequirement":"7.2",
           "artifactVersions":[
-            "0.1.3"
+            "0.4.2"
           ]
         },
         {
           "platformRequirement":"7.0",
           "artifactVersions":[
             "0.2.3"
+          ]
+        },
+        {
+          "platformRequirement":"6.10",
+          "artifactVersions":[
+            "0.1.3"
           ]
         },
         {
@@ -1819,7 +1963,7 @@
         "UI"
       ],
       "vendor":"Haulmont",
-      "updateDateTime":1567434987771,
+      "updateDateTime":1584949155395,
       "groupId":"com.haulmont.addon.tour",
       "artifactId":"tour-global",
       "compatibilityList":[
@@ -1840,6 +1984,12 @@
           "artifactVersions":[
             "1.2.0"
           ]
+        },
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "1.3.0"
+          ]
         }
       ],
       "commercial":false,
@@ -1855,7 +2005,7 @@
         "Localization"
       ],
       "vendor":"Mario David",
-      "updateDateTime":1565935059779,
+      "updateDateTime":1585295098295,
       "groupId":"de.diedavids.cuba.dblocalization",
       "artifactId":"dblocalization-global",
       "compatibilityList":[
@@ -1863,6 +2013,18 @@
           "platformRequirement":"7.0",
           "artifactVersions":[
             "0.2.1"
+          ]
+        },
+        {
+          "platformRequirement":"7.1",
+          "artifactVersions":[
+            "0.3.0"
+          ]
+        },
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "0.4.0"
           ]
         }
       ],
@@ -1873,20 +2035,26 @@
       "id":"bproc",
       "name":"BProc",
       "about":"The BProc add-on provides seamless integration of a BPM engine into your project, extending it with multiple powerful features. ",
-      "description":"## Overview\nThe BProc add-on provides seamless integration of a BPM engine into your project, extending it with multiple powerful features. \n\nThe add-on allows you to describe business process steps right in the application using the integrated BPMN 2.0 modeler. Being a part of the application, it enables seamless integration with the runtime application parts and visual process customizing. For example, to specify which service method should be invoked at a particular process step, you just need to select a Spring bean name and a method from a drop-down list.\n\nUsers may interact with running process instances using process forms. For simple cases, you can declare input dialogs right in the modeler. Also, you can use screens based on CUBA Generic UI to create process forms of any complexity.\n\n## Features\n- The embedded light-weight [Flowable](https://flowable.org) runtime engine. You are free to use the Flowable API directly, or you may use an API layer provided by the BProc addon.\n- Integrated BPMN 2.0 visual designer based on [bpmn.io](https://bpmn.io) framework.\n- Integrated DMN 1.1 decision table designer for complex decision logic.\n- Two types of process forms: \n       a) Input dialogs that can be created at runtime in the process modeler\n       b) Design-time defined CUBA screens\n- Administrative screens for managing running processes provide a ready solution to: \n       a) view all running process instances\n       b) reassign user tasks\n       c) modify process variables’ values\n       d) investigate failed jobs\n       e) analyze processes execution history, etc.\n- API for working with business processes from the code.\n\n## Installation\nPlease note that to install the add-on you must have the BProc add-on [subscription](https://www.cuba-platform.com/store/#/store/studio). \n\nFollow the [documentation](https://doc.cuba-platform.com/bproc-1.0/#_installation) for installation instructions.\n\n## License\n\nThe add-on is licensed per company and includes:\n\n- Unlimited number of developers, servers, and projects.\n- Access to the source code repository.\n- The right to distribute the add-on as part of your applications without restrictions.\n- All upgrades during the subscription period.\n- The right to continue using previously downloaded versions after subscription expiry.\n\nThe pricing is reduced for individual developers. You can use Individual pricing if you are developing a project on your own (e.g. as a freelancer) and you are paying for Studio with personal funds. Individuals can acquire only one license key per account. \n\n## Links\n\n- [Documentation](https://doc.cuba-platform.com/bproc-1.0/)\n- [Sampler](https://github.com/cuba-labs/bproc-sampler)",
+      "description":"## Overview\r\nThe BProc add-on provides seamless integration of a BPM engine into your project, extending it with multiple powerful features. \r\n\r\nThe add-on allows you to describe business process steps right in the application using the integrated BPMN 2.0 modeler. Being a part of the application, it enables seamless integration with the runtime application parts and visual process customizing. For example, to specify which service method should be invoked at a particular process step, you just need to select a Spring bean name and a method from a drop-down list.\r\n\r\nUsers may interact with running process instances using process forms. For simple cases, you can declare input dialogs right in the modeler. Also, you can use screens based on CUBA Generic UI to create process forms of any complexity.\r\n\r\n## Features\r\n- The embedded light-weight [Flowable](https://flowable.org) runtime engine. You are free to use the Flowable API directly, or you may use an API layer provided by the BProc addon.\r\n- Integrated BPMN 2.0 visual designer based on [bpmn-js](https://bpmn.io) framework.\r\n- Integrated DMN 1.1 decision table designer for complex decision logic.\r\n- Two types of process forms: \r\n       a) Input dialogs that can be created at runtime in the process modeler\r\n       b) Design-time defined CUBA screens\r\n- Administrative screens for managing running processes provide a ready solution to: \r\n       a) view all running process instances\r\n       b) reassign user tasks\r\n       c) modify process variables’ values\r\n       d) investigate failed jobs\r\n       e) analyze processes execution history, etc.\r\n- API for working with business processes from the code.\r\n\r\n## Installation\r\nPlease note that to install the add-on you must have the BProc add-on [subscription](https://www.cuba-platform.com/store/#/store/studio). \r\n\r\nFollow the [documentation](https://doc.cuba-platform.com/bproc-1.1/#_installation) for installation instructions.\r\n\r\n## License\r\n\r\nThe add-on is licensed per company and includes:\r\n\r\n- Unlimited number of developers, servers, and projects.\r\n- Access to the source code repository.\r\n- The right to distribute the add-on as part of your applications without restrictions.\r\n- All upgrades during the subscription period.\r\n- The right to continue using previously downloaded versions after subscription expiry.\r\n\r\nThe pricing is reduced for individual developers. You can use Individual pricing if you are developing a project on your own (e.g. as a freelancer) and you are paying for Studio with personal funds. Individuals can acquire only one license key per account. \r\n\r\n## Links\r\n\r\n- [Documentation](https://doc.cuba-platform.com/bproc-1.1/)\r\n- [Sampler](https://github.com/cuba-labs/bproc-sampler)\r\n\r\n## Video Tutorial\r\n<iframe width=\"770\" height=\"433\" src=\"https://www.youtube.com/embed/znq5P0Tk55k\" frameborder=\"0\" allow=\"accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen></iframe>",
       "category":"Add-on",
       "tags":[
         "Features"
       ],
       "vendor":"Haulmont",
-      "updateDateTime":1576540800000,
+      "updateDateTime":1593648000000,
       "groupId":"com.haulmont.addon.bproc",
       "artifactId":"bproc-global",
       "compatibilityList":[
         {
           "platformRequirement":"7.1",
           "artifactVersions":[
-            "1.0.2"
+            "1.0.4"
+          ]
+        },
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "1.1.2"
           ]
         }
       ],
@@ -1927,13 +2095,13 @@
       "id":"rest-api",
       "name":"REST API",
       "about":"The add-on provides a universal REST API that uses the OAuth2 protocol for authentication and supports anonymous access.",
-      "description":"## Overview\nThe add-on provides a universal REST API that uses the OAuth2 protocol for authentication and supports anonymous access. All REST API endpoints work with data according to the authenticated user permissions set in the security subsystem.\n\n## Features\n- CRUD operations on entities.\n- Execution of predefined JPQL queries.\n- Execution of service methods.\n- Getting metadata: entities, views, enumerations, data types.\n- Getting current user permissions: access to entities and attributes, specific permissions.\n- Getting current user information: name, language, time zone, etc.\n- Uploading and downloading files.\n\n## Links\n- [Documentation](https://doc.cuba-platform.com/restapi-7.1/)\n\n",
+      "description":"## Overview\r\nThe add-on provides a universal REST API that uses the OAuth2 protocol for authentication and supports anonymous access. All REST API endpoints work with data according to the authenticated user permissions set in the security subsystem.\r\n\r\n## Features\r\n- CRUD operations on entities.\r\n- Execution of predefined JPQL queries.\r\n- Execution of service methods.\r\n- Getting metadata: entities, views, enumerations, data types.\r\n- Getting current user permissions: access to entities and attributes, specific permissions.\r\n- Getting current user information: name, language, time zone, etc.\r\n- Uploading and downloading files.\r\n\r\n## Links\r\n- [Documentation](https://doc.cuba-platform.com/restapi-7.2/)\r\n\r\n",
       "category":"Add-on",
       "tags":[
         "Integration"
       ],
       "vendor":"Haulmont",
-      "updateDateTime":1579606151253,
+      "updateDateTime":1594712429910,
       "groupId":"com.haulmont.addon.restapi",
       "artifactId":"restapi-global",
       "compatibilityList":[
@@ -1946,7 +2114,7 @@
         {
           "platformRequirement":"7.2",
           "artifactVersions":[
-            "7.2.0.BETA1"
+            "7.2.1"
           ]
         }
       ],
@@ -1963,7 +2131,7 @@
         "UI"
       ],
       "vendor":"Haulmont",
-      "updateDateTime":1567468800000,
+      "updateDateTime":1583485373833,
       "groupId":"com.haulmont.addon.dashboardchart",
       "artifactId":"dashboardchart-global",
       "compatibilityList":[
@@ -1984,6 +2152,12 @@
           "artifactVersions":[
             "1.2.0"
           ]
+        },
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "1.3.0"
+          ]
         }
       ],
       "commercial":false,
@@ -1999,7 +2173,7 @@
         "Maintenance"
       ],
       "vendor":"Mario David",
-      "updateDateTime":1574409141879,
+      "updateDateTime":1583909692198,
       "groupId":"de.diedavids.cuba.defaultvalues",
       "artifactId":"defaultvalues-global",
       "compatibilityList":[
@@ -2007,6 +2181,12 @@
           "platformRequirement":"7.1",
           "artifactVersions":[
             "0.1.3"
+          ]
+        },
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "0.2.0"
           ]
         }
       ],
@@ -2024,7 +2204,7 @@
         "UI"
       ],
       "vendor":"Mario David",
-      "updateDateTime":1573171200000,
+      "updateDateTime":1583393732789,
       "groupId":"de.diedavids.cuba.metadataextensions",
       "artifactId":"metadataextensions-global",
       "compatibilityList":[
@@ -2032,6 +2212,12 @@
           "platformRequirement":"7.1",
           "artifactVersions":[
             "0.2.1"
+          ]
+        },
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "0.3.1"
           ]
         }
       ],
@@ -2063,16 +2249,198 @@
       "weight":725
     },
     {
+      "id":"data-generator",
+      "name":"Data Generator",
+      "about":"This component lets you generate sample data (persistent entities) via the user interface.",
+      "description":"## Overview\n\nThis component lets you generate sample data (persistent entities) via the user interface. It may be useful for demo and test projects as well as for real projects when it's not possible to retrieve a dump.\n\n## Features\n\n- Different generation strategies: \n  a) Random  \n  b) Manual \n  c) [Faker](https://github.com/serpro69/kotlin-faker) is used for conscious strings generation. See [data-providers](https://github.com/serpro69/kotlin-faker#data-providers).\n- Batch generation.\n- Browse and remove generated entities.",
+      "category":"Add-on",
+      "tags":[
+        "Tools"
+      ],
+      "vendor":"Vlad Minaev",
+      "updateDateTime":1584181216695,
+      "groupId":"com.haulmont.addon.datagen",
+      "artifactId":"datagen-global",
+      "compatibilityList":[
+        {
+          "platformRequirement":"7.1",
+          "artifactVersions":[
+            "0.3.1"
+          ]
+        },
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "0.4.0"
+          ]
+        }
+      ],
+      "commercial":false,
+      "weight":655
+    },
+    {
+      "id":"aws-filestorage",
+      "name":"AWS Filestorage",
+      "about":"The add-on provides support of Amazon S3 file storage service out-of-the-box, that enables storing and protecting any amount of data.",
+      "description":"## Overview \nThe add-on provides support of [Amazon S3](https://aws.amazon.com/s3/) file storage service out-of-the-box, that enables storing and protecting any amount of data. You can use a cloud storage service instead of the standard file storage implementation. \n\nIt is recommended to use a separate cloud file storage service for cloud deployments. The storage folder structure is organized similarly to the standard implementation.\n\n## Links\n- [Documentation](https://github.com/cuba-platform/cuba-aws/blob/master/README.md)\n",
+      "category":"Add-on",
+      "tags":[
+        "Integration",
+        "System"
+      ],
+      "vendor":"Haulmont",
+      "updateDateTime":1588759295268,
+      "groupId":"com.haulmont.addon.cubaaws",
+      "artifactId":"cubaaws-global",
+      "compatibilityList":[
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "1.0.1"
+          ]
+        }
+      ],
+      "commercial":false,
+      "weight":665
+    },
+    {
+      "id":"sneferu",
+      "name":"Sneferu",
+      "about":"Sneferu is a testing library to simplify web integration testing for a CUBA application.",
+      "description":"## Overview\n\nSneferu is a testing library for simplifying web integration testing for a CUBA application. It consists of a couple of APIs that allow you to express interactions and verifications with UI screens via a dedicated high-level testing language. Sneferu is the way to have very good test coverage and quality assurance at a fraction of the cost.\n\nVia its easy-to-read language, you can create integration tests that are optimized for readability because this is what matters most for keeping a test suite maintainable & cheap to operate.\n\n## Features\n\nWith Sneferu it is possible to:\n\n- Verify any business logic in a Screen Controller\n- Ensure the correct linking between Screen XML and its Controller counterpart\n- Verify correct display of any programmatic creation of Screen Components / Dialogs\n- Emulate & verify data loading\n- Emulate & verify Service Interface interactions\n\nWhat Sneferu *does not cover*:\n\n- End-to-End data loading and displaying on a Screen\n- End-to-End Service execution (middleware)\n- Client-Side Vaadin UI logic that is executed only in the browser\n\n## Links\n\n- [Documentation](https://github.com/mariodavid/sneferu/blob/master/README.md)\n- [Sample project](https://github.com/mariodavid/cuba-petclinic-using-sneferu)",
+      "category":"Tools",
+      "tags":[
+        "Tools"
+      ],
+      "vendor":"Mario David",
+      "updateDateTime":1596412800000,
+      "groupId":"de.diedavids.sneferu",
+      "artifactId":"sneferu",
+      "compatibilityList":[
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "0.3.3"
+          ]
+        }
+      ],
+      "commercial":false,
+      "weight":855
+    },
+    {
+      "id":"querydsl",
+      "name":"QueryDSL",
+      "about":"The add-on provides QueryDSL integration for CUBA applications.",
+      "description":"## Overview\n\nThe add-on provides [QueryDSL](http://www.querydsl.com/) integration for CUBA applications. QueryDSL enables the construction of unified type-safe database queries for Java. Instead of writing queries, you can use a fluent API.\n\nSee the [demo project](https://github.com/ikuchmin/querydsl-shop) using this add-on.\n\n### Suggestions in IDE\n\nQueryDSL provides suggestions in your IDE while writing queries in your CUBA application.\n\n### Compilation\n\nQueryDSL guarantees that the compiler will check that your database queries are type-safe. It also helps you adapt better to refactoring changes.\n\n### Studio Compatibility\n\nThe add-on works with CUBA Studio 13.2 or later versions.\n\n## Links\n\n- [Documentation](https://github.com/ikuchmin/querydsl-cuba/blob/master/README.md)\n- [Demo project](https://github.com/ikuchmin/querydsl-shop)",
+      "category":"Add-on",
+      "tags":[
+        "System"
+      ],
+      "vendor":"Ilya Kuchmin",
+      "updateDateTime":1584489600000,
+      "groupId":"ru.udya.querydsl.cuba",
+      "artifactId":"querydsl-cuba-global",
+      "compatibilityList":[
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "1.0.0"
+          ]
+        }
+      ],
+      "commercial":false,
+      "weight":765
+    },
+    {
+      "id":"helium",
+      "name":"Helium",
+      "about":"Designed from scratch, Helium theme provides a modern look and feel and customization capabilities.",
+      "description":"## Overview\nDesigned from scratch, Helium theme provides a modern look and feel and customization capabilities.\n\n## Features\n\n- CSS variables are used for colors. As a result it's possible to apply different color presets on the fly, without theme recompilation and app restart.\n- Built-in size presets (small/large/medium), also switchable in runtime.\n- Persistent per-user color/size settings.\n    - Settings screen (Help > Theme Settings).\n    - Built-in helium-theme-minimal role to enable access to the settings screen.\n\n## Links\n- [Online demo and editor](https://helium-editor.cuba-platform.com/)\n\n## Browser compatibility\nHelium works in the latest versions of modern browsers that support [CSS variables](https://caniuse.com/#feat=css-variables).\nIE 11 is not supported out of the box since it does not support CSS variables, though it is possible to use [polyfill](https://github.com/nuxodin/ie11CustomProperties).\n\n## Limitations\nStudio 13 supports only platform themes extension, once [this issue](https://youtrack.cuba-platform.com/issue/STUDIO-4474) is resolved (presumably in release 14) it will be possible to extend Helium without any manual actions.",
+      "category":"Theme",
+      "tags":[
+        "UI"
+      ],
+      "vendor":"Haulmont",
+      "updateDateTime":1587340800000,
+      "groupId":"com.haulmont.addon.helium",
+      "artifactId":"helium-global",
+      "compatibilityList":[
+        {
+          "platformRequirement":"7.1",
+          "artifactVersions":[
+            "0.1.0"
+          ]
+        },
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "0.2.0"
+          ]
+        }
+      ],
+      "commercial":false,
+      "weight":1010
+    },
+    {
+      "id":"greek-translation",
+      "name":"Greek Translation",
+      "about":"Greek translation of CUBA Platform (plus components) implemented as an add-on.",
+      "description":"## Overview\n\nGreek translation of CUBA Platform (plus components) implemented as an add-on.\n\nFor more information, please refer to [README](https://github.com/pbaris/cuba-translation-el/blob/master/README.md) on GitHub.",
+      "category":"Translation",
+      "tags":[
+        "Localization"
+      ],
+      "vendor":"Panos Bariamis",
+      "updateDateTime":1589760000000,
+      "groupId":"gr.netmechanics.cuba.translationel",
+      "artifactId":"translationel-global",
+      "compatibilityList":[
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "1.0.0"
+          ]
+        }
+      ],
+      "commercial":false,
+      "weight":529
+    },
+    {
+      "id":"azure-file-storage",
+      "name":"Azure File Storage",
+      "about":"This add-on enables using Azure Storage Blob as File Storage.",
+      "description":"## Overview\n\nThis add-on enables using Azure Storage Blob as File Storage.\n\n## Links\n- [Documentation](https://github.com/pbaris/cuba-azure-file-storage/blob/master/README.md)",
+      "category":"Add-on",
+      "tags":[
+        "Integration",
+        "System"
+      ],
+      "vendor":"Panos Bariamis",
+      "updateDateTime":1592611200000,
+      "groupId":"gr.netmechanics.cuba.afs",
+      "artifactId":"cubaafs-global",
+      "compatibilityList":[
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "1.0.1"
+          ]
+        }
+      ],
+      "commercial":false,
+      "weight":667
+    },
+    {
       "id":"cuba-cli",
       "name":"CUBA CLI",
       "about":"CUBA CLI is a command line utility that enables you to easily create projects based on CUBA Platform. Also, it provides the lightweight scaffolding of the main project artifacts.",
-      "description":"## Overview\n\nCUBA CLI is a command line utility that enables you to easily create projects based on CUBA Platform. Also, it provides the lightweight scaffolding of the main project artifacts: entities, screens, services, etc.\n\nWith this tool, you can use CUBA Platform without any additional proprietary tools. Just command line, framework and you.\n\n## Useful links\n\n*   [Download](https://www.cuba-platform.com/download/previous-cli/)\n*   [Github Wiki](https://github.com/cuba-platform/cuba-cli/wiki)\n*   [Quick Start Webinar](https://www.cuba-platform.com/webinars/cuba-cli-quick-start)\n\n## Installation\n\n**Windows** — use [EXE](https://cdn.cuba-platform.com/cuba-cli/2.1.0/cuba-cli-2.1.0.exe) installer\n\n**Mac OS** — install via Homebrew:\n\n```$ brew install cuba-platform/tools/cuba-cli```\n\n**Linux** — install via SDK MAN\n\n```sdk install cuba``` \n\nThe full installation guide is available [here](https://github.com/cuba-platform/cuba-cli/wiki/Installation).\n\n## Plugins\n\nYou can extend CLI functionality by adding a published plugin or creating your own one.\n\n*   [Available plugins](https://github.com/topics/cuba-cli)\n*   [How to create a plugin?](https://github.com/cuba-platform/cuba-cli/wiki/Plugin-Development)\n*   [How to create custom templates?](https://github.com/cuba-platform/cuba-cli/wiki/Custom-templates)\n\n## Quick Start Tutorial\n\n<iframe width=\"770\" height=\"433\" src=\"https://www.youtube.com/embed/5nHeA57-628\" frameborder=\"0\" allow=\"accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen></iframe>",
+      "description":"## Overview\n\nCUBA CLI is a command line utility that enables you to easily create projects based on CUBA Platform. Also, it provides the lightweight scaffolding of the main project artifacts: entities, screens, services, etc.\n\nWith this tool, you can use CUBA Platform without any additional proprietary tools. Just command line, framework and you.\n\n## Useful links\n\n*   [Download](https://www.cuba-platform.com/download/previous-cli/)\n*   [Github Wiki](https://github.com/cuba-platform/cuba-cli/wiki)\n\n## Installation\n\n**Windows** — use EXE installer\n\n**Mac OS** — install via Homebrew:\n\n```$ brew install cuba-platform/tools/cuba-cli```\n\n**Linux** — install via SDK MAN\n\n```sdk install cuba``` \n\nThe full installation guide is available [here](https://github.com/cuba-platform/cuba-cli/wiki/Installation).\n\n## Plugins\n\nYou can extend CLI functionality by adding a published plugin or creating your own one.\n\n*   [Available plugins](https://github.com/topics/cuba-cli)\n*   [How to create a plugin?](https://github.com/cuba-platform/cuba-cli/wiki/Plugin-Development)\n*   [How to create custom templates?](https://github.com/cuba-platform/cuba-cli/wiki/Custom-templates)\n\n## Quick Start Tutorial\n\n<iframe width=\"770\" height=\"433\" src=\"https://www.youtube.com/embed/5nHeA57-628\" frameborder=\"0\" allow=\"accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen></iframe>",
       "category":"Tools",
       "tags":[
         "Tools"
       ],
       "vendor":"Haulmont",
-      "updateDateTime":1555893900000,
+      "updateDateTime":1586133900000,
       "groupId":"",
       "artifactId":"",
       "compatibilityList":[
@@ -2091,7 +2459,7 @@
         "UI"
       ],
       "vendor":"Haulmont",
-      "updateDateTime":1567686297093,
+      "updateDateTime":1588756110009,
       "groupId":"com.haulmont.addon.grapesjs",
       "artifactId":"grapesjs-global",
       "compatibilityList":[
@@ -2110,7 +2478,13 @@
         {
           "platformRequirement":"7.1",
           "artifactVersions":[
-            "0.3.0"
+            "0.4.0"
+          ]
+        },
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "0.5.3"
           ]
         }
       ],
@@ -2181,10 +2555,16 @@
         "Features"
       ],
       "vendor":"Haulmont",
-      "updateDateTime":1573735277486,
+      "updateDateTime":1595506300294,
       "groupId":"com.haulmont.addon.emailtemplates",
       "artifactId":"yet-global",
       "compatibilityList":[
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "1.4.2"
+          ]
+        },
         {
           "platformRequirement":"6.10",
           "artifactVersions":[
@@ -2200,7 +2580,7 @@
         {
           "platformRequirement":"7.1",
           "artifactVersions":[
-            "1.3.0"
+            "1.3.1"
           ]
         }
       ],
@@ -2217,7 +2597,7 @@
         "System"
       ],
       "vendor":"Mario David",
-      "updateDateTime":1570307118103,
+      "updateDateTime":1583326914332,
       "groupId":"de.diedavids.cuba.entitysoftreference",
       "artifactId":"entity-soft-reference-global",
       "compatibilityList":[
@@ -2255,6 +2635,12 @@
           "platformRequirement":"7.0",
           "artifactVersions":[
             "0.5.1"
+          ]
+        },
+        {
+          "platformRequirement":"7.2",
+          "artifactVersions":[
+            "0.7.0"
           ]
         }
       ],
