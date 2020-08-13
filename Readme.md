@@ -43,14 +43,14 @@ CUBA SDK is a useful tool if it is required to develop applications with limited
 
 ## Download links:
 
-- [Windows installer](https://cuba-platform.bintray.com/tools/cuba-sdk/1.0.1/cuba-sdk-1.0.1.exe)
-- [Windows](https://cuba-platform.bintray.com/tools/cuba-sdk/1.0.1/cuba-sdk-1.0.1-windows.zip)
-- [Linux](https://cuba-platform.bintray.com/tools/cuba-sdk/1.0.1/cuba-sdk-1.0.1-linux.zip)
-- [MacOS](https://cuba-platform.bintray.com/tools/cuba-sdk/1.0.1/cuba-sdk-1.0.1-macos.zip)
+- [Windows installer](https://cuba-platform.bintray.com/tools/cuba-sdk/1.0.3/cuba-sdk-1.0.3.exe)
+- [Windows](https://cuba-platform.bintray.com/tools/cuba-sdk/1.0.3/cuba-sdk-1.0.3-windows.zip)
+- [Linux](https://cuba-platform.bintray.com/tools/cuba-sdk/1.0.3/cuba-sdk-1.0.3-linux.zip)
+- [MacOS](https://cuba-platform.bintray.com/tools/cuba-sdk/1.0.3/cuba-sdk-1.0.3-macos.zip)
 
 ### Windows
 
-1. Use [EXE installer](https://cuba-platform.bintray.com/tools/cuba-sdk/1.0.1/cuba-sdk-1.0.1.exe). It will automatically register `cuba-sdk` in the PATH environment variable.
+1. Use [EXE installer](https://cuba-platform.bintray.com/tools/cuba-sdk/1.0.3/cuba-sdk-1.0.3.exe). It will automatically register `cuba-sdk` in the PATH environment variable.
 2. Open a terminal and run the `cuba-sdk` command to start cuba-sdk.
 
 ### Mac OS
@@ -63,10 +63,10 @@ CUBA SDK is a useful tool if it is required to develop applications with limited
 
 ### Linux
 
-1. Unpack the [`cuba-sdk-1.0.1-linux.zip`](https://cuba-platform.bintray.com/tools/cuba-sdk/1.0.1/cuba-sdk-1.0.1-linux.zip) archive
+1. Unpack the [`cuba-sdk-1.0.3-linux.zip`](https://cuba-platform.bintray.com/tools/cuba-sdk/1.0.3/cuba-sdk-1.0.3-linux.zip) archive
 ```
-unzip cuba-sdk-1.0.1-linux.zip
-mv ./cuba-sdk-1.0.1 ~/cuba-sdk-1.0.1
+unzip cuba-sdk-1.0.3-linux.zip
+mv ./cuba-sdk-1.0.3 ~/cuba-sdk-1.0
 ```
 
 2. Create local `~/.haulmont/bin` folder if not exists
@@ -90,7 +90,7 @@ source ~/.bashrc
 
 5. Add symlink to `cuba-sdk`
 ```
-ln -sf ~/cuba-sdk-1.0.1/bin/cuba-sdk ~/.haulmont/bin/cuba-sdk
+ln -sf ~/cuba-sdk-1.0/bin/cuba-sdk ~/.haulmont/bin/cuba-sdk
 ```
 
 6. Run the `cuba-sdk` command to start cuba-sdk.
