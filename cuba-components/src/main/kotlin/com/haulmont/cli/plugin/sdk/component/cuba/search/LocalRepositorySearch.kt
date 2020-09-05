@@ -56,7 +56,7 @@ class LocalRepositorySearch(repository: Repository) : AbstractRepositorySearch(r
                                         val split = artifactFile.name.substringAfter(componentPrefix).split(".")
                                         Classifier(split.get(0).substringAfter("-"), split.get(1))
                                     }
-                                    .toMutableList())
+                                    .toMutableSet())
                             if (componentAlreadyExists(component.components, componentToResolve) == null) {
                                 component.components.add(componentToResolve)
                             }

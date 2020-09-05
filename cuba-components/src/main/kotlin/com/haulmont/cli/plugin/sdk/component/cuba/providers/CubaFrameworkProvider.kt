@@ -20,7 +20,7 @@ import com.haulmont.cli.plugin.sdk.component.cuba.di.cubaComponentKodein
 import com.haulmont.cli.plugin.sdk.component.cuba.dto.CubaComponent
 import com.haulmont.cuba.cli.plugin.sdk.commands.artifacts.NameVersion
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
-import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier.Companion.default
+import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier.Companion.jar
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier.Companion.javadoc
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier.Companion.pom
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier.Companion.sdk
@@ -95,7 +95,7 @@ class CubaFrameworkProvider : CubaProvider() {
             if (tomcatVersion != null) {
                 sdkBomDependencies.add(
                     Component(
-                        "org.apache.tomcat", "tomcat", tomcatVersion, classifiers = mutableListOf(
+                        "org.apache.tomcat", "tomcat", tomcatVersion, classifiers = mutableSetOf(
                             pom(),
                             Classifier("", "zip")
                         )
@@ -110,7 +110,7 @@ class CubaFrameworkProvider : CubaProvider() {
                         artifactId = "gradle",
                         url = sdkSettings["gradle.downloadLink"].format(gradleVersion),
                         version = gradleVersion,
-                        classifiers = mutableListOf(Classifier("", "zip"))
+                        classifiers = mutableSetOf(Classifier("", "zip"))
                     )
                 )
             }
@@ -121,13 +121,13 @@ class CubaFrameworkProvider : CubaProvider() {
     private fun additionalPlatformLibs(template: Component): MutableSet<Component> {
         return mutableSetOf(
             Component(
-                "com.haulmont.cuba-resources", "cuba-png-icons", "1.0.1", classifiers = mutableListOf(
-                    default(), pom()
+                "com.haulmont.cuba-resources", "cuba-png-icons", "1.0.1", classifiers = mutableSetOf(
+                    jar(), pom()
                 )
             ),
             Component(
-                "com.haulmont.gradle", "cuba-plugin", template.version, classifiers = mutableListOf(
-                    default(), pom(), sdk(), sources()
+                "com.haulmont.gradle", "cuba-plugin", template.version, classifiers = mutableSetOf(
+                    jar(), pom(), sdk(), sources()
                 )
             ),
 
@@ -178,8 +178,8 @@ class CubaFrameworkProvider : CubaProvider() {
                 classifiers.add(Classifier("web"))
             },
             Component(
-                packageName, "$name-web6-themes", version, classifiers = mutableListOf(
-                    default(),
+                packageName, "$name-web6-themes", version, classifiers = mutableSetOf(
+                    jar(),
                     pom()
                 )
             ),

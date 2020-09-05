@@ -60,7 +60,8 @@ class ComponentManagerImpl : ComponentManager {
         val groupUrl = artifact.groupId.replace(".", "/")
         val name = artifact.artifactId
         val version = artifact.version
-        return "$groupUrl/$name/$version/$name-$version.${classifier.extension}"
+        val classifierDesc = if (classifier.type == "") "" else "-${classifier.type}"
+        return "$groupUrl/$name/$version/$name-$version$classifierDesc.${classifier.extension}"
     }
 
     override fun isAlreadyInstalled(component: Component): Boolean {
@@ -240,22 +241,46 @@ class ComponentManagerImpl : ComponentManager {
             }
 
             performance("Read all classifiers") {
-                for (classifier in component.classifiers) {
-                    performance("Read classifier $classifier") {
-                        artifactManager.getOrDownloadArtifactWithClassifiers(artifact, component.classifiers)
-                    }
-                }
-                artifact.classifiers.addAll(component.classifiers)
+                artifactManager.getOrDownloadArtifactWithClassifiers(artifact, component.classifiers)
             }
 
-            val dependencies: List<MvnArtifact> = performance("Resolve") {
-                artifactManager.resolve(artifact)
+            performance("Read classifier $component.classifiers") {
+                for (classifier in component.classifiers) {
+                    artifactManager.getOrDownloadArtifactFile(artifact, classifier)?.let {
+                        artifact.classifiers.add(classifier)
+                    }
+                }
+            }
+
+            val dependencies: Collection<MvnArtifact> = performance("Resolve all") {
+                performance("Resolve"){artifactManager.resolve(artifact)}.let { dependencies ->
+                    val list = dependencies.toMutableSet()
+                    performance("Read all parents") {
+                        dependencies.parallelStream().forEach {
+                            performance("Read parents ${it.mvnCoordinates()}") {
+                                list.addAll(readParentDependencies(it));
+                            }
+                        }
+                    }
+                    return@let list
+                }
             }
 
             log.fine("Component ${component} dependencies: ${dependencies}")
             progress?.let { it(component, localProgressCount(progressCount++, component), 1) }
 
-            component.dependencies.add(artifact)
+            var artifactContainsInDependencies = false
+
+            dependencies.forEach {
+                if (it.isSame(artifact)) {
+                    it.classifiers.addAll(artifact.classifiers)
+                    artifactContainsInDependencies = true
+                }
+            }
+
+            if (!artifactContainsInDependencies) {
+                component.dependencies.add(artifact)
+            }
             component.dependencies.addAll(dependencies)
 
             progress?.let { it(component, localProgressCount(progressCount++, component), 1) }
@@ -291,6 +316,26 @@ class ComponentManagerImpl : ComponentManager {
         return null
     }
 
+    fun readParentDependencies(mvnArtifact: MvnArtifact): Collection<MvnArtifact> {
+        try {
+            artifactManager.readPom(mvnArtifact)?.let { model ->
+                model.parent?.let {
+                    val parentArtifact = MvnArtifact(
+                        it.groupId, it.artifactId, it.version, mutableSetOf(Classifier.pom())
+                    )
+                    artifactManager.getOrDownloadArtifactFile(mvnArtifact, Classifier.pom())
+                    val list = mutableListOf(parentArtifact)
+                    list.addAll(readParentDependencies(parentArtifact))
+                    return list
+                }
+            }
+        } catch (ignored: Exception) {
+//            printWriter.println("UNABLE TO READ POM: $mvnArtifact")
+        }
+
+        return emptyList()
+    }
+
     private fun searchAdditionalDependencies(artifact: MvnArtifact): List<MvnArtifact> {
         try {
             val model = artifactManager.readPom(artifact)
@@ -317,7 +362,7 @@ class ComponentManagerImpl : ComponentManager {
                         val artifactList = ArrayList<MvnArtifact>()
                         val artifact = MvnArtifact(
                             dependency.groupId, dependency.artifactId, version,
-                            classifiers = arrayListOf(Classifier("", dependency.type ?: "jar"))
+                            classifiers = mutableSetOf(Classifier("", dependency.type ?: "jar"))
                         )
                         artifactList.add(artifact)
                         artifactList.addAll(searchAdditionalDependencies(artifact))
@@ -337,7 +382,7 @@ class ComponentManagerImpl : ComponentManager {
     private fun getClassifiersToResolve(component: Component): List<Classifier> {
         return listOf(
             Classifier.pom(),
-            Classifier.default(),
+            Classifier.jar(),
             Classifier.sources()
         )
     }

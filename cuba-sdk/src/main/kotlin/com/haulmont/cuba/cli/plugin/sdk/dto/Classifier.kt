@@ -26,6 +26,6 @@ data class Classifier(
         fun sources() = Classifier("sources").copy()
         fun javadoc() = Classifier("javadoc").copy()
         fun client() = Classifier("client").copy()
-        fun default() = Classifier("", "jar").copy()
+        fun jar() = Classifier("", "jar").copy()
     }
 }

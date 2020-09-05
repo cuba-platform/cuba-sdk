@@ -71,7 +71,7 @@ class Nexus2Search(repository: Repository) : AbstractRepositorySearch(repository
                                 )
                             }
                     }
-                    .toMutableList()
+                    .toMutableSet()
                 return@map Component(groupId, artifactId, version, classifiers = classifiers)
             }
             .filterNotNull()

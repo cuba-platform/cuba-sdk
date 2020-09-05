@@ -69,7 +69,7 @@ class Nexus3Search(repository: Repository) : AbstractRepositorySearch(repository
                         val extension = classifierAndExtension.substringAfter(".")
                         Classifier(classifier, extension)
                     }
-                    .toMutableList()
+                    .toMutableSet()
                 return@map Component(groupId, artifactId, version, classifiers = classifiers)
             }
             .filterNotNull()

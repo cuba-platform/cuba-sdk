@@ -100,7 +100,7 @@ object SdkPerformance {
         val sb = StringBuilder(mainTask.taskName)
         sb.append('\n')
         val totalTimeSeconds = mainTask.stopTimeMillis!! - mainTask.startTimeMillis
-        val pad = 7
+        val pad = 10
         val taskPad = timers.map { it.taskName.length + 1 }.max() ?: 10
         sb.append("${"-".padEnd(taskPad + (pad + 2) * 5, padChar = '-')}\n")
         sb.append(

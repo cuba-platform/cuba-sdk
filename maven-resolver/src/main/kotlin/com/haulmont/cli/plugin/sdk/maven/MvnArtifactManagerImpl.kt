@@ -216,13 +216,8 @@ class MvnArtifactManagerImpl : ArtifactManager {
         return null
     }
 
-    private fun getArtifactFile(artifact: MvnArtifact, classifier: Classifier = Classifier.default()): Path {
-        return artifact.localPath(Path.of(sdkSettings["maven.local.repo"]), classifier).also {
-            val parent = it.parent
-            if (!Files.exists(parent)) {
-                Files.createDirectories(parent)
-            }
-        }
+    override fun getArtifactFile(artifact: MvnArtifact, classifier: Classifier): Path {
+        return artifact.localPath(Path.of(sdkSettings["maven.local.repo"]), classifier)
     }
 
     override fun upload(repositories: List<Repository>, artifact: MvnArtifact) {
@@ -307,7 +302,7 @@ class MvnArtifactManagerImpl : ArtifactManager {
         }
     }
 
-    override fun resolve(artifact: MvnArtifact, classifier: Classifier): List<MvnArtifact> {
+    override fun resolve(artifact: MvnArtifact, classifier: Classifier): Collection<MvnArtifact> {
         if (listOf("jar", "pom", "sdk").contains(classifier.extension)) {
             return artifact.pomClassifiers().flatMap { resolveDependencies(artifact, classifier, it) }.toList()
         } else {
@@ -391,7 +386,7 @@ class MvnArtifactManagerImpl : ArtifactManager {
     override fun getOrDownloadArtifactFile(
         artifact: MvnArtifact,
         classifier: Classifier
-    ): Path {
+    ): Path? {
         val file = getArtifactFile(artifact, classifier)
         if (!Files.exists(file)) {
             log.info("Download artifact again ${artifact.mvnCoordinates(classifier)}")

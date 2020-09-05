@@ -74,7 +74,7 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
 
     @Parameter(
         names = ["--single"],
-        description = "Resolve component dependencies in parallel",
+        description = "Resolve component dependencies in single thread",
         hidden = true
     )
     var single: Boolean = false

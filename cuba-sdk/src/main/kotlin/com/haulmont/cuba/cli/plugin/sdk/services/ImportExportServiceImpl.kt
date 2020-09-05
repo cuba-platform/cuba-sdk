@@ -37,7 +37,7 @@ class ImportExportServiceImpl : ImportExportService {
     private val log: Logger = Logger.getLogger(ImportExportServiceImpl::class.java.name)
     private val sdkSettings: SdkSettingsHolder by sdkKodein.instance<SdkSettingsHolder>()
     private val componentManager: ComponentManager by sdkKodein.instance<ComponentManager>()
-    private val artifactManager: ArtifactManager by lazy { ArtifactManager.instance()}
+    private val artifactManager: ArtifactManager by lazy { ArtifactManager.instance() }
     private val repositoryManager: RepositoryManager by sdkKodein.instance<RepositoryManager>()
 
     override fun export(fileName: String, components: Collection<Component>, progress: ExportProcessCallback?): Path {
@@ -60,26 +60,9 @@ class ImportExportServiceImpl : ImportExportService {
             for (artifact in allDependencies) {
                 val zipPath = artifact.localPath(Path.of("m2")).parent
                 for (classifier in artifact.classifiers) {
-                    artifactManager.getOrDownloadArtifactFile(artifact, classifier).let {
-                        val file = it.toFile()
-                        FileInputStream(file).use { fi ->
-                            BufferedInputStream(fi).use { origin ->
-                                val path = zipPath.resolve(file.name)
-                                if (!paths.contains(path)) {
-                                    val entry = ZipEntry(path.toString())
-                                    out.putNextEntry(entry)
-                                    while (true) {
-                                        val readBytes = origin.read(data)
-                                        if (readBytes == -1) {
-                                            break
-                                        }
-                                        out.write(data, 0, readBytes)
-                                    }
-                                    paths.add(path)
-                                }
-                            }
-                        }
-                    }
+                    artifactManager.getOrDownloadArtifactFile(artifact, classifier)?.let {
+                        zipFile(it, zipPath, paths, out, data)
+                    } ?: throw IllegalStateException("Unable to download ${artifact.gradleCoordinates(classifier)}")
                 }
                 progress?.let {
                     it(artifact, ++exported, total)
@@ -87,6 +70,33 @@ class ImportExportServiceImpl : ImportExportService {
             }
         }
         return sdkFileName
+    }
+
+    private fun zipFile(
+        filePath: Path,
+        zipPath: Path,
+        paths: MutableSet<Path>,
+        out: ZipOutputStream,
+        data: ByteArray
+    ) {
+        val file = filePath.toFile()
+        FileInputStream(file).use { fi ->
+            BufferedInputStream(fi).use { origin ->
+                val path = zipPath.resolve(file.name)
+                if (!paths.contains(path)) {
+                    val entry = ZipEntry(path.toString())
+                    out.putNextEntry(entry)
+                    while (true) {
+                        val readBytes = origin.read(data)
+                        if (readBytes == -1) {
+                            break
+                        }
+                        out.write(data, 0, readBytes)
+                    }
+                    paths.add(path)
+                }
+            }
+        }
     }
 
     override fun import(

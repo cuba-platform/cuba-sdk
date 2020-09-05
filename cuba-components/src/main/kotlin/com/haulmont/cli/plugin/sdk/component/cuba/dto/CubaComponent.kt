@@ -24,8 +24,8 @@ class CubaComponent(
     groupId: String,
     artifactId: String,
     version: String,
-    classifiers: MutableList<Classifier> = mutableListOf(
-        Classifier.default(),
+    classifiers: MutableSet<Classifier> = mutableSetOf(
+        Classifier.jar(),
         Classifier.pom(),
         Classifier.sources()
     ),

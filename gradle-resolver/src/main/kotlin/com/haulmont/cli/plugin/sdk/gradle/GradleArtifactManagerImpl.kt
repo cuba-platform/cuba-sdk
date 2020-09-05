@@ -178,7 +178,7 @@ class GradleArtifactManagerImpl : ArtifactManager {
         return null
     }
 
-    private fun readFromCache(artifact: MvnArtifact, classifier: Classifier = Classifier.default()): Path? {
+    private fun readFromCache(artifact: MvnArtifact, classifier: Classifier = Classifier.jar()): Path? {
         dbProvider["gradle"][artifact.gradleCoordinates(classifier)].also {
             if (it != null) {
                 return Path.of(sdkSettings["gradle.cache"], it)
@@ -190,12 +190,15 @@ class GradleArtifactManagerImpl : ArtifactManager {
     override fun upload(repositories: List<Repository>, artifact: MvnArtifact) {
         val descriptors = artifact.classifiers.distinct()
             .filter { it != Classifier.pom() }
-            .map { UploadDescriptor(artifact, it, getOrDownloadArtifactFile(artifact, it).toString()) }
+            .map {
+                UploadDescriptor(artifact, it,
+                    artifactPath(artifact, it)
+                ) }
             .toList()
 
         var pomDescriptor: String? = null
         if (artifact.classifiers.contains(Classifier.pom())) {
-            pomDescriptor = getOrDownloadArtifactFile(artifact, Classifier.pom()).toString()
+            pomDescriptor = artifactPath(artifact, Classifier.pom())
         }
         try {
             gradleConnector.runTask(
@@ -211,6 +214,12 @@ class GradleArtifactManagerImpl : ArtifactManager {
         }
     }
 
+    private fun artifactPath(
+        artifact: MvnArtifact,
+        it: Classifier
+    ) = (getOrDownloadArtifactFile(artifact, it)?.toString()
+        ?: throw IllegalStateException("Unable to download ${artifact.gradleCoordinates(it)}"))
+
     override fun getArtifact(artifact: MvnArtifact, classifier: Classifier) {
         cacheResult(
             gradleConnector.runTask(
@@ -222,6 +231,9 @@ class GradleArtifactManagerImpl : ArtifactManager {
             )
         )
     }
+
+    override fun getArtifactFile(artifact: MvnArtifact, classifier: Classifier): Path?
+            = readFromCache(artifact, classifier)
 
     private fun cacheResult(result: JsonElement?): JsonElement? {
         if (result == null) {
@@ -246,14 +258,11 @@ class GradleArtifactManagerImpl : ArtifactManager {
         return result
     }
 
-    override fun getOrDownloadArtifactFile(artifact: MvnArtifact, classifier: Classifier): Path {
+    override fun getOrDownloadArtifactFile(artifact: MvnArtifact, classifier: Classifier): Path? {
         var file: Path? = readFromCache(artifact, classifier)
         if (file == null || !Files.exists(file)) {
             getArtifact(artifact, classifier)
             file = readFromCache(artifact, classifier)
-        }
-        if (file == null) {
-            throw IllegalStateException("Unable to download ${artifact.gradleCoordinates(classifier)}")
         }
         return file
     }
@@ -261,7 +270,7 @@ class GradleArtifactManagerImpl : ArtifactManager {
     override fun getOrDownloadArtifactWithClassifiers(artifact: MvnArtifact, classifiers: Collection<Classifier>) {
         val componentsToResolve = mutableListOf<String>()
         for (classifier in classifiers) {
-            if (!listOf(Classifier.default(), Classifier.sources(), Classifier.pom()).contains(classifier)) {
+            if (!listOf(Classifier.jar(), Classifier.sources(), Classifier.pom()).contains(classifier)) {
                 if (readFromCache(artifact, classifier) == null) {
                     componentsToResolve.add(artifact.gradleCoordinates(classifier))
                 }
@@ -280,7 +289,7 @@ class GradleArtifactManagerImpl : ArtifactManager {
         }
     }
 
-    override fun resolve(artifact: MvnArtifact, classifier: Classifier): List<MvnArtifact> {
+    override fun resolve(artifact: MvnArtifact, classifier: Classifier): Collection<MvnArtifact> {
         val result = cacheResult(
             gradleConnector.runTask(
                 "resolve", mapOf(
@@ -288,7 +297,7 @@ class GradleArtifactManagerImpl : ArtifactManager {
                 )
             )
         ) ?: return emptyList()
-        val artifacts = mutableListOf<MvnArtifact>()
+        val artifacts = mutableSetOf<MvnArtifact>()
         val jsonObject = result.asJsonObject
         jsonObject.entrySet().forEach { entry ->
             val coordinates = entry.key.split(":")

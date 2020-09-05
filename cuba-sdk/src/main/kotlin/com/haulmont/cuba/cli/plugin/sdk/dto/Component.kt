@@ -22,8 +22,8 @@ open class Component(
     var groupId: String,
     var artifactId: String,
     var version: String,
-    var classifiers: MutableList<Classifier> = mutableListOf(
-        Classifier.default(),
+    var classifiers: MutableSet<Classifier> = mutableSetOf(
+        Classifier.jar(),
         Classifier.pom(),
         Classifier.sources()
     ),

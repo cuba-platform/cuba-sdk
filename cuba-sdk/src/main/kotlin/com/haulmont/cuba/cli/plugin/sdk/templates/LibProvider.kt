@@ -47,14 +47,14 @@ open class LibProvider : BintraySearchComponentProvider() {
                     it[1],
                     it[2],
                     type = getType(),
-                    classifiers = arrayListOf(Classifier.pom(), Classifier(it[3]))
+                    classifiers = mutableSetOf(Classifier.pom(), Classifier(it[3]))
                 )
                 5 -> return Component(
                     it[0],
                     it[1],
                     it[2],
                     type = getType(),
-                    classifiers = arrayListOf(Classifier.pom(), Classifier(it[3], it[4]))
+                    classifiers = mutableSetOf(Classifier.pom(), Classifier(it[3], it[4]))
                 )
                 else -> return null
             }

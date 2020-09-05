@@ -22,7 +22,7 @@ buildscript {
             commonsCollections   : "3.2.2",
             kotlinXmlBuilder     : "1.6.0",
             jUnit                : "4.12",
-            toolingApi           : "6.4.1",
+            toolingApi           : "6.6.1",
             mvnrepo              : "1.1.0",
             mapdb                : "3.0.8",
             slf4j                : "1.7.10",

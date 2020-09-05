@@ -41,11 +41,13 @@ interface ArtifactManager {
 
     fun getArtifact(artifact: MvnArtifact, classifier: Classifier)
 
-    fun getOrDownloadArtifactFile(artifact: MvnArtifact, classifier: Classifier): Path
+    fun getArtifactFile(artifact: MvnArtifact, classifier: Classifier = Classifier.jar()): Path?
+
+    fun getOrDownloadArtifactFile(artifact: MvnArtifact, classifier: Classifier): Path?
 
     fun getOrDownloadArtifactWithClassifiers(artifact: MvnArtifact, classifiers:Collection<Classifier>)
 
-    fun resolve(artifact: MvnArtifact, classifier: Classifier = Classifier.default()): List<MvnArtifact>
+    fun resolve(artifact: MvnArtifact, classifier: Classifier = Classifier.jar()): Collection<MvnArtifact>
 
     fun checkClassifiers(artifact: MvnArtifact)
 

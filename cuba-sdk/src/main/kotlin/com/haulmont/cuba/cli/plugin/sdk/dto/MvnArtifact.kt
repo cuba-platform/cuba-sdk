@@ -23,7 +23,7 @@ data class MvnArtifact(
     val groupId: String,
     val artifactId: String,
     val version: String,
-    val classifiers: MutableList<Classifier> = mutableListOf()
+    val classifiers: MutableSet<Classifier> = mutableSetOf()
 ) {
     fun mvnCoordinates(classifier: Classifier? = null): String {
         var coordinates = "${groupId}:${artifactId}:${version}"
@@ -65,7 +65,7 @@ data class MvnArtifact(
         return classifiers
     }
 
-    fun localPath(repoPath: Path, classifier: Classifier = Classifier.default()): Path {
+    fun localPath(repoPath: Path, classifier: Classifier = Classifier.jar()): Path {
         var path: Path = repoPath
         for (groupPart in groupId.split(".")) {
             path = path.resolve(groupPart)
@@ -74,4 +74,8 @@ data class MvnArtifact(
         val classifierSuffix = if (classifier.type.isEmpty()) "" else "-${classifier.type}"
         return path.resolve("${artifactId}-${version}${classifierSuffix}.${classifier.extension}")
     }
+
+    fun isSame(artifact: MvnArtifact) = artifactId == artifact.artifactId &&
+            groupId == artifact.groupId &&
+            version == artifact.version
 }

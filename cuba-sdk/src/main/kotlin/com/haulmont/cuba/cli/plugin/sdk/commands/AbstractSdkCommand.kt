@@ -103,7 +103,7 @@ abstract class AbstractSdkCommand : AbstractCommand() {
     internal var parameters: List<String>? = null
 
     @Parameter(
-        names = ["--performance"],
+        names = ["--performance", "--pf"],
         description = "Measure task performance",
         hidden = true
     )
