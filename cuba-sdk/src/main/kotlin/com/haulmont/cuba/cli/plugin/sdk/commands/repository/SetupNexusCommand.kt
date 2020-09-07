@@ -11,10 +11,11 @@ import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
 import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.dto.*
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusScriptManager
+import com.haulmont.cuba.cli.plugin.sdk.services.MetadataHolder
 import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
 import com.haulmont.cuba.cli.plugin.sdk.utils.FileUtils
 import com.haulmont.cuba.cli.plugin.sdk.utils.currentOsType
-import org.apache.commons.lang.BooleanUtils
+import org.apache.commons.lang.BooleanUtils.isTrue
 import org.json.JSONObject
 import org.kodein.di.generic.instance
 import java.io.FileInputStream
@@ -32,6 +33,7 @@ class SetupNexusCommand : AbstractSdkCommand() {
 
     internal val repositoryManager: RepositoryManager by sdkKodein.instance<RepositoryManager>()
     internal val nexusScriptManager: NexusScriptManager by sdkKodein.instance<NexusScriptManager>()
+    internal val metadataHolder: MetadataHolder by sdkKodein.instance<MetadataHolder>()
 
     override fun run() {
         Prompts.create(kodein) { askRepositorySettings() }
@@ -43,9 +45,13 @@ class SetupNexusCommand : AbstractSdkCommand() {
         question("repository-path", messages["setup.localRepositoryLocationCaption"]) {
             default(sdkSettings.sdkHome().resolve("repository").toString())
         }
+        confirmation("upgrade-nexus", messages["setup.upgradeNexusCaption"].format(sdkSettings["nexus.version"])) {
+            default(true)
+            askIf { !repositoryPathIsEmpty(it) && nexusInstalled(it) }
+        }
         confirmation("rewrite-install-path", messages["setup.localRepositoryRewriteInstallPathCaption"]) {
             default(true)
-            askIf { !repositoryPathIsEmpty(it) }
+            askIf { !repositoryPathIsEmpty(it) && !upgradeRequired(it) }
         }
         question("port", messages["setup.localRepositoryPortCaption"]) {
             default("8085")
@@ -65,8 +71,20 @@ class SetupNexusCommand : AbstractSdkCommand() {
         }
     }
 
+    private fun upgradeRequired(it: Answers) =
+        isTrue(it["upgrade-nexus"] as Boolean?)
+
+    private fun nexusInstalled(answers: Answers): Boolean {
+        val repositoryPath = answers["repository-path"]
+        return repositoryPath != null && Files.exists(
+            Path.of(
+                repositoryPath as String
+            ).resolve("nexus3")
+        )
+    }
+
     private fun nexusConfigurationRequired(it: Answers) =
-        repositoryPathIsEmpty(it) || BooleanUtils.isTrue(it["rewrite-install-path"] as Boolean?)
+        repositoryPathIsEmpty(it) || isTrue(it["rewrite-install-path"] as Boolean?)
 
     private fun repositoryPathIsEmpty(answers: Map<String, Answer>): Boolean {
         return answers["repository-path"] != null && !Files.exists(
@@ -78,10 +96,11 @@ class SetupNexusCommand : AbstractSdkCommand() {
 
     private fun setupRepository(answers: Answers) {
         StopCommand().apply { checkState = false }.execute()
-        if (repositoryPathIsEmpty(answers) || answers["rewrite-install-path"] as Boolean) {
-            if (downloadAndConfigureNexus(answers)) {
-                addTargetSdkRepository(answers)
-            }
+        if (repositoryPathIsEmpty(answers)
+            || isTrue(answers["rewrite-install-path"] as Boolean?)
+            || isTrue(answers["upgrade-nexus"] as Boolean?)
+        ) {
+            downloadAndConfigureNexus(answers)
         }
     }
 
@@ -90,13 +109,20 @@ class SetupNexusCommand : AbstractSdkCommand() {
             object : ToolInstaller("Nexus", nexusDownloadLink(), Path.of(answers["repository-path"] as String)) {
                 override fun beforeUnzip(zipFilePath: Path): Path {
                     printWriter.println(messages["setup.unzipRepositoryCaption"].format(answers["repository-path"]))
+
+                    if (isTrue(answers["rewrite-install-path"] as Boolean?)) {
+                        if (Files.exists(installPath.resolve("sonatype-work"))) {
+                            FileUtils.deleteDirectory(installPath.resolve("sonatype-work"))
+                        }
+                    }
+
                     return zipFilePath
                 }
 
                 override fun onUnzipFinished() {
                     installPath.resolve("nexus3").let { path ->
-                        if (Files.exists(path)) {
-                            FileUtils.deleteDirectory(path)
+                        if (Files.exists(installPath.resolve("nexus3"))) {
+                            FileUtils.deleteDirectory(installPath.resolve("nexus3"))
                         }
                     }
 
@@ -115,7 +141,13 @@ class SetupNexusCommand : AbstractSdkCommand() {
                 configureNexusProperties(answers)
                 makeNexusExecutable()
                 StartCommand().execute()
-                configureNexus(answers)
+                if (!isTrue(answers["upgrade-nexus"] as Boolean?)) {
+                    configureNexus(answers)
+                    addTargetSdkRepository(answers)
+                    metadataHolder.getInstalled().forEach {
+                        metadataHolder.removeInstalled(it)
+                    }
+                }
             },
             onFail = {
                 printWriter.println(messages["setup.nexus.configurationFailed"].format(it.message).red())
@@ -127,8 +159,8 @@ class SetupNexusCommand : AbstractSdkCommand() {
     }
 
     private fun makeNexusExecutable() {
-        if (currentOsType()!= OsType.WINDOWS) {
-            val nexusExecutable:Path = Path.of(sdkSettings["repository.path"],  "nexus3", "bin", "nexus")
+        if (currentOsType() != OsType.WINDOWS) {
+            val nexusExecutable: Path = Path.of(sdkSettings["repository.path"], "nexus3", "bin", "nexus")
             nexusExecutable.toFile().setExecutable(true)
         }
     }
@@ -300,15 +332,28 @@ class SetupNexusCommand : AbstractSdkCommand() {
             properties.load(inputStreamReader)
         }
 
-        properties["application-port"] = answers["port"]
+        var port: Any?
+        if (answers["port"] != null) {
+            port = answers["port"]
+        } else if (properties["application-port"] != null) {
+            port = properties["application-port"]
+        } else {
+            port = "8085"
+        }
+
+        properties["application-port"] = port
         properties["nexus.scripts.allowCreation"] = "true"
         FileWriter(nexusConfig.toString()).use {
             properties.store(it, "Nexus properties")
         }
         sdkSettings["repository.type"] = "local"
-        sdkSettings["repository.url"] = sdkSettings["template.repositoryUrl"].format(answers["port"])
-        sdkSettings["repository.path"] = answers["repository-path"] as String?
-        sdkSettings["repository.name"] = answers["repository-name"] as String?
+        sdkSettings["repository.url"] = sdkSettings["template.repositoryUrl"].format(port)
+        if (answers["repository-path"] != null) {
+            sdkSettings["repository.path"] = answers["repository-path"] as String?
+        }
+        if (answers["repository-name"] != null) {
+            sdkSettings["repository.name"] = answers["repository-name"] as String?
+        }
         sdkSettings.flushAppProperties()
     }
 

@@ -54,6 +54,7 @@ open class ToolInstaller(
                 unzip(it)
             }.also {
                 configure(it)
+                Files.delete(it)
             }
         } catch (e: Exception) {
             onFail(e)
@@ -93,7 +94,7 @@ open class ToolInstaller(
                 calculateProgress(0, 1)
             )
 
-            var (_, _, result) = FileUtils.downloadFile(downloadLink, archive) { readBytes, totalBytes ->
+            val (_, _, result) = FileUtils.downloadFile(downloadLink, archive) { readBytes, totalBytes ->
                 printProgress(
                     rootMessages["setup.download"].format(name),
                     calculateProgress(readBytes, totalBytes)
