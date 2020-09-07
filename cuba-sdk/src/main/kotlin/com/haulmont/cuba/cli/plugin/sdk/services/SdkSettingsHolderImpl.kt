@@ -34,12 +34,32 @@ class SdkSettingsHolderImpl : SdkSettingsHolder {
     internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance<SdkSettingsHolder>()
 
     private val SDK_PROPERTIES_PATH = "sdk.properties"
+    private val SDK_HOME_PATH = defaultPath().resolve("sdk.home")
 
     private var sdkProperties: Properties
+    private var sdkHomeProperties: Properties
     private var userProperties = Properties()
 
     init {
+        var newFile = false
+        if (!Files.exists(SDK_HOME_PATH)) {
+            Files.createFile(SDK_HOME_PATH)
+            newFile = true
+        }
+        sdkHomeProperties = readProperties(FileInputStream(SDK_HOME_PATH.toString()))
+        if (newFile || sdkHomeProperties["sdk.home"] == null) {
+            sdkHomeProperties["sdk.home"] = getSdkPath().toString()
+            flushSdkHome()
+        }
+
         sdkProperties = readDefaultProperties()
+
+    }
+
+    private fun flushSdkHome() {
+        FileWriter(SDK_HOME_PATH.toString()).use {
+            sdkHomeProperties.store(it, "SDK home")
+        }
     }
 
     private fun readDefaultProperties(): Properties {
@@ -83,10 +103,15 @@ class SdkSettingsHolderImpl : SdkSettingsHolder {
         .resolve("bin")
         .resolve("nexus")
 
-    private fun getSdkPath() =
-        if (sdkProperties != null && sdkProperties.get("sdk.home") != null)
-            Path.of(getProperty("sdk.home"))
-        else defaultPath()
+    private fun getSdkPath() = Path.of(
+        if (sdkHomeProperties["sdk.home"] != null) {
+            sdkHomeProperties["sdk.home"] as String
+        } else if (sdkProperties["sdk.home"] != null) {
+            sdkProperties["sdk.home"] as String
+        } else {
+            defaultPath().toString();
+        }
+    )
 
     private fun defaultPath(): Path {
         return Paths.get(
@@ -98,6 +123,9 @@ class SdkSettingsHolderImpl : SdkSettingsHolder {
 
 
     override fun getProperty(property: String): String {
+        if (property == "sdk.home") {
+            return sdkHomeProperties.getProperty(property)
+        }
         return sdkProperties.getProperty(property)
     }
 
@@ -111,7 +139,11 @@ class SdkSettingsHolderImpl : SdkSettingsHolder {
 
     override fun setProperty(property: String, value: String?) {
         if (value != null) {
-            sdkProperties[property] = value
+            if (property == "sdk.home") {
+                sdkHomeProperties[property] = value
+            } else {
+                sdkProperties[property] = value
+            }
             userProperties[property] = value
         }
     }
@@ -122,6 +154,7 @@ class SdkSettingsHolderImpl : SdkSettingsHolder {
         FileWriter(getSdkPath().resolve(SDK_PROPERTIES_PATH).toString()).use {
             userProperties.store(it, "SDK properties")
         }
+        flushSdkHome()
     }
 
     override fun sdkConfigured(): Boolean {
@@ -137,6 +170,7 @@ class SdkSettingsHolderImpl : SdkSettingsHolder {
 
     override fun resetProperties() {
         sdkProperties = readDefaultProperties()
+        sdkHomeProperties = readProperties(FileInputStream(SDK_HOME_PATH.toString()))
     }
 
     override fun propertyNames(): Set<String> {
