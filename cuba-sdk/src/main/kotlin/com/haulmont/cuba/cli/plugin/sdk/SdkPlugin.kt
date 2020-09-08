@@ -28,6 +28,7 @@ import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.perf.SdkPerformance.sdkSettings
 import com.haulmont.cuba.cli.plugin.sdk.templates.ComponentRegistry
 import com.haulmont.cuba.cli.plugin.sdk.templates.LibProvider
+import com.haulmont.cuba.cli.plugin.sdk.utils.formatPath
 import org.jline.terminal.Terminal
 import org.kodein.di.generic.instance
 import java.io.PrintWriter
@@ -132,7 +133,8 @@ class SdkPlugin : MainCliPlugin {
             InitCommand().execute()
         }
 
-        writer.println("${messages["sdk.currentHome"]} ${sdkSettings.sdkHome().toString().green()}")
+        writer.println(messages["validation.notUseBackslashesInPaths"])
+        writer.println("${messages["sdk.currentHome"]} ${sdkSettings.sdkHome().toString().formatPath().green()}")
 
         Runtime.getRuntime().addShutdownHook(thread(isDaemon = true) {
             StopCommand().apply { checkState = false }.execute()

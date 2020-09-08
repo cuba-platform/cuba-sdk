@@ -48,6 +48,7 @@ class SdkSettingsHolderImpl : SdkSettingsHolder {
         }
         sdkHomeProperties = readProperties(FileInputStream(SDK_HOME_PATH.toString()))
         if (newFile || sdkHomeProperties["sdk.home"] == null) {
+            sdkProperties = readDefaultProperties()
             sdkHomeProperties["sdk.home"] = getSdkPath().toString()
             flushSdkHome()
         }
@@ -104,9 +105,9 @@ class SdkSettingsHolderImpl : SdkSettingsHolder {
         .resolve("nexus")
 
     private fun getSdkPath() = Path.of(
-        if (sdkHomeProperties["sdk.home"] != null) {
+        if (sdkHomeProperties != null && sdkHomeProperties.containsKey("sdk.home")) {
             sdkHomeProperties["sdk.home"] as String
-        } else if (sdkProperties["sdk.home"] != null) {
+        } else if (sdkProperties != null && sdkProperties.containsKey("sdk.home")) {
             sdkProperties["sdk.home"] as String
         } else {
             defaultPath().toString();

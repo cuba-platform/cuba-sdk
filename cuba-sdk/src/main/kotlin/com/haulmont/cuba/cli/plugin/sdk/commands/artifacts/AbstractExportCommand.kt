@@ -22,6 +22,7 @@ import com.haulmont.cli.core.red
 import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.services.ImportExportService
+import com.haulmont.cuba.cli.plugin.sdk.utils.formatPath
 import org.kodein.di.generic.instance
 
 @Parameters(commandDescription = "Export SDK")
@@ -41,7 +42,7 @@ abstract class AbstractExportCommand : BaseComponentCommand() {
                 calculateProgress(exported, total)
             )
         }
-        printWriter.println(messages["export.exportedTo"].format(sdkArchive).green())
+        printWriter.println(messages["export.exportedTo"].format(sdkArchive.toString().formatPath()).green())
     }
 
     abstract fun componentsToExport(): Collection<Component>?

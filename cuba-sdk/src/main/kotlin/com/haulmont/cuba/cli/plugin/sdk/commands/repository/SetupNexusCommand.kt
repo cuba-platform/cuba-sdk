@@ -15,6 +15,7 @@ import com.haulmont.cuba.cli.plugin.sdk.services.MetadataHolder
 import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
 import com.haulmont.cuba.cli.plugin.sdk.utils.FileUtils
 import com.haulmont.cuba.cli.plugin.sdk.utils.currentOsType
+import com.haulmont.cuba.cli.plugin.sdk.utils.formatPath
 import org.apache.commons.lang.BooleanUtils.isTrue
 import org.json.JSONObject
 import org.kodein.di.generic.instance
@@ -43,7 +44,12 @@ class SetupNexusCommand : AbstractSdkCommand() {
 
     private fun QuestionsList.askRepositorySettings() {
         question("repository-path", messages["setup.localRepositoryLocationCaption"]) {
-            default(sdkSettings.sdkHome().resolve("repository").toString())
+            validate {
+                if (value.contains("\\")) {
+                    fail(messages["validation.notUseBackslashesInPaths"])
+                }
+            }
+            default(sdkSettings.sdkHome().resolve("repository").toString().formatPath())
         }
         confirmation("upgrade-nexus", messages["setup.upgradeNexusCaption"].format(sdkSettings["nexus.version"])) {
             default(true)

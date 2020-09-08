@@ -28,6 +28,7 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryTarget
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryType
 import com.haulmont.cuba.cli.plugin.sdk.services.ArtifactManager
 import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
+import com.haulmont.cuba.cli.plugin.sdk.utils.formatPath
 import org.kodein.di.generic.instance
 import java.nio.file.Files
 import java.nio.file.Path
@@ -49,8 +50,11 @@ class SdkHomeCommand : AbstractSdkCommand() {
 
     private fun QuestionsList.askInitSettings() {
         question("sdk-home", messages["init.sdk-home"]) {
-            default(sdkSettings.sdkHome().toString())
+            default(sdkSettings.sdkHome().toString().formatPath())
             validate {
+                if (value.contains("\\")){
+                    fail(messages["validation.notUseBackslashesInPaths"])
+                }
                 if (!Files.exists(Path.of(value))){
                     fail(messages["init.directoryIsNotExists"])
                 }
