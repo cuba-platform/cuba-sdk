@@ -43,6 +43,7 @@ class SdkSettingsHolderImpl : SdkSettingsHolder {
     init {
         var newFile = false
         if (!Files.exists(SDK_HOME_PATH)) {
+            Files.createDirectories(SDK_HOME_PATH.parent)
             Files.createFile(SDK_HOME_PATH)
             newFile = true
         }
