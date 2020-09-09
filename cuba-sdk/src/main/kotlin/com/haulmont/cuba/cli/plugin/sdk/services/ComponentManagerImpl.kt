@@ -234,7 +234,19 @@ class ComponentManagerImpl : ComponentManager {
                 component.version
             )
 
-            if (artifactManager.readPom(artifact) == null) {
+            var pomClassifier = component.classifiers.filter { it == Classifier.pom() }.firstOrNull()
+            if (pomClassifier == null) {
+                pomClassifier = component.classifiers.filter { it == Classifier.sdk() }.firstOrNull()
+            }
+
+            if (pomClassifier == null) {
+                log.info("Component not found: ${component}")
+                progress?.let { it(component, 1f, 1) }
+                return null
+            }
+
+            val pomModel = artifactManager.readPom(artifact, pomClassifier)
+            if (pomModel == null) {
                 log.info("Component not found: ${component}")
                 progress?.let { it(component, 1f, 1) }
                 return null
@@ -253,12 +265,21 @@ class ComponentManagerImpl : ComponentManager {
             }
 
             val dependencies: Collection<MvnArtifact> = performance("Resolve all") {
-                performance("Resolve"){artifactManager.resolve(artifact)}.let { dependencies ->
+                performance("Resolve") {
+                    artifactManager.resolve(
+                        artifact,
+                        artifact.mainClassifier()
+                    )
+                }.let { dependencies ->
                     val list = dependencies.toMutableSet()
+
+                    pomModel.dependencies.filter { it.groupId == "org.codehaus.groovy" && it.artifactId == "groovy-all" }
+                        .forEach { list.add(MvnArtifact(it.groupId, it.artifactId, it.version)) }
+
                     performance("Read all parents") {
                         dependencies.parallelStream().forEach {
                             performance("Read parents ${it.mvnCoordinates()}") {
-                                list.addAll(readParentDependencies(it));
+                                list.addAll(readParentDependencies(it))
                             }
                         }
                     }

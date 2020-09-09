@@ -114,6 +114,9 @@ class CubaFrameworkProvider : CubaProvider() {
                     )
                 )
             }
+            model.dependencies.forEach {
+                sdkBomDependencies.add(Component(it.groupId, it.artifactId, it.version))
+            }
         }
         return sdkBomDependencies
     }

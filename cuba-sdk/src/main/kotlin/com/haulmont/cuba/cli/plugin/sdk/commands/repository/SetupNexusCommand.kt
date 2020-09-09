@@ -158,7 +158,7 @@ class SetupNexusCommand : AbstractSdkCommand() {
             onFail = {
                 printWriter.println(messages["setup.nexus.configurationFailed"].format(it.message).red())
                 printWriter.println(messages["setup.nexus.configurationManual"].format(Path.of(answers["repository-path"] as String)))
-                result = false;
+                result = false
             }
         )
         return result

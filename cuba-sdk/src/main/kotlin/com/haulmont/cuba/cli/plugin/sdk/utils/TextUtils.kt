@@ -18,6 +18,6 @@ package com.haulmont.cuba.cli.plugin.sdk.utils
 
 fun String.doubleUnderline(): String =
     """$this
-${"".padEnd(80, '=')}""".trimIndent();
+${"".padEnd(80, '=')}""".trimIndent()
 
 fun String.formatPath(): String = this.replace("\\", "/")

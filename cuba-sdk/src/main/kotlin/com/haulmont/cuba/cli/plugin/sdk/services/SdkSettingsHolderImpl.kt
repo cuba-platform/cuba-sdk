@@ -111,7 +111,7 @@ class SdkSettingsHolderImpl : SdkSettingsHolder {
         } else if (sdkProperties != null && sdkProperties.containsKey("sdk.home")) {
             sdkProperties["sdk.home"] as String
         } else {
-            defaultPath().toString();
+            defaultPath().toString()
         }
     )
 
