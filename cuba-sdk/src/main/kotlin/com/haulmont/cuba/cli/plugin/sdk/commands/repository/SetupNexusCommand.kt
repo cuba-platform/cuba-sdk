@@ -150,7 +150,7 @@ class SetupNexusCommand : AbstractSdkCommand() {
                 if (!isTrue(answers["upgrade-nexus"] as Boolean?)) {
                     configureNexus(answers)
                     addTargetSdkRepository(answers)
-                    metadataHolder.getInstalled().forEach {
+                    HashSet(metadataHolder.getInstalled()).forEach {
                         metadataHolder.removeInstalled(it)
                     }
                 }
@@ -338,13 +338,16 @@ class SetupNexusCommand : AbstractSdkCommand() {
             properties.load(inputStreamReader)
         }
 
-        var port: Any?
-        if (answers["port"] != null) {
-            port = answers["port"]
-        } else if (properties["application-port"] != null) {
-            port = properties["application-port"]
-        } else {
-            port = "8085"
+        val port = when {
+            answers["port"] != null -> {
+                answers["port"]
+            }
+            properties["application-port"] != null -> {
+                properties["application-port"]
+            }
+            else -> {
+                "8085"
+            }
         }
 
         properties["application-port"] = port
