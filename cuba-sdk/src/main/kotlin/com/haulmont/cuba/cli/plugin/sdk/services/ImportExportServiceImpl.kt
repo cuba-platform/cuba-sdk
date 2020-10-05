@@ -117,11 +117,8 @@ class ImportExportServiceImpl : ImportExportService {
             var count = 0
             zip.entries().asSequence().forEach { entry ->
                 zip.getInputStream(entry).use { input ->
-                    var entryName = entry.name
-                    if (entryName.startsWith("m2")) {
-                        entryName = entryName.replaceFirst("m2\\", "")
-                    }
-                    targetDir.resolve(entryName).also {
+                    val entryName = entry.name
+                    targetDir.resolveSibling(Path.of(entryName)).also {
                         Files.createDirectories(it.parent)
                         if (Files.exists(it)) {
                             Files.delete(it)
