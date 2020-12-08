@@ -17,26 +17,27 @@
 
 # 1. Overview <a name="overview"></a>
 
-CUBA SDK is a command-line tool that provides an ability to resolve, export and upload to external repository all dependencies 
-for CUBA framework, add-ons or any external library with few simple commands. SDK can be used as an embedded repository. This tool has a built-in [Nexus 3 repository](https://www.sonatype.com/nexus-repository-oss). 
+CUBA SDK is a command-line tool that provides an ability to resolve, export and upload to an external repository all dependencies 
+for CUBA framework, add-ons or any external library with a few simple commands. SDK can be used as an embedded repository. This tool has a built-in [Nexus 3 repository](https://www.sonatype.com/nexus-repository-oss). 
 
-CUBA SDK is a useful tool if it is required to develop applications with limited network environment. 
+CUBA SDK is a useful tool if it is required to develop applications with a limited network environment. 
 
 
 ### Main CUBA SDK features
-- IDE-Agnostic command line tool.
+
+- IDE-Agnostic command-line tool.
 - Can be installed on CI server.
-- Automatically collect and resolve all artifact dependencies.
-- Automatically download and resolve artifact sources. 
-- User friendly command line interface.
+- Automatically collects and resolves all artifact dependencies.
+- Automatically downloads and resolves artifact sources. 
+- User friendly command-line interface.
 - Supports external plugins.
-- Using Gradle to resolve artifact dependencies.
+- Uses Gradle to resolve artifact dependencies.
 - Checks for new artifacts versions and can install them automatically with all dependencies.
-- Can work with few a source and target repositories.
-- Supports local `m2` repository as source or target repository.
-- Can install and setup embedded Nexus OSS repository.
+- Can work with several source and target repositories.
+- Supports local `m2` repository as a source or target repository.
+- Can install and setup an embedded Nexus OSS repository.
 - Import/Export resolved artifacts with dependencies.
-- Integrated with CUBA addons marketplace. 
+- Integrated with CUBA add-ons marketplace. 
 - Supports different profiles for one CUBA SDK instance. 
 
 # 2. Installation <a name="installation"></a>
@@ -105,12 +106,12 @@ SDK should be configured before the first usage. To configure SDK run the `init`
 
 ## 4.1. Common SDK Commands <a name="common-sdk-commands"></a>
 
-- `sdk` - prints current SDK status.
+- `sdk` - prints a current SDK status.
 - `properties` - prints configured SDK properties. Specific properties can be printed with `--n` or `--name` additional parameters, for example,  `properties --n sdk.export.path`
 - `init` - inits SDK. This command configures SDK properties and downloads, installs and configures *Gradle*. For the already configured SDK, this command does not clean up current SDK metadata.
 - `sdk-home` - change current SDK home directory
-- `setup-nexus` - sets up embedded Nexus repository. This command downloads, installs and configures Nexus repository.
-- `cleanup` - cleans up SDK metadata and remove all artifacts from the local *m2* repository and the embedded Nexus repository. If `--local-only` flag is provided, then only the local *m2* repository will be cleaned.
+- `setup-nexus` - sets up an embedded Nexus repository. This command downloads, installs and configures Nexus repository.
+- `cleanup` - cleans up SDK metadata and removes all artifacts from the local *m2* repository and the embedded Nexus repository. If `--local-only` flag is provided, then only the local *m2* repository will be cleaned.
 - `set-license` - sets the license key and configures Premium repositories for the *source* repository. 
 - `check-updates` - checks available minor updates for framework and add-ons.  Specific target repository can be configured with `--r` or `--repository` additional parameters, for example, `import --r sdk2`. If `--no-upload` additional parameter is presented, then SDK archive will be imported only to the local *m2* repository.
 
