@@ -14,6 +14,10 @@
   - [Manage Components](#manage-components)
 - [SDK Settings](#sdk-settings)
 - [Plugins](#plugins)
+- [Guides](#guides)
+  - [How to Organize Local Repository](#how-to-organize-local-repository)
+  - [How to Export Artifacts](#how-to-export-artifacts)
+  - [How to Import Artifacts](#how-to-import-artifacts)
 
 # 1. Overview <a name="overview"></a>
 
@@ -271,4 +275,100 @@ CUBA SDK provides additional events which can be used in external plugins:
 - `AfterAddRepositoryEvent` - fires after repository was added, provides repository
 - `BeforeRemoveRepositoryEvent` - fires before repository will be removed, provides repository
 - `AfterRemoveRepositoryEvent` - fires after repository was removed, provides repository
+
+# Guides
+
+## How to Organize Local Repository
+
+As an example let's use the case when we need to download and push to the local repository CUBA artifacts and Dashboards add-on.
+
+1. Install CUBA SDK according to the [Installation](#installation) section. After installation you will see in the console:
+
+  ![start](img/start.png)
+
+2. If you use CUBA SDK for the first time, configure SDK by running the `init` command. This command creates the necessary initial environment settings, downloads Gradle, and initializes the standard repositories.
+
+  ![init](img/init.png)
+
+  Enter a path to the home directory. Pay attention, that you need to use `/` instead of `\` when entering a path.
+
+  For the already configured SDK, the `init` command does not clean up current SDK metadata. To check the current SDK status use the `sdk` command.
+
+3. Use the `setup-nexus` command to install and configure a local Nexus OSS repository. We assume that we have access to the internet. Otherwise, follow the instructions in [CUBA Platform manual](https://doc.cuba-platform.com/manual-latest/private_repo_in_isolated_network.html) to install and configure Nexus repository.
+
+  ![nexus](img/nexus.png)
+
+  By default, the repository can be accessed at `localhost:8085`.
+
+  ![nexus-ui](img/nexus-ui.png)
+
+  To launch and stop the repository use `start` and `stop` commands.
+
+  The list of the repositories can be obtained by using the `repository list` command. In the example below, you can see the default repositories and the configured target repository.
+
+  ![repo-list](img/repo-list.png)
+
+  The repository manager supports local and remote repositories which are divided into two groups within SDK:
+
+  * source - repositories used for searching artifacts
+  * target - repositories to which the artifacts will be loaded
+
+4. To install CUBA to the local repository run the `install cuba` command. If the platform version is not specified, SDK provides available platform versions.
+
+  ![cuba](img/cuba.png)
+
+  This command resolves and pushes components to all target repositories.
+
+5. To install an add-on run the `install addon dashboard` command and select the version.
+
+  ![dashboard](img/dashboard.png)
+
+  Also, you can use just the `install` command to select the necessary category.
+
+  ![category](img/category.png)
+
+  If you need to install the premium add-on then set the license key by using the `set-license` command.
+
+  ![key](img/key.png)
+
+6. To grant access to the installed artifacts for your project add the line with the repository into `build.gradle` file of your project.
+
+```
+buildscript {
+    ext.cubaVersion = '7.2.10'
+    repositories {
+        maven {
+            url 'http:/localhost:8085/repository/cuba-sdk'
+        }
+        ...
+    }
+    dependencies {
+        classpath "com.haulmont.gradle:cuba-plugin:$cubaVersion"
+    }
+}
+```
+
+## How to Export Artifacts
+
+Exporting artifacts can be useful when you are going to work in an isolated network or a network with weak internet access. Then you can export artifacts to the archive and transfer them to the computer in the isolated network.
+
+1. Open a console on the computer with the installed CUBA SDK. We assume, that the required artifacts have been already installed (see [How to Organize Local Repository](#how-to-organize-local-repository)).
+
+2. Run the `export` command. All resolved components will be exported as an archive to the home directory.
+
+  ![export](img/export.png)
+
+In case you need to export only a particular component use commands `export addon`, `export cuba` or `export lib`.
+
+3. Finally, find the archive in the `<home>/export` directory and transfer it to the required environment.
+
+## How to Import Artifacts
+
+We assume that we have an exported archive with the required artifacts. A computer we need to import the archive on is in an isolated network and have no access to the internet. To install CUBA SDK you need to transfer an installation file to the computer.
+
+First, you need to organize a local repository. Follow the instructions in the [CUBA Platform manual](https://doc.cuba-platform.com/manual-latest/private_repo_in_isolated_network.html) to organize the repository. 
+
+When CUBA SDK is installed and the local repository is configured run the `import` command and specify the path to the archive.
+
+![import](img/import.png)
 
