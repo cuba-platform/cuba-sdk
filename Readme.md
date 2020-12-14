@@ -294,7 +294,7 @@ As an example let's use the case when we need to download and push to the local 
 
   For the already configured SDK, the `init` command does not clean up current SDK metadata. To check the current SDK status, use the `sdk` command.
 
-3. Use the `setup-nexus` command to install and configure a local Nexus OSS repository. We assume that we have access to the internet. Otherwise, please download correct nexus repository version from [https://www.sonatype.com/nexus-repository-oss]() and unzip the archive to the `nexus3` and `sonatype-work` folders in the SDK home directory. Then run `setup-nexus` command again.
+3. Use the `setup-nexus` command to install and configure a local Nexus OSS repository. We assume that we have access to the internet. Otherwise, please download correct nexus repository version from [https://www.sonatype.com/nexus-repository-oss](https://www.sonatype.com/nexus-repository-oss) and unzip the archive to the `nexus3` and `sonatype-work` folders in the SDK home directory. Then run `setup-nexus` command again.
 
   ![nexus](img/nexus.png)
 
