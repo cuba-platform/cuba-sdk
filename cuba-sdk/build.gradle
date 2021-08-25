@@ -258,6 +258,7 @@ task bundle(dependsOn: jarPatch, group: 'distribution', description: 'Builds bun
         logger.info("Linking")
 
         def javaHome = System.getenv('JAVA11_HOME')
+//        def javaHome = 'C:/Program Files/Java/jdk-11.0.10'
         if (javaHome == null
                 || javaHome.isEmpty()) {
             throw new GradleException('JAVA_HOME is not set')

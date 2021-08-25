@@ -59,6 +59,7 @@ apply plugin: 'base'
 allprojects {
     repositories {
         jcenter()
+//        mavenCentral()
         mavenLocal()
         maven {
             credentials {

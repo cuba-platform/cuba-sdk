@@ -89,6 +89,7 @@ class CubaFrameworkProvider : CubaProvider() {
         val model = artifactManager.readPom(
             MvnArtifact("com.haulmont.gradle", "cuba-plugin", template.version),
             sdk()
+//            pom()
         )
         if (model != null) {
             val tomcatVersion = model.properties["tomcat.version"] as String?
@@ -110,7 +111,7 @@ class CubaFrameworkProvider : CubaProvider() {
                         artifactId = "gradle",
                         url = sdkSettings["gradle.downloadLink"].format(gradleVersion),
                         version = gradleVersion,
-                        classifiers = mutableSetOf(Classifier("", "zip"))
+                        classifiers = mutableSetOf(Classifier("", "zip"), Classifier(""))
                     )
                 )
             }
@@ -177,9 +178,9 @@ class CubaFrameworkProvider : CubaProvider() {
             Component(packageName, "$name-web6", version).apply {
                 classifiers.add(Classifier("web"))
             },
-            Component(packageName, "$name-web6", version).apply {
-                classifiers.add(Classifier("web"))
-            },
+//            Component(packageName, "$name-web6", version).apply {
+//                classifiers.add(Classifier("web"))
+//            },
             Component(
                 packageName, "$name-web6-themes", version, classifiers = mutableSetOf(
                     jar(),

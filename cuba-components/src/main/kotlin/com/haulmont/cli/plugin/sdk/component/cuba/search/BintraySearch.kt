@@ -24,7 +24,7 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 
 class BintraySearch(repository: Repository) : AbstractRepositorySearch(repository) {
-    override fun searchParameters(component: Component): List<Pair<String, String>> = listOf(
+    override fun searchParameters(component: Component, searchUrl: String): List<Pair<String, String>> = listOf(
         "g" to component.groupId,
         "a" to((component as CubaComponent).globalModule()?.artifactId?.substringBefore("-global") ?: "") + "*",
         "subject" to repository.repositoryName

@@ -20,29 +20,36 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.haulmont.cli.plugin.sdk.component.cuba.dto.CubaComponent
+import com.haulmont.cli.plugin.sdk.component.cuba.dto.JmixComponent
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 
 class Nexus3Search(repository: Repository) : AbstractRepositorySearch(repository) {
 
-    override fun searchParameters(component: Component): List<Pair<String, String>> {
+    override fun searchParameters(component: Component, searchUrl: String): List<Pair<String, String>> {
         return listOf(
             "group" to component.groupId,
-            "name" to  ((component as CubaComponent).globalModule()?.artifactId?.substringBefore("-global") ?: "") + "*",
+            "name" to
+                    if (searchUrl.contains("jmix.io"))
+                        (component as JmixComponent).artifactId
+                    else
+                        ((component as CubaComponent).globalModule()?.artifactId?.substringBefore("-global")
+                            ?: "") + "*",
             "version" to component.version,
             "repository" to repository.repositoryName
         )
     }
 
     override fun handleResultJson(it: JsonElement, component: Component): Component? {
-        if (!it.isJsonArray) return null
-        val array = it as JsonArray
-        if (array.size() == 0) {
-            log.info("Unknown ${component.type}: ${component.groupId}")
-            return null
-        }
-        val json = array.get(0) as JsonObject
+//        if (!it.isJsonArray) return null
+//        val array = it as JsonArray
+//        if (array.size() == 0) {
+//            log.info("Unknown ${component.type}: ${component.groupId}")
+//            return null
+//        }
+//        val json = array.get(0) as JsonObject
+        val json = it as JsonObject
         val itemsArray = json.getAsJsonArray("items")
         if (itemsArray.size() == 0) {
             log.info("Unknown version: ${component.version}")
@@ -52,10 +59,19 @@ class Nexus3Search(repository: Repository) : AbstractRepositorySearch(repository
             .map { dataObj ->
                 val groupId = dataObj.get("group").asString
                 val artifactId = dataObj.get("name").asString
-                (component as CubaComponent).globalModule()?.let {
-                    val prefix = it.artifactId.substringBefore("-global")
-                    if (!artifactId.startsWith(prefix)) {
-                        return@map null
+                if (groupId.contains("io.jmix")) {
+                    (component as JmixComponent).let {
+                        val prefix = it.artifactId.substringBefore("-global")
+                        if (!artifactId.startsWith(prefix)) {
+                            return@map null
+                        }
+                    }
+                } else {
+                    (component as CubaComponent).globalModule()?.let {
+                        val prefix = it.artifactId.substringBefore("-global")
+                        if (!artifactId.startsWith(prefix)) {
+                            return@map null
+                        }
                     }
                 }
                 val version = dataObj.get("version").asString

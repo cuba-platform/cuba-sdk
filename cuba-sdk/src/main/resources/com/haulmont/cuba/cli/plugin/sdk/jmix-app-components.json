@@ -1,0 +1,831 @@
+{
+  "appComponents": [
+    {
+      "id": "russian-translation",
+      "name": "Russian Translation",
+      "about": "Russian translation of the framework.",
+      "description": "## Overview\n\nThis add-on provides the Russian translation of the framework messages and the localized set of data formats.\n\n## Usage\n\nAfter installation, add Russian (ru) locale using the Locales tab of the Project Properties window in Studio.",
+      "category": "Translation",
+      "tags": [
+        "Localization"
+      ],
+      "vendor": "Haulmont",
+      "updateDateTime": 1628072062000,
+      "dependencies": [
+        {
+          "group": "io.jmix.translations",
+          "name": "jmix-translations-ru"
+        }
+      ],
+      "compatibilityList": [
+        {
+          "platformRequirement": "0.2",
+          "artifactVersions": [
+            "0.2.0"
+          ]
+        },
+        {
+          "platformRequirement": "0.3",
+          "artifactVersions": [
+            "0.3.2"
+          ]
+        },
+        {
+          "platformRequirement": "0.9",
+          "artifactVersions": [
+            "0.9.0"
+          ]
+        },
+        {
+          "platformRequirement": "1.0",
+          "artifactVersions": [
+            "1.0.1"
+          ]
+        }
+      ],
+      "commercial": false,
+      "weight": 500
+    },
+    {
+      "id": "bpm",
+      "name": "BPM",
+      "about": "Provides seamless integration of a BPM engine into your project.",
+      "description": "## Overview\nThe BPM add-on provides seamless integration of a BPM engine into your project, extending it with multiple powerful features.\n\nThe add-on allows you to describe business process steps right in the application using the integrated BPMN 2.0 modeler. Being a part of the application, it enables seamless integration with the runtime application parts and visual process customizing. For example, to specify which service method should be invoked at a particular process step, you just need to select a Spring bean name and a method from a drop-down list.\n\nUsers may interact with running process instances using process forms. For simple cases, you can declare input dialogs right in the modeler. Also, you can use screens based on Jmix backoffice UI to create process forms of any complexity.\n\n## Features\n- The embedded light-weight [Flowable](https://flowable.org) runtime engine. You are free to use the Flowable API directly, or you may use an API layer provided by the BPM addon.\n- Integrated BPMN 2.0 visual designer based on [bpmn-js](https://bpmn.io) framework.\n- Integrated DMN 1.1 decision table designer for complex decision logic.\n- Two types of process forms:\n       a) Input dialogs that can be created at runtime in the process modeler\n       b) Design-time defined backoffice UI screens\n- Administrative screens for managing running processes provide a ready solution to:\n       a) view all running process instances\n       b) reassign user tasks\n       c) modify process variables’ values\n       d) investigate failed jobs\n       e) analyze processes execution history, etc.\n- API for working with business processes from the code",
+      "category": "Add-on",
+      "tags": [
+        "Features"
+      ],
+      "vendor": "Haulmont",
+      "updateDateTime": 1628071372000,
+      "dependencies": [
+        {
+          "group": "io.jmix.bpm",
+          "name": "jmix-bpm-starter"
+        },
+        {
+          "group": "io.jmix.bpm",
+          "name": "jmix-bpm-ui-starter"
+        }
+      ],
+      "compatibilityList": [
+        {
+          "platformRequirement": "0.9",
+          "artifactVersions": [
+            "0.9.0"
+          ]
+        },
+        {
+          "platformRequirement": "1.0",
+          "artifactVersions": [
+            "1.0.1"
+          ]
+        }
+      ],
+      "commercial": true,
+      "weight": 950
+    },
+    {
+      "id": "charts",
+      "name": "Charts",
+      "about": "Provides two extensions for Backoffice UI: charts and geographic maps.",
+      "description": "## Overview\nThis add-on provides two functional modules: charts and geographic maps which can be both included in your application.\n\nThe charts module is based on the [amCharts](https://www.amcharts.com/) library and includes various types of dynamic charts: basic charts such as pie chart, bar chart, serial chart, funnel, etc as well as advanced charts - stock chart and Gantt chart.",
+      "category": "Add-on",
+      "tags": [
+        "UI"
+      ],
+      "vendor": "Haulmont",
+      "updateDateTime": 1628069211000,
+      "dependencies": [
+        {
+          "group": "io.jmix.ui",
+          "name": "jmix-charts-starter"
+        },
+        {
+          "group": "io.jmix.ui",
+          "name": "jmix-ui-widgets"
+        },
+        {
+          "group": "io.jmix.ui",
+          "name": "jmix-charts-widgets"
+        }
+      ],
+      "compatibilityList": [
+        {
+          "platformRequirement": "0.9",
+          "artifactVersions": [
+            "0.9.1"
+          ]
+        },
+        {
+          "platformRequirement": "1.0",
+          "artifactVersions": [
+            "1.0.1"
+          ]
+        }
+      ],
+      "commercial": false,
+      "weight": 970
+    },
+    {
+      "id": "german-translation",
+      "name": "German Translation",
+      "about": "German translation of the framework.",
+      "description": "## Overview\n\nThis add-on provides the German translation of the framework messages and the localized set of data formats.\n\n## Usage\n\nAfter installation, add German (de) locale using the Locales tab of the Project Properties window in Studio.",
+      "category": "Translation",
+      "tags": [
+        "Localization"
+      ],
+      "vendor": "Haulmont",
+      "updateDateTime": 1628072059000,
+      "dependencies": [
+        {
+          "group": "io.jmix.translations",
+          "name": "jmix-translations-de"
+        }
+      ],
+      "compatibilityList": [
+        {
+          "platformRequirement": "1.0",
+          "artifactVersions": [
+            "1.0.1"
+          ]
+        }
+      ],
+      "commercial": false,
+      "weight": 510
+    },
+    {
+      "id": "pivot-table",
+      "name": "Pivot Table",
+      "about": "Enables turning a data set into a summary table and manipulating it using 2D drag-and-drop UI.",
+      "description": "## Overview\n\nThe add-on provides a PivotTable UI component based on [PivotTable.js](https://github.com/nicolaskruchten/pivottable) library. The table component enables turning a data set into a summary table and manipulating it using 2D drag-and-drop UI.",
+      "category": "Add-on",
+      "tags": [
+        "UI"
+      ],
+      "vendor": "Haulmont",
+      "updateDateTime": 1628069218000,
+      "dependencies": [
+        {
+          "group": "io.jmix.ui",
+          "name": "jmix-pivot-table-starter"
+        },
+        {
+          "group": "io.jmix.ui",
+          "name": "jmix-ui-widgets"
+        },
+        {
+          "group": "io.jmix.ui",
+          "name": "jmix-pivot-table-widgets"
+        }
+      ],
+      "compatibilityList": [
+        {
+          "platformRequirement": "0.9",
+          "artifactVersions": [
+            "0.9.1"
+          ]
+        },
+        {
+          "platformRequirement": "1.0",
+          "artifactVersions": [
+            "1.0.1"
+          ]
+        }
+      ],
+      "commercial": false,
+      "weight": 760
+    },
+    {
+      "id": "imap",
+      "name": "IMAP",
+      "about": "Provides integration of email messaging via IMAP protocol.\n",
+      "description": "## Overview\n\nThe add-on provides integration of email messaging into any Jmix-based application via IMAP protocol. The component is designed to interact with incoming emails via Spring application events.\n\nYou can manipulate email boxes, handle emails, view and retrieve emails, search through them and operate with custom IMAP flags.\n\n## Features\n* Integration with any IMAP server.\n* API methods to connect to IMAP server and operate with emails.\n* User interface to configure IMAP connection, browse messages and events settings.\n* Predefined events for various updates processing.\n\n\n\n",
+      "category": "Add-on",
+      "tags": [
+        "Integration"
+      ],
+      "vendor": "Haulmont",
+      "updateDateTime": 1628071317000,
+      "dependencies": [
+        {
+          "group": "io.jmix.imap",
+          "name": "jmix-imap-starter"
+        },
+        {
+          "group": "io.jmix.imap",
+          "name": "jmix-imap-ui-starter"
+        }
+      ],
+      "compatibilityList": [
+        {
+          "platformRequirement": "0.3",
+          "artifactVersions": [
+            "0.3.2"
+          ]
+        },
+        {
+          "platformRequirement": "0.9",
+          "artifactVersions": [
+            "0.9.0"
+          ]
+        },
+        {
+          "platformRequirement": "1.0",
+          "artifactVersions": [
+            "1.0.1"
+          ]
+        }
+      ],
+      "commercial": false,
+      "weight": 900
+    },
+    {
+      "id": "aws-file-storage",
+      "name": "AWS File Storage",
+      "about": "A FileStorage implementation that stores data in Amazon S3.",
+      "description": "## Overview \nThe add-on provides a FileStorage implementation that stores data backed by file references in [Amazon S3](https://aws.amazon.com/s3/) storage.\n",
+      "category": "Add-on",
+      "tags": [
+        "Integration",
+        "System"
+      ],
+      "vendor": "Haulmont",
+      "updateDateTime": 1628068218000,
+      "dependencies": [
+        {
+          "group": "io.jmix.awsfs",
+          "name": "jmix-awsfs-starter"
+        }
+      ],
+      "compatibilityList": [
+        {
+          "platformRequirement": "0.3",
+          "artifactVersions": [
+            "0.3.0"
+          ]
+        },
+        {
+          "platformRequirement": "0.9",
+          "artifactVersions": [
+            "0.9.0"
+          ]
+        },
+        {
+          "platformRequirement": "1.0",
+          "artifactVersions": [
+            "1.0.1"
+          ]
+        }
+      ],
+      "commercial": false,
+      "weight": 665
+    },
+    {
+      "id": "email-sending",
+      "name": "Email",
+      "about": "Provides email sending functionality.",
+      "description": "## Overview\nThe addon provides email sending facilities.\n\n## Features\n- Synchronous or asynchronous sending. In case of synchronous sending, the calling code waits till the message is sent to the SMTP server. In case of asynchronous sending, the message is persisted to the database and the control is returned immediately to the calling code. The actual sending is done later by a scheduled task.\n- Reliable tracking of message sending timestamp or errors in the database for both synchronous and asynchronous modes.\n- User interface to search and view information about sent messages, including all message attributes and content, sending status and the number of attempts.",
+      "category": "Add-on",
+      "tags": [
+        "Features"
+      ],
+      "vendor": "Haulmont",
+      "updateDateTime": 1628071155000,
+      "dependencies": [
+        {
+          "group": "io.jmix.email",
+          "name": "jmix-email-starter"
+        },
+        {
+          "group": "io.jmix.email",
+          "name": "jmix-email-ui-starter"
+        }
+      ],
+      "compatibilityList": [
+        {
+          "platformRequirement": "0.2",
+          "artifactVersions": [
+            "0.2.0"
+          ]
+        },
+        {
+          "platformRequirement": "0.3",
+          "artifactVersions": [
+            "0.3.2"
+          ]
+        },
+        {
+          "platformRequirement": "0.9",
+          "artifactVersions": [
+            "0.9.0"
+          ]
+        },
+        {
+          "platformRequirement": "1.0",
+          "artifactVersions": [
+            "1.0.1"
+          ]
+        }
+      ],
+      "commercial": false,
+      "weight": 990
+    },
+    {
+      "id": "audit",
+      "name": "Audit",
+      "about": "Provides the Entity Log mechanism for tracking changes in your JPA entities.",
+      "description": "## Overview\n\nThe add-on provides the Entity Log mechanism for tracking changes in your JPA entities.\n\nIt records changes in entity attributes and provides a user interface for searching and displaying information about the changes:\n\n- What entity instance was changed.\n- Old and new values of changed attributes.\n- When it was changed.\n- Which user changed the entity.\n\n",
+      "category": "Add-on",
+      "tags": [
+        "Features"
+      ],
+      "vendor": "Haulmont",
+      "updateDateTime": 1628070989000,
+      "dependencies": [
+        {
+          "group": "io.jmix.audit",
+          "name": "jmix-audit-starter"
+        },
+        {
+          "group": "io.jmix.audit",
+          "name": "jmix-audit-ui-starter"
+        }
+      ],
+      "compatibilityList": [
+        {
+          "platformRequirement": "0.2",
+          "artifactVersions": [
+            "0.2.0"
+          ]
+        },
+        {
+          "platformRequirement": "0.3",
+          "artifactVersions": [
+            "0.3.2"
+          ]
+        },
+        {
+          "platformRequirement": "0.9",
+          "artifactVersions": [
+            "0.9.0"
+          ]
+        },
+        {
+          "platformRequirement": "1.0",
+          "artifactVersions": [
+            "1.0.1"
+          ]
+        }
+      ],
+      "commercial": false,
+      "weight": 950
+    },
+    {
+      "id": "data-tools",
+      "name": "Data Tools",
+      "about": "Provides a set of instruments for working with entities in the Backoffice UI.",
+      "description": "## Overview\n\n#### Entity Inspector\n\nEntity Inspector provides auto-generated UI for your data model entities. It allows you to browse, create, update and remove entity instances without creating any specific UI. Also, if your entity is soft-deleted, Entity Inspector lets you browse, restore or wipe out deleted instances.\n\nEntity Inspector respects data access constraints imposed by security, so it can be helpful both for administrators and for users with limited permissions.\n\n#### Entity Information Action\n\nA UI action that displays a system information about a selected entity. It includes the entity name, Java class, database table, identifier, and values of system attributes that constitute the entity traits.\n",
+      "category": "Add-on",
+      "tags": [
+        "Features"
+      ],
+      "vendor": "Haulmont",
+      "updateDateTime": 1628071133000,
+      "dependencies": [
+        {
+          "group": "io.jmix.datatools",
+          "name": "jmix-datatools-starter"
+        },
+        {
+          "group": "io.jmix.datatools",
+          "name": "jmix-datatools-ui-starter"
+        }
+      ],
+      "compatibilityList": [
+        {
+          "platformRequirement": "0.2",
+          "artifactVersions": [
+            "0.2.0"
+          ]
+        },
+        {
+          "platformRequirement": "0.3",
+          "artifactVersions": [
+            "0.3.2"
+          ]
+        },
+        {
+          "platformRequirement": "0.9",
+          "artifactVersions": [
+            "0.9.0"
+          ]
+        },
+        {
+          "platformRequirement": "1.0",
+          "artifactVersions": [
+            "1.0.1"
+          ]
+        }
+      ],
+      "commercial": false,
+      "weight": 980
+    },
+    {
+      "id": "dynamic-attributes",
+      "name": "Dynamic Attributes",
+      "about": "Additional entity attributes that extend the data model on the fly.",
+      "description": "## Overview\nDynamic attributes are additional entity attributes that extend the data model without changing the database schema and restarting the application. It allows you to define new entity properties at the deployment or production stage.\n\nDynamic attributes are stored in the [main data store](https://docs.jmix.io/jmix/latest/data-model/data-stores.html#main) in an Entity-Attribute-Value structure. The framework automatically loads and saves values of dynamic attributes together with entity instances.\n\nUsers can view and edit dynamic attributes in tables and forms of existing application screens in [Backoffice UI](https://docs.jmix.io/jmix/latest/backoffice-ui/index.html).\n\nJmix provides UI to configure dynamic attributes. An administrator can define a name, a type, validation rules, and specify what UI screens and visual components will display a dynamic attribute.",
+      "category": "Add-on",
+      "tags": [
+        "Features"
+      ],
+      "vendor": "Haulmont",
+      "updateDateTime": 1628070194000,
+      "dependencies": [
+        {
+          "group": "io.jmix.dynattr",
+          "name": "jmix-dynattr-starter"
+        },
+        {
+          "group": "io.jmix.dynattr",
+          "name": "jmix-dynattr-ui-starter"
+        }
+      ],
+      "compatibilityList": [
+        {
+          "platformRequirement": "0.2",
+          "artifactVersions": [
+            "0.2.0"
+          ]
+        },
+        {
+          "platformRequirement": "0.3",
+          "artifactVersions": [
+            "0.3.2"
+          ]
+        },
+        {
+          "platformRequirement": "0.9",
+          "artifactVersions": [
+            "0.9.0"
+          ]
+        },
+        {
+          "platformRequirement": "1.0",
+          "artifactVersions": [
+            "1.0.1"
+          ]
+        }
+      ],
+      "commercial": false,
+      "weight": 960
+    },
+    {
+      "id": "rest-api",
+      "name": "REST API",
+      "about": "A generic REST API that allows you to work with entities and services.",
+      "description": "## Overview\nJmix provides a generic REST API that allows you to work with data model entities and business services without writing REST controllers on the backend. It automatically exposes endpoints for the following functionality:\n\n- CRUD operations on entities.\n- Calling of registered service methods.\n- Execution of predefined JPQL queries.\n- Uploading and downloading files.\n- Returning information about the data model.\n- Returning information about the current user and their permissions.\n\nREST API uses the OAuth2 protocol for authentication and supports anonymous access. All REST API endpoints respect data access constraints imposed by [security](https://docs.jmix.io/jmix/latest/security/index.html).\n\n\n",
+      "category": "Add-on",
+      "tags": [
+        "Integration"
+      ],
+      "vendor": "Haulmont",
+      "updateDateTime": 1628070546000,
+      "dependencies": [
+        {
+          "group": "io.jmix.rest",
+          "name": "jmix-rest-starter"
+        },
+        {
+          "group": "io.jmix.security",
+          "name": "jmix-security-oauth2-starter"
+        }
+      ],
+      "compatibilityList": [
+        {
+          "platformRequirement": "0.2",
+          "artifactVersions": [
+            "0.2.0"
+          ]
+        },
+        {
+          "platformRequirement": "0.3",
+          "artifactVersions": [
+            "0.3.2"
+          ]
+        },
+        {
+          "platformRequirement": "0.9",
+          "artifactVersions": [
+            "0.9.0"
+          ]
+        },
+        {
+          "platformRequirement": "1.0",
+          "artifactVersions": [
+            "1.0.1"
+          ]
+        }
+      ],
+      "commercial": false,
+      "weight": 1000
+    },
+    {
+      "id": "maps",
+      "name": "Maps",
+      "about": "Enriches your application with visual representation for spatial data.",
+      "description": "## Overview\n\nThe add-on helps you to enrich your application with visual representation and intuitive manipulation for spatial data. You can use a preferable map provider that meets your needs.\n\nThe component integrates spatial types (point, polyline, polygon) from [JTS Topology Suite (JTS)](https://locationtech.github.io/jts/) — the most popular Java library for working with spatial data.\n\nThe add-on supports a traditional multi-layer structure commonly used in professional GIS systems. The layers are represented as structural units of maps.\n\nYou can use the following types of layers:\n- Raster layers that consist of raster images. Can be provided by XYZ tiles services or Web Map Services.\n- Vector layers that contain geo-objects — entities with geometry attributes.\n\nThe add-on supports drawing and interactive editing of geo-entities and provides features for geoanalysis: heatmaps and clustering.",
+      "category": "Add-on",
+      "tags": [
+        "UI"
+      ],
+      "vendor": "Haulmont",
+      "updateDateTime": 1628071177000,
+      "dependencies": [
+        {
+          "group": "io.jmix.maps",
+          "name": "jmix-maps-starter"
+        },
+        {
+          "group": "io.jmix.maps",
+          "name": "jmix-maps-ui-starter"
+        },
+        {
+          "group": "io.jmix.ui",
+          "name": "jmix-ui-widgets"
+        },
+        {
+          "group": "io.jmix.maps",
+          "name": "jmix-maps-ui-widgets"
+        }
+      ],
+      "compatibilityList": [
+        {
+          "platformRequirement": "0.3",
+          "artifactVersions": [
+            "0.3.2"
+          ]
+        },
+        {
+          "platformRequirement": "0.9",
+          "artifactVersions": [
+            "0.9.0"
+          ]
+        },
+        {
+          "platformRequirement": "1.0",
+          "artifactVersions": [
+            "1.0.1"
+          ]
+        }
+      ],
+      "commercial": true,
+      "weight": 980
+    },
+    {
+      "id": "grid-export-actions",
+      "name": "Grid Export Actions",
+      "about": "The add-on provides actions that allow to export contents of table and grid components as a file in one of supported formats.",
+      "description": "## Overview\n\nThe add-on provides actions that allow user to export contents of table and grid components as a file in one of supported formats.\nExport formats: XLS, XLSX and JSON.\nSupported components: Table, GroupTable, TreeTable, DataGrid, TreeDataGrid, Tree.\n",
+      "category": "Add-on",
+      "tags": [
+        "Features"
+      ],
+      "vendor": "Haulmont",
+      "updateDateTime": 1628069239000,
+      "dependencies": [
+        {
+          "group": "io.jmix.ui",
+          "name": "jmix-ui-export-starter"
+        }
+      ],
+      "compatibilityList": [
+        {
+          "platformRequirement": "0.2",
+          "artifactVersions": [
+            "0.2.0"
+          ]
+        },
+        {
+          "platformRequirement": "0.3",
+          "artifactVersions": [
+            "0.3.2"
+          ]
+        },
+        {
+          "platformRequirement": "0.9",
+          "artifactVersions": [
+            "0.9.1"
+          ]
+        },
+        {
+          "platformRequirement": "1.0",
+          "artifactVersions": [
+            "1.0.1"
+          ]
+        }
+      ],
+      "commercial": false,
+      "weight": 1
+    },
+    {
+      "id": "simplified-chinese-translation",
+      "name": "Simplified Chinese Translation",
+      "about": "Simplified Chinese translation of the framework.",
+      "description": "## Overview \nThis add-on provides the Simplified Chinese translation of the framework messages and the localized set of data formats.\n\n## Usage\nAfter installation, add Chinese (China) (zh_CN) locale using the Locales tab of the Project Properties window in Studio.",
+      "category": "Translation",
+      "tags": [
+        "Localization"
+      ],
+      "vendor": "Haulmont",
+      "updateDateTime": 1628072063000,
+      "dependencies": [
+        {
+          "group": "io.jmix.translations",
+          "name": "jmix-translations-zh-cn"
+        }
+      ],
+      "compatibilityList": [
+        {
+          "platformRequirement": "1.0",
+          "artifactVersions": [
+            "1.0.1"
+          ]
+        }
+      ],
+      "commercial": false,
+      "weight": 1
+    },
+    {
+      "id": "search",
+      "name": "Search",
+      "about": "Integration with Elasticsearch for full-text search in your data.",
+      "description": "## Overview\n\nThe add-on provides a complete solution for indexing and searching through your entities and uploaded files. It is based on Elasticsearch and supports the following features:\n\n- Defining Elasticsearch indexes for your data model declaratively in Java.\n- Automatic reindexing of changed data.\n- Applying access control to the retrieved data.\n- Java API for indexing and searching.\n- UI components that allow you to easily use search from your Backoffice UI screens.\n- Ability to use a standalone Elasticsearch or Amazon Elasticsearch Service.\n\n\nCAUTION: The add-on currently has experimental status and may introduce breaking changes in the next feature release.",
+      "category": "Add-on",
+      "tags": [
+        "Integration",
+        "Features"
+      ],
+      "vendor": "Haulmont",
+      "updateDateTime": 1628071497000,
+      "dependencies": [
+        {
+          "group": "io.jmix.search",
+          "name": "jmix-search-starter"
+        },
+        {
+          "group": "io.jmix.search",
+          "name": "jmix-search-ui-starter"
+        }
+      ],
+      "compatibilityList": [
+        {
+          "platformRequirement": "1.0",
+          "artifactVersions": [
+            "1.0.1"
+          ]
+        }
+      ],
+      "commercial": false,
+      "weight": 1
+    },
+    {
+      "id": "reports",
+      "name": "Reports",
+      "about": "Integrated report generator.",
+      "description": "## Overview\n\nThe add-on provides a complete solution for report generation in Jmix applications. It supports the following features:\n\n- Generating reports from templates created in office formats (DOCX, XLSX, ODT) or HTML.\n- Defining the report data sources at runtime using a step-by-step wizard or by manually coding SQL, JPQL or Groovy scripts.\n- Generating output documents in office formats or HTML, and converting them to PDF.\n- Creating complex XLSX reports: multi-tiered reports, reports with data aggregation, crosstab reports.\n- Using diagrams and formulas in XLSX reports.\n- Saving and viewing report execution history.\n- Report access rights.\n- REST API to execute reports.",
+      "category": "Add-on",
+      "tags": [
+        "Features"
+      ],
+      "vendor": "Haulmont",
+      "updateDateTime": 1628071366000,
+      "dependencies": [
+        {
+          "group": "io.jmix.reports",
+          "name": "jmix-reports-starter"
+        },
+        {
+          "group": "io.jmix.reports",
+          "name": "jmix-reports-ui-starter"
+        },
+        {
+          "group": "io.jmix.reports",
+          "name": "jmix-reports-rest-starter"
+        }
+      ],
+      "compatibilityList": [
+        {
+          "platformRequirement": "1.0",
+          "artifactVersions": [
+            "1.0.1"
+          ]
+        }
+      ],
+      "commercial": false,
+      "weight": 1
+    },
+    {
+      "id": "multitenancy",
+      "name": "Multitenancy",
+      "about": "Support for multitenant applications with a single database.",
+      "description": "## Overview\n\nThe add-on provides support for building multitenant applications with a single database.\n\nThe add-on supports two types of data:\n\n- common data - shared across tenants. Tenants have read-only access to this type of data;\n- tenant-specific data - not accessible to other tenants. Tenants have full access to this type of data.\n\nAll tenants have their own admin users which can create tenant users and assign tenant-specific roles.",
+      "category": "Add-on",
+      "tags": [
+        "System"
+      ],
+      "vendor": "Haulmont",
+      "updateDateTime": 1628071979000,
+      "dependencies": [
+        {
+          "group": "io.jmix.multitenancy",
+          "name": "jmix-multitenancy-starter"
+        },
+        {
+          "group": "io.jmix.multitenancy",
+          "name": "jmix-multitenancy-ui-starter"
+        }
+      ],
+      "compatibilityList": [
+        {
+          "platformRequirement": "1.0",
+          "artifactVersions": [
+            "1.0.1"
+          ]
+        }
+      ],
+      "commercial": false,
+      "weight": 1
+    },
+    {
+      "id": "ldap",
+      "name": "LDAP",
+      "about": "Enables LDAP authentication in Jmix applications.",
+      "description": "## Overview\n\nThe add-on provides an easy way to enable LDAP authentication in Jmix applications. It allows you to synchronize users and map LDAP groups and user attributes to Jmix security roles. The add-on also supports the case when users are managed only in LDAP and you don't have a user entity stored in the database.\n\nYou can use the add-on with Active Directory and with any other LDAP implementation.\n\nCAUTION: The add-on currently has experimental status and may introduce breaking changes in the next feature release.",
+      "category": "Add-on",
+      "tags": [
+        "Integration",
+        "Security"
+      ],
+      "vendor": "Haulmont",
+      "updateDateTime": 1628071843000,
+      "dependencies": [
+        {
+          "group": "io.jmix.ldap",
+          "name": "jmix-ldap-starter"
+        }
+      ],
+      "compatibilityList": [
+        {
+          "platformRequirement": "1.0",
+          "artifactVersions": [
+            "1.0.1"
+          ]
+        }
+      ],
+      "commercial": false,
+      "weight": 1
+    },
+    {
+      "id": "grapesjs",
+      "name": "GrapesJS",
+      "about": "A visual HTML editor based on the GrapesJS library.",
+      "description": "## Overview\nThe add-on provides a visual HTML editor based on a [GrapesJS](https://grapesjs.com/) JavaScript library with the extensive set of HTML elements. It allows building HTML templates without any knowledge of coding.</p>\n\nAll you need is to drag an element into the canvas. The wide range of options enables independent styling of any element inside the canvas.\n\nTree of elements is always available to control the structure. Also, you can edit HTML code manually or upload code from the file.\n\n## Features\n\n* Wide variety of built-in HTML elements.\n* Viewing representation for different devices.\n* Using CSS properties.\n* Downloading/uploading HTML code.",
+      "category": "Add-on",
+      "tags": [
+        "UI"
+      ],
+      "vendor": "Haulmont",
+      "updateDateTime": 1628071157000,
+      "dependencies": [
+        {
+          "group": "io.jmix.grapesjs",
+          "name": "jmix-grapesjs-starter"
+        }
+      ],
+      "compatibilityList": [
+        {
+          "platformRequirement": "0.3",
+          "artifactVersions": [
+            "0.3.2"
+          ]
+        },
+        {
+          "platformRequirement": "0.9",
+          "artifactVersions": [
+            "0.9.0"
+          ]
+        },
+        {
+          "platformRequirement": "1.0",
+          "artifactVersions": [
+            "1.0.1"
+          ]
+        }
+      ],
+      "commercial": false,
+      "weight": 10
+    }
+  ]
+}

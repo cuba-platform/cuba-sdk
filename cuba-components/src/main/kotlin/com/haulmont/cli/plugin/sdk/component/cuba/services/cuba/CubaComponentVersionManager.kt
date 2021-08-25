@@ -14,19 +14,13 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.cli.plugin.sdk.dto
+package com.haulmont.cli.plugin.sdk.component.cuba.services.cuba
 
-data class MarketplaceAddon(
-    val id: String,
-    val name: String,
-    val about: String,
-    val description: String,
-    val category: String,
-    val tags: List<String>,
-    val vendor: String,
-    val updateDateTime: Long,
-    val groupId: String,
-    val artifactId: String,
-    var compatibilityList: List<MarketplaceAddonCompatibility>,
-    val commercial: Boolean
-)
+import com.haulmont.cuba.cli.plugin.sdk.dto.CubaMarketplaceAddon
+
+interface CubaComponentVersionManager {
+
+    fun addons(): List<CubaMarketplaceAddon>
+
+    fun load(loadCompletedFun: (addons: List<CubaMarketplaceAddon>) -> Unit)
+}

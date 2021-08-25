@@ -69,15 +69,15 @@ class LicenseCommand : AbstractSdkCommand() {
             val login = it[0]
             val password = it[1]
 
-            repositoryManager.removeRepository("cuba-bintray-premium",RepositoryTarget.SOURCE)
-            repositoryManager.addRepository(
-                Repository(
-                    name = "cuba-bintray-premium",
-                    type = RepositoryType.BINTRAY,
-                    url = "https://cuba-platform.bintray.com/premium",
-                    authentication = Authentication("$login@cuba-platform", password)
-                ), RepositoryTarget.SOURCE
-            )
+//            repositoryManager.removeRepository("cuba-bintray-premium",RepositoryTarget.SOURCE)
+//            repositoryManager.addRepository(
+//                Repository(
+//                    name = "cuba-bintray-premium",
+//                    type = RepositoryType.BINTRAY,
+//                    url = "https://cuba-platform.bintray.com/premium",
+//                    authentication = Authentication("$login@cuba-platform", password)
+//                ), RepositoryTarget.SOURCE
+//            )
 
             repositoryManager.removeRepository("cuba-nexus-premium",RepositoryTarget.SOURCE)
             repositoryManager.addRepository(
@@ -85,6 +85,16 @@ class LicenseCommand : AbstractSdkCommand() {
                     name = "cuba-nexus-premium",
                     type = RepositoryType.NEXUS2,
                     url = "https://repo.cuba-platform.com/content/groups/premium",
+                    authentication = Authentication(login, password)
+                ), RepositoryTarget.SOURCE
+            )
+
+            repositoryManager.removeRepository("jmix-premium", RepositoryTarget.SOURCE)
+            repositoryManager.addRepository(
+                Repository(
+                    name = "jmix-premium",
+                    type = RepositoryType.NEXUS3,
+                    url = "https://global.repo.jmix.io/service/rest/repository/browse/premium/",   // Is it correct URL?
                     authentication = Authentication(login, password)
                 ), RepositoryTarget.SOURCE
             )

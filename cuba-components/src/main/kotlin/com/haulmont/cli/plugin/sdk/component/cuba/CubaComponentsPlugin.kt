@@ -23,6 +23,8 @@ import com.haulmont.cli.core.event.InitPluginEvent
 import com.haulmont.cli.plugin.sdk.component.cuba.commands.LicenseCommand
 import com.haulmont.cli.plugin.sdk.component.cuba.providers.CubaAddonProvider
 import com.haulmont.cli.plugin.sdk.component.cuba.providers.CubaFrameworkProvider
+import com.haulmont.cli.plugin.sdk.component.cuba.providers.JmixAddonProvider
+import com.haulmont.cli.plugin.sdk.component.cuba.providers.JmixFrameworkProvider
 import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.templates.ComponentRegistry
 import org.kodein.di.generic.instance
@@ -36,10 +38,13 @@ class CubaComponentsPlugin : CliPlugin {
     @Subscribe
     fun onInit(event: InitPluginEvent) {
         System.setProperty("deployment.security.TLSv1.2", "true");
-        System.setProperty("https.protocols", "TLSv1.2");
+        System.setProperty("deployment.security.TLSv1.3", "true");
+        System.setProperty("jdk.tls.acknowledgeCloseNotify", "true")
+        System.setProperty("https.protocols", "TLSv1.2,TLSv1.3");
 
         componentRegistry.addProviders(
-            CubaAddonProvider(), CubaFrameworkProvider()
+            CubaAddonProvider(), CubaFrameworkProvider(),
+            JmixAddonProvider(), JmixFrameworkProvider()
         )
 
         componentRegistry.providers().forEach {

@@ -20,7 +20,7 @@ import com.haulmont.cuba.cli.plugin.sdk.commands.artifacts.NameVersion
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 
-open class LibProvider : BintraySearchComponentProvider() {
+open class LibProvider : NexusSearchComponentProvider("https://nexus.cuba-platform.cn/service/rest/v1/search?repository=cuba&") {
 
     override fun getType() = "lib"
 

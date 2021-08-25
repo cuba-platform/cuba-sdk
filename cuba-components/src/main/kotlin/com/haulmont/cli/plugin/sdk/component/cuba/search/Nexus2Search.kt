@@ -25,7 +25,7 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 
 class Nexus2Search(repository: Repository) : AbstractRepositorySearch(repository) {
-    override fun searchParameters(component: Component): List<Pair<String, String>> {
+    override fun searchParameters(component: Component, searchUrl: String): List<Pair<String, String>> {
         return listOf(
             "g" to component.groupId,
             "a" to ((component as CubaComponent).globalModule()?.artifactId?.substringBefore("-global") ?: ""),

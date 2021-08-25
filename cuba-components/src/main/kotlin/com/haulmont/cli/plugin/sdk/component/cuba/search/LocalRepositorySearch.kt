@@ -24,7 +24,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 class LocalRepositorySearch(repository: Repository) : AbstractRepositorySearch(repository) {
-    override fun searchParameters(component: Component): List<Pair<String, String>> {
+    override fun searchParameters(component: Component, searchUrl: String): List<Pair<String, String>> {
         return emptyList()
     }
 

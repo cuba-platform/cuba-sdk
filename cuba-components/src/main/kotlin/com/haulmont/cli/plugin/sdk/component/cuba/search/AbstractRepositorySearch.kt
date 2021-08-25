@@ -36,7 +36,7 @@ abstract class AbstractRepositorySearch : RepositorySearch {
         this.repository = repository
     }
 
-    abstract fun searchParameters(component: Component): List<Pair<String, String>>
+    abstract fun searchParameters(component: Component, searchUrl: String): List<Pair<String, String>>
 
     override fun search(component: Component): Component? {
         val result = createSearchRequest(repository.url, component)
@@ -67,7 +67,7 @@ abstract class AbstractRepositorySearch : RepositorySearch {
     ): Component?
 
     internal fun createSearchRequest(searchUrl: String, component: Component): Request {
-        return searchUrl.httpGet(searchParameters(component))
+        return searchUrl.httpGet(searchParameters(component, searchUrl))
             .authorizeIfRequired(repository)
             .header(Headers.CONTENT_TYPE, "application/json")
             .header(Headers.ACCEPT, "application/json")
