@@ -277,7 +277,7 @@ task bundle(dependsOn: jarPatch, group: 'distribution', description: 'Builds bun
 
             commandLine(
                     "${javaHome}/bin/jlink",
-                    '--module-path', (["${targetOsJavaHome}/jmods"] + ext.appModulePaths).grep().join(File.pathSeparator),
+                    '--module-path', (["${javaHome}/jmods"] + ext.appModulePaths).grep().join(File.pathSeparator),
                     '--add-modules', moduleName,
                     '--output', bundleOutput,
                     '--launcher', "cuba-sdk=$mainClassModuleName/$mainClassName",

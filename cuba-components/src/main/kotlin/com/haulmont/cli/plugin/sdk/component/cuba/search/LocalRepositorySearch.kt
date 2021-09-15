@@ -17,14 +17,17 @@
 package com.haulmont.cli.plugin.sdk.component.cuba.search
 
 import com.google.gson.JsonElement
+import com.haulmont.cli.plugin.sdk.component.cuba.dto.JmixComponent
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.stream.Collectors
+import kotlin.streams.toList
 
 class LocalRepositorySearch(repository: Repository) : AbstractRepositorySearch(repository) {
-    override fun searchParameters(component: Component): List<Pair<String, String>> {
+    override fun searchParameters(component: Component, searchUrl: String): List<Pair<String, String>> {
         return emptyList()
     }
 
@@ -38,7 +41,12 @@ class LocalRepositorySearch(repository: Repository) : AbstractRepositorySearch(r
         }
         val baseDir = baseSearchPath.toFile()
         val componentsList = mutableListOf<Component>()
-        baseDir.listFiles()?.let { list ->
+
+        val filesList = baseDir.listFiles()
+
+
+
+        filesList?.let { list ->
             list.filter { it.isDirectory }
                 .forEach { componentDir ->
                     val componentName = componentDir.name

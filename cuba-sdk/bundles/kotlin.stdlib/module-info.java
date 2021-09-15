@@ -7,7 +7,7 @@ open module kotlin.stdlib {
     exports kotlin.comparisons;
     exports kotlin.concurrent;
     exports kotlin.internal;
-    exports kotlin.coroutines.experimental;
+    exports kotlin.coroutines;
     exports kotlin.experimental;
     exports kotlin.io;
     exports kotlin.jvm;

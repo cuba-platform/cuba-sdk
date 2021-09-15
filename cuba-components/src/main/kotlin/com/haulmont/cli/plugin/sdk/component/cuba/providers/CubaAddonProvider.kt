@@ -20,25 +20,22 @@ import com.haulmont.cli.core.localMessages
 import com.haulmont.cli.core.prompting.Option
 import com.haulmont.cli.plugin.sdk.component.cuba.di.cubaComponentKodein
 import com.haulmont.cli.plugin.sdk.component.cuba.dto.CubaComponent
-import com.haulmont.cli.plugin.sdk.component.cuba.services.ComponentVersionManager
+import com.haulmont.cli.plugin.sdk.component.cuba.services.cuba.CubaComponentVersionManager
 import com.haulmont.cuba.cli.plugin.sdk.commands.artifacts.NameVersion
-import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
-import com.haulmont.cuba.cli.plugin.sdk.dto.Component
-import com.haulmont.cuba.cli.plugin.sdk.dto.MarketplaceAddon
-import com.haulmont.cuba.cli.plugin.sdk.dto.MvnArtifact
+import com.haulmont.cuba.cli.plugin.sdk.dto.*
 import org.apache.maven.model.Dependency
 import org.kodein.di.generic.instance
 import java.util.logging.Logger
 
 class CubaAddonProvider : CubaProvider() {
 
-    internal val componentVersionsManager: ComponentVersionManager by cubaComponentKodein.instance<ComponentVersionManager>()
+    internal val cubaComponentVersionsManager: CubaComponentVersionManager by cubaComponentKodein.instance<CubaComponentVersionManager>()
 
     internal val messages by localMessages()
 
     private val log: Logger = Logger.getLogger(CubaAddonProvider::class.java.name)
 
-    override fun getType() = "addon"
+    override fun getType() = "cuba-addon"
 
     override fun getName() = "CUBA addon"
 
@@ -57,13 +54,13 @@ class CubaAddonProvider : CubaProvider() {
         )
     }
 
-    override fun components() = componentVersionsManager
+    override fun components() = cubaComponentVersionsManager
         .addons()
         .sortedBy { it.id }
         .map { initAddonTemplate(it, "\${version}") }
         .toList()
 
-    private fun initAddonTemplate(addon: MarketplaceAddon, version: String): Component {
+    private fun initAddonTemplate(addon: CubaMarketplaceAddon, version: String): Component {
         val packageName = addon.groupId
         val name = addon.artifactId.substringBefore("-global")
         val componentName = addon.id
@@ -80,6 +77,10 @@ class CubaAddonProvider : CubaProvider() {
         ).apply {
             if (componentName == "bproc") {
                 this.components.add(Component(packageName, "$name-modeler", version))
+            } else if (componentName == "maps") {
+                this.components.add(Component(packageName, "$name-web-toolkit", version).apply {
+                    classifiers.add(Classifier("web", "zip"))
+                })
             }
         }
     }
@@ -108,7 +109,7 @@ class CubaAddonProvider : CubaProvider() {
         )
     }
 
-    override fun versions(componentId: String?) = componentVersionsManager.addons()
+    override fun versions(componentId: String?) = cubaComponentVersionsManager.addons()
         .filter {
             it.id == componentId
         }
@@ -154,7 +155,7 @@ class CubaAddonProvider : CubaProvider() {
     }
 
     private fun searchInMarketplace(id: String? = null, groupId: String? = null, artifactId: String? = null) =
-        componentVersionsManager.addons()
+        cubaComponentVersionsManager.addons()
             .find { addon ->
                 addon.id == id || (addon.groupId == groupId && addon.artifactId == artifactId)
                         || (addon.groupId == groupId && addon.artifactId == "$artifactId-global")
@@ -200,7 +201,7 @@ class CubaAddonProvider : CubaProvider() {
     }
 
     override fun load() {
-        componentVersionsManager.load { }
+        cubaComponentVersionsManager.load { }
     }
 
 

@@ -55,7 +55,7 @@ class VelocityHelper {
 
     fun generate(input: String, templateName: String, bindings: Map<String, Any>): String {
         val vc = VelocityContext().apply {
-            bindings.forEach { k, v -> put(k, v) }
+            bindings.forEach { (k, v) -> put(k, v) }
         }
         return generate(input, templateName, vc)
     }

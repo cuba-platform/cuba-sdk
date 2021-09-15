@@ -26,8 +26,11 @@ import com.haulmont.cuba.cli.plugin.sdk.templates.ComponentRegistry
 import com.haulmont.cuba.cli.plugin.sdk.utils.VelocityHelper
 import com.haulmont.cuba.cli.plugin.sdk.utils.authorizeIfRequired
 import com.haulmont.cuba.cli.plugin.sdk.utils.performance
+import org.apache.maven.model.Dependency
+import org.apache.maven.model.Model
 import org.json.JSONObject
 import org.kodein.di.generic.instance
+import java.io.PrintWriter
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.concurrent.atomic.AtomicInteger
@@ -37,6 +40,8 @@ import java.util.stream.Collectors
 class ComponentManagerImpl : ComponentManager {
 
     private val log: Logger = Logger.getLogger(ComponentManagerImpl::class.java.name)
+
+    private val printWriter: PrintWriter by sdkKodein.instance<PrintWriter>()
 
     private val componentTemplates: ComponentTemplates by sdkKodein.instance<ComponentTemplates>()
     private val metadataHolder: MetadataHolder by sdkKodein.instance<MetadataHolder>()
@@ -308,7 +313,7 @@ class ComponentManagerImpl : ComponentManager {
 
             val additionalDependencies = performance("Search additional dependencies") {
                 artifactsStream(component.dependencies)
-                    .flatMap { searchAdditionalDependencies(it).stream() }
+                    .flatMap { searchAdditionalDependencies(it, null).stream() }
                     .collect(Collectors.toSet())
             }
 
@@ -357,39 +362,58 @@ class ComponentManagerImpl : ComponentManager {
         return emptyList()
     }
 
-    private fun searchAdditionalDependencies(artifact: MvnArtifact): List<MvnArtifact> {
+    private fun searchAdditionalDependencies(artifact: MvnArtifact, prevArtifact: MvnArtifact?): List<MvnArtifact> {
         try {
             val model = artifactManager.readPom(artifact)
-            if (model == null || model.dependencyManagement == null) return ArrayList()
-            return performance("Search additional dependencies") {
+            if (model == null) return ArrayList()
+
+            var parentArtifact = artifact
+
+            model.parent?.let {
+                parentArtifact = MvnArtifact(
+                    it.groupId, it.artifactId, it.version, mutableSetOf(Classifier.pom())
+                )
+            }
+
+            val artifactList = ArrayList<MvnArtifact>()
+
+            if (model.dependencyManagement == null) {
+                if (!parentArtifact.isSame(artifact)) {
+                    artifactList.add(parentArtifact)
+                    artifactList.addAll(searchAdditionalDependencies(parentArtifact, artifact))
+                    return artifactList
+                }
+
+                return ArrayList()
+            }
+
+            if (!parentArtifact.isSame(artifact)) {
+                artifactList.add(parentArtifact)
+                artifactList.addAll(searchAdditionalDependencies(parentArtifact, artifact))
+            }
+
+            artifactList.addAll(performance("Search additional dependencies") {
                 model.dependencyManagement.dependencies.stream()
                     .filter { it.type == "pom" }
                     .flatMap { dependency ->
-                        val version = if (dependency.version.startsWith("\${")) {
-                            val propertiesMap = HashMap<String, String>()
-                            for (entry in (model.properties.toMap() as Map<String, String>).entries) {
-                                propertiesMap.put(entry.key.replace(".", "_"), entry.value)
-                            }
-                            propertiesMap.put("project_version", model.version)
-                            val version = dependency.version.replace(".", "_")
-                            velocityHelper.generate(
-                                version,
-                                dependency.groupId,
-                                propertiesMap
-                            )
-                        } else {
-                            dependency.version
-                        }
-                        val artifactList = ArrayList<MvnArtifact>()
-                        val artifact = MvnArtifact(
+                        val version = getDependencyVersion(model, dependency)
+
+                        val depsArtifactList = ArrayList<MvnArtifact>()
+                        val dependencyArtifact = MvnArtifact(
                             dependency.groupId, dependency.artifactId, version,
                             classifiers = mutableSetOf(Classifier("", dependency.type ?: "jar"))
                         )
-                        artifactList.add(artifact)
-                        artifactList.addAll(searchAdditionalDependencies(artifact))
-                        return@flatMap artifactList.stream()
+
+                        if (prevArtifact == null || !dependencyArtifact.isSame(prevArtifact)) {
+                            depsArtifactList.add(dependencyArtifact)
+                            depsArtifactList.addAll(searchAdditionalDependencies(dependencyArtifact, artifact))
+                        }
+
+                        return@flatMap depsArtifactList.stream()
                     }.collect(Collectors.toList())
-            }
+            })
+
+            return artifactList
         } catch (e: Exception) {
             log.throwing(
                 ComponentManagerImpl::class.java.name,
@@ -412,4 +436,58 @@ class ComponentManagerImpl : ComponentManager {
         progressCount: Int,
         component: Component
     ) = progressCount * localProgress(component)
+
+    private fun getDependencyVersion(model: Model, dependency: Dependency): String {
+
+        if (dependency.version.startsWith("\${")) {
+            val propertiesMap = HashMap<String, String>()
+            for (entry in (model.properties.toMap() as Map<String, String>).entries) {
+                propertiesMap.put(entry.key.replace(".", "_"), entry.value)
+            }
+            propertiesMap.put("project_version", model.version)
+            val version = dependency.version.replace(".", "_")
+
+            val resolvedVersion = velocityHelper.generate(
+                version,
+                dependency.groupId,
+                propertiesMap
+            )
+
+            if (resolvedVersion == version) {
+
+                if (model.parent != null) {
+                    model.parent.let {
+                        val parentArtifact = MvnArtifact(
+                            it.groupId, it.artifactId, it.version, mutableSetOf(Classifier.pom())
+                        )
+                        val parentModel = artifactManager.readPom(parentArtifact)
+
+                        if (parentModel != null) {
+                            return getDependencyVersion(parentModel, dependency)
+                        } else {
+                            log.throwing(
+                                ComponentManagerImpl::class.java.name,
+                                "Error on reading pom file for ${parentArtifact.mvnCoordinates()}",
+                                Exception()
+                            )
+                            return version
+                        }
+
+                    }
+                } else {
+                    log.throwing(
+                        ComponentManagerImpl::class.java.name,
+                        "Error: parent for dependency ${dependency} is absent",
+                        Exception()
+                    )
+                    return version
+                }
+            } else {
+                return resolvedVersion
+            }
+        }
+
+        return dependency.version
+
+    }
 }

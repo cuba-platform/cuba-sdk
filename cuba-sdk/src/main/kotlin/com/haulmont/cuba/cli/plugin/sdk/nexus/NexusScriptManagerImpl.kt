@@ -17,13 +17,14 @@
 package com.haulmont.cuba.cli.plugin.sdk.nexus
 
 import com.github.kittinunf.fuel.core.Response
+import com.github.kittinunf.fuel.core.extensions.authenticate
+import com.github.kittinunf.fuel.core.extensions.authentication
 import com.github.kittinunf.fuel.httpDelete
 import com.github.kittinunf.fuel.httpPost
 import com.haulmont.cuba.cli.plugin.sdk.SdkPlugin
 import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
 import com.haulmont.cuba.cli.plugin.sdk.utils.Headers
-import com.haulmont.cuba.cli.plugin.sdk.utils.header
 import org.json.JSONObject
 import org.kodein.di.generic.instance
 
@@ -46,9 +47,10 @@ class NexusScriptManagerImpl : NexusScriptManager {
         val (_, response, _) =
             "${sdkSettings["repository.url"]}service/rest/v1/script"
                 .httpPost()
-                .authenticate(login, password)
+                .authentication().basic(login, password)
                 .header(Headers.ACCEPT, "application/json")
-                .jsonBody(jsonObject.toString())
+                .header(Headers.CONTENT_TYPE, "application/json")
+                .body(jsonObject.toString())
                 .response()
         return response
     }
@@ -57,11 +59,12 @@ class NexusScriptManagerImpl : NexusScriptManager {
         val (_, response, _) =
             "${sdkSettings["repository.url"]}service/rest/v1/script/$name/run"
                 .httpPost()
-                .authenticate(login, password)
+                .authentication().basic(login, password)
                 .header(Headers.ACCEPT, "application/json")
                 .header(Headers.CACHE_CONTROL, "no-cache")
+                .header(Headers.CONTENT_TYPE, "application/json")
                 .also { request ->
-                    jsonObject?.let { request.jsonBody(jsonObject.toString()) }
+                    jsonObject?.let { request.body(jsonObject.toString()) }
                 }
                 .response()
         return response
@@ -71,7 +74,7 @@ class NexusScriptManagerImpl : NexusScriptManager {
         val (_, response, _) =
             "${sdkSettings["repository.url"]}service/rest/v1/script/${name}"
                 .httpDelete()
-                .authenticate(login, password)
+                .authentication().basic(login, password)
                 .header(Headers.ACCEPT, "application/json")
                 .response()
         return response

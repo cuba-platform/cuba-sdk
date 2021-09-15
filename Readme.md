@@ -22,7 +22,7 @@
 # 1. Overview <a name="overview"></a>
 
 CUBA SDK is a command-line tool that provides an ability to resolve, export and upload to an external repository all dependencies 
-for CUBA framework, add-ons or any external library with a few simple commands. SDK can be used as an embedded repository. This tool has a built-in [Nexus 3 repository](https://www.sonatype.com/nexus-repository-oss). 
+for CUBA and Jmix frameworks, add-ons or any external library with a few simple commands. SDK can be used as an embedded repository. This tool has a built-in [Nexus 3 repository](https://www.sonatype.com/nexus-repository-oss). 
 
 CUBA SDK is a useful tool if it is required to develop applications with a limited network environment. 
 
@@ -133,10 +133,9 @@ SDK tool has three repository scopes:
 By default the following repositories are configured:
 - **source scope:**
   - Local `m2`
-  - Jcenter
   - Maven central
-  - CUBA Bintray
   - CUBA Nexus   
+  - Jmix Nexus
 - **target scope:**
   - repository configured in `setup` command 
     
@@ -158,8 +157,8 @@ By default the following repositories are configured:
 ### Component Commands 
 
 List command prints a list of resolved and installed components:
-- `list cuba`
-- `list addon`
+- `list cuba`/`list jmix`
+- `list cuba-addon`/`list jmix-addon`
 - `list lib`
 
 Component coordinates for framework and add-on component commands can be configured as:
@@ -172,33 +171,33 @@ Example: `push cuba 7.1.3`
  
 Resolve command finds and downloads all component dependencies to local Gradle cache. If an add-on depends on other add-ons, then SDK will ask to resolve additional add-ons too. This feature can be disabled with `--nra` or `--not-resolve-addons` additional parameters. 
 - `resolve` - bulk command for the list of frameworks, add-ons, and libs.
-- `resolve cuba`
-- `resolve addon`
+- `resolve cuba`/`resolve jmix`
+- `resolve cuba-addon`/`resolve jmix-addon`
 - `resolve lib`
 
-Push command uploads resolved components with dependencies to all *target* repositories. Specific target repository can be configured with `--r` or `--repository` additional parameters, for example, `push addon dashboard --r sdk2`.
+Push command uploads resolved components with dependencies to all *target* repositories. Specific target repository can be configured with `--r` or `--repository` additional parameters, for example, `push cuba-addon dashboard --r sdk2`.
 - `push` - bulk command for the list of frameworks, add-ons, and libs.  
-- `push cuba`
-- `push addon <name>`
+- `push cuba`/`push jmix`
+- `push cuba-addon <name>`/`push jmix-addon <name>`
 - `push lib`
 
-Install command resolves and pushes components. Specific target repository can be configured with `--r` or `--repository` additional parameters, for example, `push addon dashboard --r sdk2`.
+Install command resolves and pushes components. Specific target repository can be configured with `--r` or `--repository` additional parameters, for example, `install cuba-addon dashboard --r sdk2`.
 - `install` - bulk command for the list of frameworks, add-ons, and libs. 
-- `install cuba`
-- `install addon`
+- `install cuba`/`install jmix`
+- `install cuba-addon`/`install jmix-addon`
 - `install lib`
 
 Remove command removes the component with dependencies from the local *m2* repository and the embedded Nexus repository. If `--local-only` flag is provided, then the component will be removed only from the local *m2* repository.  
-- `remove cuba`
-- `remove addon`
+- `remove cuba`/`remove jmix`
+- `remove cuba-addon`/`remove jmix-addon`
 - `remove lib`
 
-Component coordinates for bulk commands can be passed with ','. For example: `install --c cuba-7.2.1,addon-dashboard:3.2.1`.
+Component coordinates for bulk commands can be passed with ','. For example: `install --c cuba-7.2.1,cuba-addon-dashboard:3.2.1`.
 
 Export command exports the component with dependencies as an archive to the `sdkproperties[sdk.export.home]` directory. If the component is not resolved yet, then SDK will ask to resolve the component.  
 - `export` - exports all resolved SDK components.
-- `export cuba`
-- `export addon`
+- `export cuba`/`export jmix`
+- `export cuba-addon`/`export jmix-addon`
 - `export lib`
     
 Import command imports exported SDK archive to the current SDK and upload it to *sdk* repositories. Specific target repository can be configured with `--r` or `--repository` additional parameters, for example, `import --r sdk2`. If the `--no-upload` additional parameter is presented, then SDK archive will be imported only to the local *m2* repository.
@@ -221,7 +220,7 @@ Configured SDK settings by default are located in the `<User.home>/cli/sdk/sdk.p
 - `repository.url` - repository URL, for embedded Nexus this property will point to nexus Web UI.
 - `repository.name` - repository name.
 - `repository.path` - path, where embedded Nexus repository is installed.
-- `repository.login -  repository user login.
+- `repository.login` -  repository user login.
 - `repository.password` - repository user password.
 
 *SDK metadata*
@@ -319,7 +318,7 @@ As an example let's use the case when we need to download and push to the local 
 
   This command resolves and pushes components to all target repositories.
 
-5. To install an add-on, run the `install addon dashboard` command and select the version.
+5. To install an add-on, run the `install cuba-addon dashboard` command and select the version.
 
   ![dashboard](img/dashboard.png)
 
@@ -331,7 +330,7 @@ As an example let's use the case when we need to download and push to the local 
 
   ![key](img/key.png)
 
-6. To grant access to the installed artifacts for your project, add the line with the repository into `build.gradle` file of your project.
+6. To grant access to the installed artifacts for your project, add the line with the repository into `build.gradle` file of your CUBA project.
 
 ```
 buildscript {
@@ -348,6 +347,11 @@ buildscript {
 }
 ```
 
+**NB**: as Jmix projects contain a newer Gradle Wrapper than CUBA projects do (by default), it is necessary to add `allowInsecureProtocol(true)`
+line to the local Nexus OSS repository declaration in `build.gradle`. Thus, the access to the repository artifacts via the HTTP protocol is granted. 
+****The other steps for organizing the local repository for work with Jmix
+projects and addons are the same as for CUBA except of replacing `cuba` with `jmix` in CLI commands.****
+
 ## How to Export Artifacts
 
 Exporting artifacts can be useful when you are going to work in an isolated network or a network with weak internet access. Then you can export artifacts to the archive and transfer them to the computer in the isolated network.
@@ -358,7 +362,7 @@ Exporting artifacts can be useful when you are going to work in an isolated netw
 
   ![export](img/export.png)
 
-In case you need to export only a particular component use commands `export addon`, `export cuba` or `export lib`.
+In case you need to export only a particular component use commands `export cuba-addon`/`export jmix-addon`, `export cuba`/`export jmix` or `export lib`.
 
 3. Finally, find the archive in the `<home>/export` directory and transfer it to the required environment.
 

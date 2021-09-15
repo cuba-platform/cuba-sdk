@@ -16,7 +16,6 @@
 
 package com.haulmont.cli.plugin.sdk.component.cuba.providers
 
-import com.haulmont.cli.plugin.sdk.component.cuba.di.cubaComponentKodein
 import com.haulmont.cli.plugin.sdk.component.cuba.dto.CubaComponent
 import com.haulmont.cuba.cli.plugin.sdk.commands.artifacts.NameVersion
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
@@ -27,12 +26,8 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier.Companion.sdk
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier.Companion.sources
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.MvnArtifact
-import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
-import org.kodein.di.generic.instance
 
 class CubaFrameworkProvider : CubaProvider() {
-
-    internal val sdkSettings: SdkSettingsHolder by cubaComponentKodein.instance<SdkSettingsHolder>()
 
     companion object {
         const val CUBA_PLATFORM_PROVIDER = "cuba"
@@ -89,6 +84,7 @@ class CubaFrameworkProvider : CubaProvider() {
         val model = artifactManager.readPom(
             MvnArtifact("com.haulmont.gradle", "cuba-plugin", template.version),
             sdk()
+//            pom()
         )
         if (model != null) {
             val tomcatVersion = model.properties["tomcat.version"] as String?
@@ -110,7 +106,7 @@ class CubaFrameworkProvider : CubaProvider() {
                         artifactId = "gradle",
                         url = sdkSettings["gradle.downloadLink"].format(gradleVersion),
                         version = gradleVersion,
-                        classifiers = mutableSetOf(Classifier("", "zip"))
+                        classifiers = mutableSetOf(Classifier("", "zip"), Classifier(""))
                     )
                 )
             }
@@ -173,9 +169,6 @@ class CubaFrameworkProvider : CubaProvider() {
                         Classifier("debug-client")
                     )
                 )
-            },
-            Component(packageName, "$name-web6", version).apply {
-                classifiers.add(Classifier("web"))
             },
             Component(packageName, "$name-web6", version).apply {
                 classifiers.add(Classifier("web"))

@@ -16,16 +16,22 @@
 
 package com.haulmont.cli.plugin.sdk.component.cuba.di
 
-import com.haulmont.cli.plugin.sdk.component.cuba.services.ComponentVersionManager
-import com.haulmont.cli.plugin.sdk.component.cuba.services.ComponentVersionManagerImpl
+import com.haulmont.cli.plugin.sdk.component.cuba.services.cuba.CubaComponentVersionManager
+import com.haulmont.cli.plugin.sdk.component.cuba.services.cuba.CubaComponentVersionManagerImpl
+import com.haulmont.cli.plugin.sdk.component.cuba.services.jmix.JmixComponentVersionManager
+import com.haulmont.cli.plugin.sdk.component.cuba.services.jmix.JmixComponentVersionManagerImpl
 import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import org.kodein.di.Kodein
 import org.kodein.di.generic.bind
 import org.kodein.di.generic.singleton
 
 val cubaComponentModule = Kodein.Module {
-    bind<ComponentVersionManager>() with singleton {
-        ComponentVersionManagerImpl()
+    bind<CubaComponentVersionManager>() with singleton {
+        CubaComponentVersionManagerImpl()
+    }
+
+    bind<JmixComponentVersionManager>() with singleton {
+        JmixComponentVersionManagerImpl()
     }
 }
 
@@ -33,3 +39,5 @@ val cubaComponentKodein = Kodein {
     extend(sdkKodein)
     import(cubaComponentModule)
 }
+
+

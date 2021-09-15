@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.haulmont.cli.plugin.sdk.component.cuba.services
+package com.haulmont.cli.plugin.sdk.component.cuba.services.cuba
 
 import com.github.kittinunf.fuel.Fuel
 import com.google.gson.Gson
@@ -23,7 +23,7 @@ import com.haulmont.cli.core.commands.LaunchOptions
 import com.haulmont.cli.plugin.sdk.component.cuba.providers.CubaFrameworkProvider
 import com.haulmont.cuba.cli.plugin.sdk.SdkPlugin
 import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
-import com.haulmont.cuba.cli.plugin.sdk.dto.MarketplaceAddon
+import com.haulmont.cuba.cli.plugin.sdk.dto.CubaMarketplaceAddon
 import com.haulmont.cuba.cli.plugin.sdk.dto.MarketplaceAddonCompatibility
 import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
 import com.haulmont.cuba.cli.plugin.sdk.templates.ComponentRegistry
@@ -34,24 +34,24 @@ import java.util.logging.Logger
 import kotlin.concurrent.thread
 
 
-class ComponentVersionManagerImpl : ComponentVersionManager {
+class CubaComponentVersionManagerImpl : CubaComponentVersionManager {
 
-    private val log: Logger = Logger.getLogger(ComponentVersionManagerImpl::class.java.name)
+    private val log: Logger = Logger.getLogger(CubaComponentVersionManagerImpl::class.java.name)
 
     private val sdkSettings: SdkSettingsHolder by sdkKodein.instance<SdkSettingsHolder>()
 
     private val componentRegistry: ComponentRegistry by sdkKodein.instance<ComponentRegistry>()
 
-    var addons: List<MarketplaceAddon>? = null
+    var addons: List<CubaMarketplaceAddon>? = null
 
-    private fun loadSync(): List<MarketplaceAddon> {
+    private fun loadSync(): List<CubaMarketplaceAddon> {
 
         if (LaunchOptions.skipVersionLoading) {
             return readAddons(
-                readAddonsFile()
+                readCubaAddonsFile()
             )
         } else {
-            var triple = Fuel.get(sdkSettings["addon.marketplaceUrl"])
+            val triple = Fuel.get(sdkSettings["cuba.addon.marketplaceUrl"])
                 .responseString()
 
             triple.third.fold(
@@ -61,29 +61,29 @@ class ComponentVersionManagerImpl : ComponentVersionManager {
                 failure = { error ->
                     log.severe("error: ${error}")
                     return readAddons(
-                        readAddonsFile()
+                        readCubaAddonsFile()
                     )
                 }
             )
         }
     }
 
-    private fun readAddonsFile(): String {
-        if (sdkSettings.hasProperty("addons-file")) {
-            return Path.of(sdkSettings["addons-file"]).toFile().readText(StandardCharsets.UTF_8)
+    private fun readCubaAddonsFile(): String {
+        if (sdkSettings.hasProperty("cuba-addons-file")) {
+            return Path.of(sdkSettings["cuba-addons-file"]).toFile().readText(StandardCharsets.UTF_8)
         }
-        return SdkPlugin::class.java.getResourceAsStream("app-components.json")
+        return SdkPlugin::class.java.getResourceAsStream("cuba-app-components.json")
             .bufferedReader()
             .use { it.readText() }
     }
 
-    private fun readAddons(json: String): List<MarketplaceAddon> {
+    private fun readAddons(json: String): List<CubaMarketplaceAddon> {
         val array = Gson().fromJson(json, JsonObject::class.java) ?: return emptyList()
         val platformVersions =
             componentRegistry.providerByName(CubaFrameworkProvider.CUBA_PLATFORM_PROVIDER).versions(null)
         return array.getAsJsonArray("appComponents")
             .map { it as JsonObject }
-            .map { Gson().fromJson(it, MarketplaceAddon::class.java) }
+            .map { Gson().fromJson(it, CubaMarketplaceAddon::class.java) }
             .filter { it.artifactId.isNotEmpty() }
             .map {
                 if (it != null) {
@@ -98,14 +98,14 @@ class ComponentVersionManagerImpl : ComponentVersionManager {
             .toList()
     }
 
-    private fun isStandardCubaAddon(addon: MarketplaceAddon): Boolean {
+    private fun isStandardCubaAddon(addon: CubaMarketplaceAddon): Boolean {
         return addon.compatibilityList.first().artifactVersions.joinToString().contains("\$cubaVersion")
     }
 
-    override fun addons(): List<MarketplaceAddon> =
+    override fun addons(): List<CubaMarketplaceAddon> =
         addons ?: loadSync().also { addons = it }
 
-    override fun load(loadCompletedFun: (addons: List<MarketplaceAddon>) -> Unit) {
+    override fun load(loadCompletedFun: (addons: List<CubaMarketplaceAddon>) -> Unit) {
         thread {
             loadCompletedFun(loadSync().also { addons = it })
         }

@@ -82,25 +82,30 @@ class RepositoryManagerImpl : RepositoryManager {
                     url = Paths.get(System.getProperty("user.home")).resolve(".m2").resolve("repository").toString()
                 ),
                 Repository(
-                    name = "jcenter",
-                    type = RepositoryType.BINTRAY,
-                    url = "https://jcenter.bintray.com/"
-                ),
-                Repository(
                     name = "central",
                     type = RepositoryType.NEXUS2,
                     url = "https://repo1.maven.org/maven2/"
                 ),
                 Repository(
-                    name = "cuba-bintray",
-                    type = RepositoryType.BINTRAY,
-                    url = "https://dl.bintray.com/cuba-platform/main"
-                ),
-                Repository(
-                    name = "cuba-nexus",
+                    name = "cuba-nexus2",
                     type = RepositoryType.NEXUS2,
                     url = "https://repo.cuba-platform.com/content/groups/work",
                     authentication = Authentication(login = "cuba", password = "cuba123")
+                ),
+                Repository(
+                    name = "cuba-nexus3",
+                    type = RepositoryType.NEXUS3,
+                    url = "https://nexus.cuba-platform.cn/repository/cuba/"
+                ),
+                Repository(
+                    name = "jmix-nexus",
+                    type = RepositoryType.NEXUS3,
+                    url = "https://nexus.jmix.io/repository/public/"
+                ),
+                Repository(
+                    name = "jmix-global",
+                    type = RepositoryType.NEXUS3,
+                    url = "https://global.repo.jmix.io/repository/public/"
                 )
             ),
             RepositoryTarget.TARGET to mutableListOf()
@@ -156,8 +161,9 @@ class RepositoryManagerImpl : RepositoryManager {
             if (sdkSettings.getIfExists("repository.name") == repository.name) {
                 url = sdkSettings["repository.url"]
             }
+
             val (_, response, _) =
-                Fuel.head(url)
+                Fuel.get(url)
                     .authorizeIfRequired(repository)
                     .response()
             return response.statusCode == 200 || response.statusCode == 403

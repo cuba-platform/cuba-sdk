@@ -67,7 +67,7 @@ open class AddRepositoryCommand : AbstractSdkCommand() {
         val repositoryName = answers["searchName"] as String?
         val repository = Repository(
             name = name,
-            type = type ?: RepositoryType.NEXUS2,
+            type = type ?: RepositoryType.NEXUS3,
             url = url,
             authentication = authentication,
             repositoryName = repositoryName ?: ""
@@ -118,7 +118,7 @@ open class AddRepositoryCommand : AbstractSdkCommand() {
         }
         question("type", messages["repository.type"]) {
             validate {
-                if (!listOf("bintray", "nexus2", "nexus3").contains(value.toLowerCase())){
+                if (!listOf("nexus2", "nexus3").contains(value.toLowerCase())){
                     fail(messages["repository.typeValidation"])
                 }
             }
@@ -141,7 +141,6 @@ open class AddRepositoryCommand : AbstractSdkCommand() {
     private fun isSearchRepository(it: Answers) = it["target"] == "search"
 
     private fun getRepositoryType(type: String): RepositoryType = when (type) {
-        "bintray" -> RepositoryType.BINTRAY
         "nexus2" -> RepositoryType.NEXUS2
         "nexus3" -> RepositoryType.NEXUS3
         else -> throw IllegalStateException("Unsupported repository type ${type}")
