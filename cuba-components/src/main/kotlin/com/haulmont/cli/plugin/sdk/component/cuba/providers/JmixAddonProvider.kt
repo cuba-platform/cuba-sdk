@@ -30,13 +30,15 @@ class JmixAddonProvider : JmixProvider() {
             id = template.id, groupId = template.groupId, artifactId = template.artifactId
         )?.let { initAddonTemplate(it, template.version) }
         return search(
-            mAddon ?: JmixComponent(template.groupId,
+            mAddon ?: JmixComponent(
+                template.groupId,
                 template.artifactId,
                 template.version,
                 id = template.id,
                 name = template.name,
-                type = getType(),
-                components = addonComponents(template.groupId, template.artifactId, template.version))
+                type = getType()
+//                components = addonComponents(template.version)
+            )
         )
     }
 
@@ -60,17 +62,31 @@ class JmixAddonProvider : JmixProvider() {
             name = addon.name,
             description = addon.description,
             category = addon.category,
-            components = addonComponents(packageName, name, version)
+            components = addonComponents(version).also {
+                val deps = addon.dependencies
+
+                for (dep in deps) {
+                    it.add(
+                        JmixComponent(
+                            groupId = dep.group,
+                            artifactId = dep.name,
+                            version = version
+                        )
+                    )
+                }
+            }
         )
-//            .apply {
-//            when (componentName) {
-////                "bpm" -> this.components.add(Component(packageName, "$name-modeler", version))
-//                "maps" -> this.components.add(Component(packageName, "$name-ui-widgets", version))
-//            }
-//        }
+            .apply {
+            when (componentName) {
+                "bpm" -> this.components.add(Component(packageName, "jmix-bpm-modeler", version))
+            }
+        }
     }
 
-    private fun addonComponents(packageName: String, name: String, version: String): MutableSet<Component> {
+    private fun addonComponents(version: String): MutableSet<Component> {
+        val packageName = "io.jmix"
+        val name = "jmix"
+
         return mutableSetOf(
             Component("${packageName}.core", "$name-core-starter", version),
             Component("${packageName}.data", "$name-eclipselink-starter", version),
@@ -129,44 +145,47 @@ class JmixAddonProvider : JmixProvider() {
             .find { addon ->
                 val artifact = addon.dependencies[0]
                 addon.id == id || (artifact.group == groupId && artifact.name == artifactId)
-                            || (artifact.group == groupId && artifact.name == "$artifactId")
+                        || (artifact.group == groupId && artifact.name == "$artifactId")
             }
 
     override fun searchAdditionalComponents(component: Component): Set<Component> {
         val additionalComponentList = mutableSetOf<Component>()
-        (component as JmixComponent).let { global ->
+        (component as JmixComponent).let { baseComponent ->
             val model = artifactManager.readPom(
                 MvnArtifact(
-                    global.groupId,
-                    global.artifactId,
-                    global.version
+                    baseComponent.groupId,
+                    baseComponent.artifactId,
+                    baseComponent.version
                 )
             )
             if (model == null) {
                 log.info("Component not found: ${component}")
                 throw IllegalStateException("Component not found: ${component}")
             }
-            component.frameworkVersion =
-                model.dependencies.filter { it.artifactId == "jmix-core-starter" }.map { it.version }.firstOrNull()
+            component.frameworkVersion = model.version
             model.dependencies.filter { it.artifactId.endsWith("-starter") }
                 .forEach {
-                        jmixAddon(it)?.let {
-                            additionalComponentList.add(it)
-                            additionalComponentList.addAll(searchAdditionalComponents(it))
-                        }
+                    jmixAddon(it)?.let {
+                        additionalComponentList.add(it)
+                        additionalComponentList.addAll(searchAdditionalComponents(it))
+                    }
                 }
         }
         return additionalComponentList
     }
 
     private fun jmixAddon(dependency: Dependency): Component? {
-        return createFromTemplate(
-            Component(
-                dependency.groupId,
-                dependency.artifactId,
-                dependency.version
+        if (dependency.version != null) {
+            return createFromTemplate(
+                Component(
+                    dependency.groupId,
+                    dependency.artifactId,
+                    dependency.version
+                )
             )
-        )
+        }
+
+        return null
     }
 
     override fun load() {

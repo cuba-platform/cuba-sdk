@@ -1,6 +1,7 @@
 open module gson {
     requires java.sql;
     requires jdk.unsupported;
+    requires kotlin.stdlib;
 
     exports com.google.gson;
     exports com.google.gson.annotations;

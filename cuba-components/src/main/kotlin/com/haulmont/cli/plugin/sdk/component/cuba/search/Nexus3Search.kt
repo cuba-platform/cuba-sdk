@@ -16,39 +16,44 @@
 
 package com.haulmont.cli.plugin.sdk.component.cuba.search
 
-import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.haulmont.cli.plugin.sdk.component.cuba.dto.CubaComponent
 import com.haulmont.cli.plugin.sdk.component.cuba.dto.JmixComponent
+import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
+import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
+import org.kodein.di.generic.instance
 
 class Nexus3Search(repository: Repository) : AbstractRepositorySearch(repository) {
 
+    private val sdkSettings: SdkSettingsHolder by sdkKodein.instance<SdkSettingsHolder>()
+
+    val cubaNexus3RepoUrl : String by lazy { sdkSettings["cuba.nexus3.repo.url"] }
+
     override fun searchParameters(component: Component, searchUrl: String): List<Pair<String, String>> {
+
         return listOf(
-            "group" to component.groupId,
+            "group" to
+                    if (!searchUrl.equals(cubaNexus3RepoUrl) && component.groupId.equals("io.jmix")) {
+                        component.groupId + "*"
+                    } else {
+                        component.groupId
+                    },
             "name" to
-                    if (searchUrl.contains("jmix.io"))
-                        (component as JmixComponent).artifactId
+                    if (!searchUrl.equals(cubaNexus3RepoUrl))
+                        ((component as JmixComponent).starterModule()?.artifactId?.substringBefore("-starter")
+                            ?: "") + "*"
                     else
                         ((component as CubaComponent).globalModule()?.artifactId?.substringBefore("-global")
                             ?: "") + "*",
-            "version" to component.version,
-            "repository" to repository.repositoryName
+            "version" to component.version
         )
     }
 
     override fun handleResultJson(it: JsonElement, component: Component): Component? {
-//        if (!it.isJsonArray) return null
-//        val array = it as JsonArray
-//        if (array.size() == 0) {
-//            log.info("Unknown ${component.type}: ${component.groupId}")
-//            return null
-//        }
-//        val json = array.get(0) as JsonObject
         val json = it as JsonObject
         val itemsArray = json.getAsJsonArray("items")
         if (itemsArray.size() == 0) {
@@ -59,14 +64,7 @@ class Nexus3Search(repository: Repository) : AbstractRepositorySearch(repository
             .map { dataObj ->
                 val groupId = dataObj.get("group").asString
                 val artifactId = dataObj.get("name").asString
-                if (groupId.contains("io.jmix")) {
-                    (component as JmixComponent).let {
-                        val prefix = it.artifactId.substringBefore("-global")
-                        if (!artifactId.startsWith(prefix)) {
-                            return@map null
-                        }
-                    }
-                } else {
+                if (repository.url.equals(cubaNexus3RepoUrl)) {
                     (component as CubaComponent).globalModule()?.let {
                         val prefix = it.artifactId.substringBefore("-global")
                         if (!artifactId.startsWith(prefix)) {

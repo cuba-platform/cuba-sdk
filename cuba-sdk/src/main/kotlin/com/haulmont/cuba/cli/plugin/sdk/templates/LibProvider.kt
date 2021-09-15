@@ -19,8 +19,9 @@ package com.haulmont.cuba.cli.plugin.sdk.templates
 import com.haulmont.cuba.cli.plugin.sdk.commands.artifacts.NameVersion
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
+import com.haulmont.cuba.cli.plugin.sdk.templates.provider.nexus.Nexus2SearchComponentProvider
 
-open class LibProvider : NexusSearchComponentProvider("https://nexus.cuba-platform.cn/service/rest/v1/search?repository=cuba&") {
+open class LibProvider : Nexus2SearchComponentProvider("cuba") {
 
     override fun getType() = "lib"
 

@@ -80,6 +80,7 @@ configurations {
 
 apply plugin: 'maven'
 apply plugin: "maven-publish"
+apply plugin: 'java'
 
 ext.getCustomExtensionFromCoordinates = { coordinates ->
     return coordinates.tokenize('@').last()
@@ -147,33 +148,65 @@ ext.resolveArtifact = { art, resolveAll ->
 
 task getArtifact() {
     doLast {
-        def resolved = [:]
-        project.ext.properties["toResolve"].tokenize(';').each {
-            dependencies.add 'extraLibs', it
-        }
-        configurations.extraLibs.transitive(Boolean.valueOf(project.ext.properties["transitive"] ?: "true"))
-        configurations.extraLibs.resolvedConfiguration.lenientConfiguration.artifacts.each { art ->
-            try {
-                def name = art.id.componentIdentifier.displayName
-                def component = resolved[name]
-                if (component == null) {
-                    resolved[name] = [:]
-                    component = resolved[name]
-                }
-                component.putAll(resolveArtifact(art, Boolean.valueOf(project.ext.properties["withClassifiers"] ?: "true")))
-            } catch (e) {
-                logger.error("Error: " + e.getMessage(), e)
-                logger.error("could not find pom for {}", art.file)
+
+        def jmixVersion = project.ext.properties["jmixVersion"]
+
+        if (jmixVersion != "") {
+            dependencies {
+                compileClasspath platform("io.jmix.bom:jmix-bom:${project.ext.properties["jmixVersion"]}")
+                runtimeClasspath platform("io.jmix.bom:jmix-bom:${project.ext.properties["jmixVersion"]}")
             }
         }
+
+        def resolved = [:]
+        project.ext.properties["toResolve"].tokenize(';').each {
+            dependencies.add 'compileClasspath', it
+            dependencies.add 'runtimeClasspath', it
+        }
+
+        configurations.compileClasspath.transitive(Boolean.valueOf(project.ext.properties["transitive"] ?: "true"))
+        configurations.runtimeClasspath.transitive(Boolean.valueOf(project.ext.properties["transitive"] ?: "true"))
+
+        configurations.all.collect {
+            if (it.canBeResolved) {
+                it.resolvedConfiguration.lenientConfiguration.artifacts.each { art ->
+                    try {
+                        def name = art.id.componentIdentifier.displayName
+                        def component = resolved[name]
+                        if (component == null) {
+                            resolved[name] = [:]
+                            component = resolved[name]
+                        }
+                        component.putAll(resolveArtifact(art, Boolean.valueOf(project.ext.properties["withClassifiers"] ?: "true")))
+                    } catch (e) {
+                        logger.error("Error: " + e.getMessage(), e)
+                        logger.error("could not find pom for {}", art.file)
+                    }
+                }
+            }
+        }
+
         println "<JSON>${JsonOutput.toJson(resolved)}</JSON>"
     }
+
 }
 
 task resolve() {
     doLast {
+
+        def jmixVersion = project.ext.properties["jmixVersion"]
+
+        if (jmixVersion != "") {
+            dependencies {
+                compileClasspath platform("io.jmix.bom:jmix-bom:${project.ext.properties["jmixVersion"]}")
+                runtimeClasspath platform("io.jmix.bom:jmix-bom:${project.ext.properties["jmixVersion"]}")
+            }
+        }
+
         project.ext.properties["toResolve"].tokenize(';').each {
-            dependencies.add 'extraLibs', it
+            dependencies.add 'compileClasspath', it
+            dependencies.add 'runtimeClasspath', it
+
         }
         def resolved = [:]
         configurations.all.collect {

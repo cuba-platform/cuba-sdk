@@ -35,8 +35,10 @@ class JmixComponentVersionManagerImpl : JmixComponentVersionManager {
                 readJmixAddonsFile()
             )
         } else {
-            var triple = Fuel.get(sdkSettings["jmix.addon.marketplaceUrl"])
+            val triple = Fuel.get(sdkSettings["jmix.addon.marketplaceUrl"])
                 .responseString()
+
+            Fuel.reset()
 
             triple.third.fold(
                 success = {

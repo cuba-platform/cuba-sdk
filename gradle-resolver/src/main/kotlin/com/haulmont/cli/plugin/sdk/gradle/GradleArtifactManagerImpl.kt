@@ -151,6 +151,11 @@ class GradleArtifactManagerImpl : ArtifactManager {
                     gradleConnector.runTask(
                         "getArtifact", mapOf(
                             "toResolve" to gradleCoordinates,
+                            if (artifact.groupId.startsWith("io.jmix.")) {
+                                "jmixVersion" to artifact.version
+                            } else {
+                                "jmixVersion" to ""
+                            },
                             "transitive" to false,
                             "withClassifiers" to false
                         )
@@ -191,9 +196,11 @@ class GradleArtifactManagerImpl : ArtifactManager {
         val descriptors = artifact.classifiers.distinct()
             .filter { it != Classifier.pom() }
             .map {
-                UploadDescriptor(artifact, it,
+                UploadDescriptor(
+                    artifact, it,
                     artifactPath(artifact, it)
-                ) }
+                )
+            }
             .toList()
 
         var pomDescriptor: String? = null
@@ -204,7 +211,12 @@ class GradleArtifactManagerImpl : ArtifactManager {
             gradleConnector.runTask(
                 "publish", mapOf(
                     "toUpload" to Gson().toJson(artifact),
-                    "descriptors" to Gson().toJson(descriptors),
+                    "descriptors" to
+                            if (!descriptors.isEmpty()) {
+                                Gson().toJson(descriptors)
+                            } else {
+                                descriptors.toString()
+                            },
                     "pomFile" to pomDescriptor,
                     "targetRepositories" to Gson().toJson(repositories)
                 )
@@ -221,10 +233,16 @@ class GradleArtifactManagerImpl : ArtifactManager {
         ?: throw IllegalStateException("Unable to download ${artifact.gradleCoordinates(it)}"))
 
     override fun getArtifact(artifact: MvnArtifact, classifier: Classifier) {
+
         cacheResult(
             gradleConnector.runTask(
                 "getArtifact", mapOf(
                     "toResolve" to artifact.gradleCoordinates(classifier),
+                    if (artifact.groupId.startsWith("io.jmix.")) {
+                        "jmixVersion" to artifact.version
+                    } else {
+                        "jmixVersion" to ""
+                    },
                     "transitive" to false,
                     "withClassifiers" to false
                 )
@@ -232,8 +250,8 @@ class GradleArtifactManagerImpl : ArtifactManager {
         )
     }
 
-    override fun getArtifactFile(artifact: MvnArtifact, classifier: Classifier): Path?
-            = readFromCache(artifact, classifier)
+    override fun getArtifactFile(artifact: MvnArtifact, classifier: Classifier): Path? =
+        readFromCache(artifact, classifier)
 
     private fun cacheResult(result: JsonElement?): JsonElement? {
         if (result == null) {
@@ -281,6 +299,11 @@ class GradleArtifactManagerImpl : ArtifactManager {
                 gradleConnector.runTask(
                     "getArtifact", mapOf(
                         "toResolve" to componentsToResolve.joinToString(separator = ";"),
+                        if (artifact.groupId.startsWith("io.jmix.")) {
+                        "jmixVersion" to artifact.version                         }
+                        else {
+                            "jmixVersion" to ""
+                        },
                         "transitive" to false,
                         "withClassifiers" to false
                     )
@@ -293,7 +316,12 @@ class GradleArtifactManagerImpl : ArtifactManager {
         val result = cacheResult(
             gradleConnector.runTask(
                 "resolve", mapOf(
-                    "toResolve" to artifact.gradleCoordinates(classifier)
+                    "toResolve" to artifact.gradleCoordinates(classifier),
+                    if (artifact.groupId.startsWith("io.jmix.")) {
+                    "jmixVersion" to artifact.version
+                    } else {
+                        "jmixVersion" to ""
+                    }
                 )
             )
         ) ?: return emptyList()

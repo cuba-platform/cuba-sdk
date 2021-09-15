@@ -51,7 +51,7 @@ class CubaComponentVersionManagerImpl : CubaComponentVersionManager {
                 readCubaAddonsFile()
             )
         } else {
-            var triple = Fuel.get(sdkSettings["cuba.addon.marketplaceUrl"])
+            val triple = Fuel.get(sdkSettings["cuba.addon.marketplaceUrl"])
                 .responseString()
 
             triple.third.fold(

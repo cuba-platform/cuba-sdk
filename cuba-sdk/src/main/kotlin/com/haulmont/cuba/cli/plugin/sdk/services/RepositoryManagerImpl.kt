@@ -86,29 +86,24 @@ class RepositoryManagerImpl : RepositoryManager {
                     type = RepositoryType.NEXUS2,
                     url = "https://repo1.maven.org/maven2/"
                 ),
-//                Repository(
-//                    name = "cuba-bintray",
-//                    type = RepositoryType.BINTRAY,
-//                    url = "https://dl.bintray.com/cuba-platform/main"
-//                ),
                 Repository(
-                    name = "cuba-nexus",
+                    name = "cuba-nexus2",
                     type = RepositoryType.NEXUS2,
                     url = "https://repo.cuba-platform.com/content/groups/work",
                     authentication = Authentication(login = "cuba", password = "cuba123")
                 ),
                 Repository(
-                    name = "cuba",
+                    name = "cuba-nexus3",
                     type = RepositoryType.NEXUS3,
                     url = "https://nexus.cuba-platform.cn/repository/cuba/"
                 ),
                 Repository(
-                    name = "public",
+                    name = "jmix-nexus",
                     type = RepositoryType.NEXUS3,
                     url = "https://nexus.jmix.io/repository/public/"
                 ),
                 Repository(
-                    name = "public",
+                    name = "jmix-global",
                     type = RepositoryType.NEXUS3,
                     url = "https://global.repo.jmix.io/repository/public/"
                 )
@@ -166,8 +161,9 @@ class RepositoryManagerImpl : RepositoryManager {
             if (sdkSettings.getIfExists("repository.name") == repository.name) {
                 url = sdkSettings["repository.url"]
             }
+
             val (_, response, _) =
-                Fuel.head(url)
+                Fuel.get(url)
                     .authorizeIfRequired(repository)
                     .response()
             return response.statusCode == 200 || response.statusCode == 403

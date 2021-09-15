@@ -73,7 +73,7 @@ class SdkGradleConnector {
             val repositoriesJson = Gson().toJson(repositoryManager.getRepositories(RepositoryTarget.SOURCE))
             val buildLauncher = connection.newBuild()
                 .withArguments(params.filter { it.value != null }.map { "-P${it.key}=${it.value}" }.toList())
-                .addArguments("-g", sdkSettings["gradle.cache"])
+                .addArguments("-g=${sdkSettings["gradle.cache"]}")
                 .addArguments("-PsdkRepositories=${repositoriesJson}")
                 .addArguments("-Dorg.gradle.parallel=true")
                 .forTasks(name)

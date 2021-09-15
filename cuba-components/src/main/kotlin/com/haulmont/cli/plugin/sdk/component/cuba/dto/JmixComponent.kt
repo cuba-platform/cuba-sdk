@@ -42,4 +42,6 @@ class JmixComponent(
     components,
     dependencies
 ) {
+    fun starterModule() =
+        components.firstOrNull { it.artifactId.endsWith("-starter") }
 }

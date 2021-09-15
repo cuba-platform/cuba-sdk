@@ -17,19 +17,16 @@
 package com.haulmont.cuba.cli.plugin.sdk.utils
 
 import com.github.kittinunf.fuel.core.Request
+import com.github.kittinunf.fuel.core.extensions.authentication
 import com.haulmont.cuba.cli.plugin.sdk.dto.Authentication
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 
 fun Request.authorizeIfRequired(repository: Repository): Request {
     if (repository.authentication != null) {
         val authentication: Authentication = repository.authentication
-        this.authenticate(authentication.login, authentication.password)
+        this.authentication().basic(authentication.login, authentication.password)
     }
     return this
 }
 
-fun Request.header(name:String,value:String): Request {
-    this.header(Pair(name,value))
-    return this
-}
 

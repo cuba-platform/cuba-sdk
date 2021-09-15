@@ -77,6 +77,10 @@ class CubaAddonProvider : CubaProvider() {
         ).apply {
             if (componentName == "bproc") {
                 this.components.add(Component(packageName, "$name-modeler", version))
+            } else if (componentName == "maps") {
+                this.components.add(Component(packageName, "$name-web-toolkit", version).apply {
+                    classifiers.add(Classifier("web", "zip"))
+                })
             }
         }
     }

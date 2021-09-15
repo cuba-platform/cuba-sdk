@@ -24,12 +24,11 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 import com.haulmont.cuba.cli.plugin.sdk.utils.Headers
 import com.haulmont.cuba.cli.plugin.sdk.utils.authorizeIfRequired
-import com.haulmont.cuba.cli.plugin.sdk.utils.header
 import java.util.logging.Logger
 
 abstract class AbstractRepositorySearch : RepositorySearch {
 
-    internal val log: Logger = Logger.getLogger(BintraySearch::class.java.name)
+    internal val log: Logger = Logger.getLogger(this::class.java.name)
     internal var repository: Repository
 
     constructor(repository: Repository) {
@@ -39,7 +38,9 @@ abstract class AbstractRepositorySearch : RepositorySearch {
     abstract fun searchParameters(component: Component, searchUrl: String): List<Pair<String, String>>
 
     override fun search(component: Component): Component? {
-        val result = createSearchRequest(repository.url, component)
+        val request = createSearchRequest(repository.url, component)
+
+        val result = request
             .responseString()
             .third
         val (data, error) = result

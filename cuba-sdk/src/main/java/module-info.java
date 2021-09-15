@@ -69,6 +69,7 @@ module com.haulmont.cuba.cli.plugin.sdk {
     exports com.haulmont.cuba.cli.plugin.sdk.utils;
     exports com.haulmont.cuba.cli.plugin.sdk.db;
     exports com.haulmont.cuba.cli.plugin.sdk.templates;
+    exports com.haulmont.cuba.cli.plugin.sdk.templates.provider.nexus;
 
     provides MainCliPlugin with SdkPlugin;
 

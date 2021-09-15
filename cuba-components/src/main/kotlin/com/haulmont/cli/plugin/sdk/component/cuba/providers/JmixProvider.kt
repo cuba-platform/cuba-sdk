@@ -10,10 +10,10 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.MvnArtifact
 import com.haulmont.cuba.cli.plugin.sdk.dto.Repository
 import com.haulmont.cuba.cli.plugin.sdk.dto.RepositoryType
 import com.haulmont.cuba.cli.plugin.sdk.services.ArtifactManager
-import com.haulmont.cuba.cli.plugin.sdk.templates.NexusSearchComponentProvider
+import com.haulmont.cuba.cli.plugin.sdk.templates.provider.nexus.Nexus3SearchComponentProvider
 import java.nio.file.Paths
 
-abstract class JmixProvider : NexusSearchComponentProvider("jmix") {
+abstract class JmixProvider : Nexus3SearchComponentProvider("jmix") {
 
     companion object{
         val SEARCH_REPOS = listOf(
@@ -23,9 +23,14 @@ abstract class JmixProvider : NexusSearchComponentProvider("jmix") {
                 url = Paths.get(System.getProperty("user.home")).resolve(".m2").resolve("repository").toString()
             ),
             Repository(
-                name = "public",
+                name = "jmix-global",
                 type = RepositoryType.NEXUS3,
                 url = "https://global.repo.jmix.io/service/rest/v1/search"
+            ),
+            Repository(
+                name = "jmix-nexus",
+                type = RepositoryType.NEXUS3,
+                url = "https://nexus.jmix.io/service/rest/v1/search"
             )
         )
     }

@@ -23,10 +23,10 @@ import com.haulmont.cli.plugin.sdk.component.cuba.search.Nexus3Search
 import com.haulmont.cli.plugin.sdk.component.cuba.search.RepositorySearch
 import com.haulmont.cuba.cli.plugin.sdk.dto.*
 import com.haulmont.cuba.cli.plugin.sdk.services.ArtifactManager
-import com.haulmont.cuba.cli.plugin.sdk.templates.NexusSearchComponentProvider
+import com.haulmont.cuba.cli.plugin.sdk.templates.provider.nexus.Nexus2SearchComponentProvider
 import java.nio.file.Paths
 
-abstract class CubaProvider : NexusSearchComponentProvider("cuba") {
+abstract class CubaProvider : Nexus2SearchComponentProvider("cuba") {
 
     companion object{
         val SEARCH_REPOS = listOf(
@@ -38,27 +38,15 @@ abstract class CubaProvider : NexusSearchComponentProvider("cuba") {
             Repository(
                 name = "cuba-nexus2",
                 type = RepositoryType.NEXUS2,
-                url = "https://repo.cuba-platform.com/content/groups/work",
+                url = "https://repo.cuba-platform.com/service/local/lucene/search",
                 authentication = Authentication(login = "cuba", password = "cuba123")
             ),
             Repository(
-                name = "cuba",
+                name = "cuba-nexus3",
                 type = RepositoryType.NEXUS3,
                 url = "https://nexus.cuba-platform.cn/service/rest/v1/search",
                 repositoryName = "cuba"
             )
-//            Repository(
-//                name = "cuba-nexus",
-//                type = RepositoryType.NEXUS2,
-//                url = "https://repo.cuba-platform.com/service/local/lucene/search",
-//                authentication = Authentication(login = "cuba", password = "cuba123")
-//            ),
-//            Repository(
-//                name = "cuba-bintray",
-//                type = RepositoryType.BINTRAY,
-//                url = "https://api.bintray.com/search/packages/maven?",
-//                repositoryName = "cuba-platform"
-//            )
         )
     }
 
@@ -86,13 +74,13 @@ abstract class CubaProvider : NexusSearchComponentProvider("cuba") {
 
     protected fun searchInExternalRepo(component: Component): Component? {
         for (searchContext in SEARCH_REPOS) {
-            initSearch(searchContext).search(component)?.let { return it }
+            initSearch(searchContext)
+                .search(component)?.let { return it }
         }
         return null
     }
 
     private fun initSearch(repository: Repository): RepositorySearch = when (repository.type) {
-//        RepositoryType.BINTRAY -> BintraySearch(repository)
         RepositoryType.NEXUS2 -> Nexus2Search(repository)
         RepositoryType.NEXUS3 -> Nexus3Search(repository)
         RepositoryType.LOCAL -> LocalRepositorySearch(repository)

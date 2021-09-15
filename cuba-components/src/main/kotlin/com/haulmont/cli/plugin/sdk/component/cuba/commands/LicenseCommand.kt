@@ -69,16 +69,6 @@ class LicenseCommand : AbstractSdkCommand() {
             val login = it[0]
             val password = it[1]
 
-//            repositoryManager.removeRepository("cuba-bintray-premium",RepositoryTarget.SOURCE)
-//            repositoryManager.addRepository(
-//                Repository(
-//                    name = "cuba-bintray-premium",
-//                    type = RepositoryType.BINTRAY,
-//                    url = "https://cuba-platform.bintray.com/premium",
-//                    authentication = Authentication("$login@cuba-platform", password)
-//                ), RepositoryTarget.SOURCE
-//            )
-
             repositoryManager.removeRepository("cuba-nexus-premium",RepositoryTarget.SOURCE)
             repositoryManager.addRepository(
                 Repository(
@@ -94,7 +84,7 @@ class LicenseCommand : AbstractSdkCommand() {
                 Repository(
                     name = "jmix-premium",
                     type = RepositoryType.NEXUS3,
-                    url = "https://global.repo.jmix.io/service/rest/repository/browse/premium/",   // Is it correct URL?
+                    url = "https://global.repo.jmix.io/repository/premium/",
                     authentication = Authentication(login, password)
                 ), RepositoryTarget.SOURCE
             )

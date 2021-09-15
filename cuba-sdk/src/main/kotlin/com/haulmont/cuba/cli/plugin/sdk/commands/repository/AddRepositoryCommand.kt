@@ -67,7 +67,7 @@ open class AddRepositoryCommand : AbstractSdkCommand() {
         val repositoryName = answers["searchName"] as String?
         val repository = Repository(
             name = name,
-            type = type ?: RepositoryType.NEXUS2,
+            type = type ?: RepositoryType.NEXUS3,
             url = url,
             authentication = authentication,
             repositoryName = repositoryName ?: ""

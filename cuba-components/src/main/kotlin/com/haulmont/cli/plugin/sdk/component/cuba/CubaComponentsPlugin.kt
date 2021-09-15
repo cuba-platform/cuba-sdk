@@ -37,10 +37,6 @@ class CubaComponentsPlugin : CliPlugin {
 
     @Subscribe
     fun onInit(event: InitPluginEvent) {
-        System.setProperty("deployment.security.TLSv1.2", "true");
-        System.setProperty("deployment.security.TLSv1.3", "true");
-        System.setProperty("jdk.tls.acknowledgeCloseNotify", "true")
-        System.setProperty("https.protocols", "TLSv1.2,TLSv1.3");
 
         componentRegistry.addProviders(
             CubaAddonProvider(), CubaFrameworkProvider(),

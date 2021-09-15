@@ -34,13 +34,13 @@ class Nexus2Search(repository: Repository) : AbstractRepositorySearch(repository
     }
 
     override fun handleResultJson(it: JsonElement, component: Component): Component? {
-        if (!it.isJsonArray) return null
-        val array = it as JsonArray
-        if (array.size() == 0) {
+        val json = it as JsonObject
+
+        if (json.entrySet().isEmpty()) {
             log.info("Unknown ${component.type}: ${component.groupId}")
             return null
         }
-        val json = array.get(0) as JsonObject
+
         val dataArray = json.get("data") as JsonArray
         if (dataArray.size() == 0) {
             log.info("Unknown version: ${component.version}")
@@ -66,7 +66,7 @@ class Nexus2Search(repository: Repository) : AbstractRepositorySearch(repository
                             .map { it as JsonObject }
                             .map { classifier ->
                                 Classifier(
-                                    classifier.get("classifier").asString,
+                                    classifier.get("classifier")?.asString?:"",
                                     classifier.get("extension").asString
                                 )
                             }
