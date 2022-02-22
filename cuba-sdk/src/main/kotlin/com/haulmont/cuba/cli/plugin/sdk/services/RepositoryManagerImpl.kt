@@ -82,25 +82,20 @@ class RepositoryManagerImpl : RepositoryManager {
                     url = Paths.get(System.getProperty("user.home")).resolve(".m2").resolve("repository").toString()
                 ),
                 Repository(
-                    name = "jcenter",
-                    type = RepositoryType.BINTRAY,
-                    url = "https://jcenter.bintray.com/"
-                ),
-                Repository(
                     name = "central",
                     type = RepositoryType.NEXUS2,
                     url = "https://repo1.maven.org/maven2/"
                 ),
                 Repository(
-                    name = "cuba-bintray",
-                    type = RepositoryType.BINTRAY,
-                    url = "https://dl.bintray.com/cuba-platform/main"
-                ),
-                Repository(
-                    name = "cuba-nexus",
+                    name = "cuba-nexus2",
                     type = RepositoryType.NEXUS2,
                     url = "https://repo.cuba-platform.com/content/groups/work",
                     authentication = Authentication(login = "cuba", password = "cuba123")
+                ),
+                Repository(
+                    name = "cuba-nexus3",
+                    type = RepositoryType.NEXUS3,
+                    url = "https://nexus.cuba-platform.cn/repository/cuba/"
                 )
             ),
             RepositoryTarget.TARGET to mutableListOf()

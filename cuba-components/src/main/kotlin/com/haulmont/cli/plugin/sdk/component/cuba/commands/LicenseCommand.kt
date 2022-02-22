@@ -69,15 +69,15 @@ class LicenseCommand : AbstractSdkCommand() {
             val login = it[0]
             val password = it[1]
 
-            repositoryManager.removeRepository("cuba-bintray-premium",RepositoryTarget.SOURCE)
-            repositoryManager.addRepository(
-                Repository(
-                    name = "cuba-bintray-premium",
-                    type = RepositoryType.BINTRAY,
-                    url = "https://cuba-platform.bintray.com/premium",
-                    authentication = Authentication("$login@cuba-platform", password)
-                ), RepositoryTarget.SOURCE
-            )
+//            repositoryManager.removeRepository("cuba-bintray-premium",RepositoryTarget.SOURCE)
+//            repositoryManager.addRepository(
+//                Repository(
+//                    name = "cuba-bintray-premium",
+//                    type = RepositoryType.BINTRAY,
+//                    url = "https://cuba-platform.bintray.com/premium",
+//                    authentication = Authentication("$login@cuba-platform", password)
+//                ), RepositoryTarget.SOURCE
+//            )
 
             repositoryManager.removeRepository("cuba-nexus-premium",RepositoryTarget.SOURCE)
             repositoryManager.addRepository(

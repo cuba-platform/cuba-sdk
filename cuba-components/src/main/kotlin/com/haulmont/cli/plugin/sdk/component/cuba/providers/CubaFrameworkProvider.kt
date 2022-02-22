@@ -16,7 +16,6 @@
 
 package com.haulmont.cli.plugin.sdk.component.cuba.providers
 
-import com.haulmont.cli.plugin.sdk.component.cuba.di.cubaComponentKodein
 import com.haulmont.cli.plugin.sdk.component.cuba.dto.CubaComponent
 import com.haulmont.cuba.cli.plugin.sdk.commands.artifacts.NameVersion
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier
@@ -27,12 +26,10 @@ import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier.Companion.sdk
 import com.haulmont.cuba.cli.plugin.sdk.dto.Classifier.Companion.sources
 import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.dto.MvnArtifact
-import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
-import org.kodein.di.generic.instance
 
 class CubaFrameworkProvider : CubaProvider() {
 
-    internal val sdkSettings: SdkSettingsHolder by cubaComponentKodein.instance<SdkSettingsHolder>()
+//    internal val sdkSettings: SdkSettingsHolder by cubaComponentKodein.instance<SdkSettingsHolder>()
 
     companion object {
         const val CUBA_PLATFORM_PROVIDER = "cuba"

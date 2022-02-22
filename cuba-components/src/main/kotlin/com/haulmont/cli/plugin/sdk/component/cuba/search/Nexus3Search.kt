@@ -36,13 +36,7 @@ class Nexus3Search(repository: Repository) : AbstractRepositorySearch(repository
     }
 
     override fun handleResultJson(it: JsonElement, component: Component): Component? {
-        if (!it.isJsonArray) return null
-        val array = it as JsonArray
-        if (array.size() == 0) {
-            log.info("Unknown ${component.type}: ${component.groupId}")
-            return null
-        }
-        val json = array.get(0) as JsonObject
+        val json = it as JsonObject
         val itemsArray = json.getAsJsonArray("items")
         if (itemsArray.size() == 0) {
             log.info("Unknown version: ${component.version}")

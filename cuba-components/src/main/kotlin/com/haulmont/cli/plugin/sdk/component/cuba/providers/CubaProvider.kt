@@ -17,13 +17,16 @@
 package com.haulmont.cli.plugin.sdk.component.cuba.providers
 
 import com.haulmont.cli.plugin.sdk.component.cuba.dto.CubaComponent
-import com.haulmont.cli.plugin.sdk.component.cuba.search.*
+import com.haulmont.cli.plugin.sdk.component.cuba.search.LocalRepositorySearch
+import com.haulmont.cli.plugin.sdk.component.cuba.search.Nexus2Search
+import com.haulmont.cli.plugin.sdk.component.cuba.search.Nexus3Search
+import com.haulmont.cli.plugin.sdk.component.cuba.search.RepositorySearch
 import com.haulmont.cuba.cli.plugin.sdk.dto.*
 import com.haulmont.cuba.cli.plugin.sdk.services.ArtifactManager
-import com.haulmont.cuba.cli.plugin.sdk.templates.BintraySearchComponentProvider
+import com.haulmont.cuba.cli.plugin.sdk.templates.provider.nexus.Nexus2SearchComponentProvider
 import java.nio.file.Paths
 
-abstract class CubaProvider : BintraySearchComponentProvider() {
+abstract class CubaProvider : Nexus2SearchComponentProvider() {
 
     companion object{
         val SEARCH_REPOS = listOf(
@@ -39,10 +42,10 @@ abstract class CubaProvider : BintraySearchComponentProvider() {
                 authentication = Authentication(login = "cuba", password = "cuba123")
             ),
             Repository(
-                name = "cuba-bintray",
-                type = RepositoryType.BINTRAY,
-                url = "https://api.bintray.com/search/packages/maven?",
-                repositoryName = "cuba-platform"
+                name = "cuba-nexus3",
+                type = RepositoryType.NEXUS3,
+                url = "https://nexus.cuba-platform.cn/service/rest/v1/search",
+                repositoryName = "cuba"
             )
         )
     }
@@ -77,7 +80,6 @@ abstract class CubaProvider : BintraySearchComponentProvider() {
     }
 
     private fun initSearch(repository: Repository): RepositorySearch = when (repository.type) {
-        RepositoryType.BINTRAY -> BintraySearch(repository)
         RepositoryType.NEXUS2 -> Nexus2Search(repository)
         RepositoryType.NEXUS3 -> Nexus3Search(repository)
         RepositoryType.LOCAL -> LocalRepositorySearch(repository)

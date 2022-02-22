@@ -18,7 +18,6 @@ package com.haulmont.cuba.cli.plugin.sdk.dto
 
 enum class RepositoryType {
     LOCAL,
-    BINTRAY,
     NEXUS2,
     NEXUS3
 }

@@ -58,7 +58,6 @@ apply plugin: 'base'
 
 allprojects {
     repositories {
-        jcenter()
         mavenLocal()
         maven {
             credentials {
@@ -66,9 +65,6 @@ allprojects {
                 password System.getenv('HAULMONT_REPOSITORY_PASSWORD') ?: 'cuba123'
             }
             url System.getenv('HAULMONT_REPOSITORY_URL') ?: 'https://repo.cuba-platform.com/content/groups/work'
-        }
-        maven {
-            url "https://dl.bintray.com/cuba-platform/main"
         }
     }
 

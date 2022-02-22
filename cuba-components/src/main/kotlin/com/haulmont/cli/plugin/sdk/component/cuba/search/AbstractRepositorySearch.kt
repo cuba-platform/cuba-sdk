@@ -29,7 +29,7 @@ import java.util.logging.Logger
 
 abstract class AbstractRepositorySearch : RepositorySearch {
 
-    internal val log: Logger = Logger.getLogger(BintraySearch::class.java.name)
+    internal val log: Logger = Logger.getLogger(Nexus2Search::class.java.name)
     internal var repository: Repository
 
     constructor(repository: Repository) {
