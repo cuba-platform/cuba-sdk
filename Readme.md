@@ -48,7 +48,7 @@ CUBA SDK is a useful tool if it is required to develop applications with limited
 
 ### Windows
 
-1. Unpack the [`cuba-sdk-1.0.5-windows.zip`](https://github.com/cuba-platform/cuba-sdk/releases/download/1.0.5/cuba-sdk-1.0.5-windows.zip). `cuba-sdk` in the PATH environment variable.
+1. Unpack the [`cuba-sdk-1.0.5-windows.zip`](https://github.com/cuba-platform/cuba-sdk/releases/download/1.0.5/cuba-sdk-1.0.5-windows.zip).
 2. Add location of directory `cuba-sdk/bin` in the PATH environment variable.
 
 ### Linux
