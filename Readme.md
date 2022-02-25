@@ -41,51 +41,12 @@ CUBA SDK is a useful tool if it is required to develop applications with limited
 
 # 2. Installation <a name="installation"></a>
 
-## Download links:
+1. Download and unpack the archive for your operating system:
 
-- [Windows](https://github.com/cuba-platform/cuba-sdk/releases/download/1.0.5/cuba-sdk-1.0.5-windows.zip)
-- [Linux](https://github.com/cuba-platform/cuba-sdk/releases/download/1.0.5/cuba-sdk-1.0.5-linux.zip)
+    - Windows: [cuba-sdk-1.0.5-windows.zip](https://github.com/cuba-platform/cuba-sdk/releases/download/1.0.5/cuba-sdk-1.0.5-windows.zip)
+    - Linux: [cuba-sdk-1.0.5-linux.zip](https://github.com/cuba-platform/cuba-sdk/releases/download/1.0.5/cuba-sdk-1.0.5-linux.zip)
 
-### Windows
-
-1. Unpack the [`cuba-sdk-1.0.5-windows.zip`](https://github.com/cuba-platform/cuba-sdk/releases/download/1.0.5/cuba-sdk-1.0.5-windows.zip).
-2. Add location of directory `cuba-sdk/bin` in the PATH environment variable.
-
-### Linux
-
-1. Unpack the [`cuba-sdk-1.0.3-linux.zip`](https://github.com/cuba-platform/cuba-sdk/releases/download/1.0.5/cuba-sdk-1.0.5-linux.zip) archive
-```
-unzip cuba-sdk-1.0.3-linux.zip
-mv ./cuba-sdk-1.0.3 ~/cuba-sdk-1.0
-```
-
-2. Create local `~/.haulmont/bin` folder if not exists
-```
-mkdir -p ~/.haulmont/bin
-```
-
-4. Add the path to the `~/.haulmont/bin/` folder to the `PATH` variable and to your `~/.bashrc` file:
-```
-nano ~/.bashrc
-```
-Add to the end of file:
-```
-PATH="$PATH:/home/$USER/.haulmont/bin/"
-```
-
-In order to update the path variable for the current session, run:
-```
-source ~/.bashrc
-```
-
-5. Add symlink to `cuba-sdk`
-```
-ln -sf ~/cuba-sdk-1.0/bin/cuba-sdk ~/.haulmont/bin/cuba-sdk
-```
-
-6. Run the `cuba-sdk` command to start cuba-sdk.
-
-Now you can use `cuba-sdk` from any directory.
+2. Add location of `cuba-sdk/bin` directory to the PATH environment variable.
 
 # 3. Configuration <a name="configuration"></a>
 
