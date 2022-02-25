@@ -43,27 +43,17 @@ CUBA SDK is a useful tool if it is required to develop applications with limited
 
 ## Download links:
 
-- [Windows installer](https://cuba-platform.bintray.com/tools/cuba-sdk/1.0.3/cuba-sdk-1.0.3.exe)
-- [Windows](https://cuba-platform.bintray.com/tools/cuba-sdk/1.0.3/cuba-sdk-1.0.3-windows.zip)
-- [Linux](https://cuba-platform.bintray.com/tools/cuba-sdk/1.0.3/cuba-sdk-1.0.3-linux.zip)
-- [MacOS](https://cuba-platform.bintray.com/tools/cuba-sdk/1.0.3/cuba-sdk-1.0.3-macos.zip)
+- [Windows](https://github.com/cuba-platform/cuba-sdk/releases/download/1.0.5/cuba-sdk-1.0.5-windows.zip)
+- [Linux](https://github.com/cuba-platform/cuba-sdk/releases/download/1.0.5/cuba-sdk-1.0.5-linux.zip)
 
 ### Windows
 
-1. Use [EXE installer](https://cuba-platform.bintray.com/tools/cuba-sdk/1.0.3/cuba-sdk-1.0.3.exe). It will automatically register `cuba-sdk` in the PATH environment variable.
-2. Open a terminal and run the `cuba-sdk` command to start cuba-sdk.
-
-### Mac OS
-
-1. Install the CUBA CLI via Homebrew:
-    ```
-    $ brew install cuba-platform/tools/cuba-sdk
-    ```
-2. Run the `cuba-sdk` command to start cuba-sdk
+1. Unpack the [cuba-sdk-1.0.5-windows.zip](https://github.com/cuba-platform/cuba-sdk/releases/download/1.0.5/cuba-sdk-1.0.5-windows.zip). `cuba-sdk` in the PATH environment variable.
+2. Add location of directory `cuba-sdk/bin` in the PATH environment variable.
 
 ### Linux
 
-1. Unpack the [`cuba-sdk-1.0.3-linux.zip`](https://cuba-platform.bintray.com/tools/cuba-sdk/1.0.3/cuba-sdk-1.0.3-linux.zip) archive
+1. Unpack the [`cuba-sdk-1.0.3-linux.zip`](https://github.com/cuba-platform/cuba-sdk/releases/download/1.0.5/cuba-sdk-1.0.5-linux.zip) archive
 ```
 unzip cuba-sdk-1.0.3-linux.zip
 mv ./cuba-sdk-1.0.3 ~/cuba-sdk-1.0
