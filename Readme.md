@@ -52,6 +52,7 @@ CUBA SDK is a useful tool if it is required to develop applications with a limit
     - Linux: [cuba-sdk-1.0.5-linux.zip](https://github.com/cuba-platform/cuba-sdk/releases/download/1.0.5/cuba-sdk-1.0.5-linux.zip)
 
 2. Add location of `cuba-sdk/bin` directory to the PATH environment variable.
+3. Open a terminal and run the `cuba-sdk` command to start cuba-sdk
 
 # 3. Configuration <a name="configuration"></a>
 
@@ -170,7 +171,7 @@ Configured SDK settings by default are located in the `<User.home>/cli/sdk/sdk.p
 - `repository.url` - repository URL, for embedded Nexus this property will point to nexus Web UI.
 - `repository.name` - repository name.
 - `repository.path` - path, where embedded Nexus repository is installed.
-- `repository.login -  repository user login.
+- `repository.login` -  repository user login.
 - `repository.password` - repository user password.
 
 *SDK metadata*
