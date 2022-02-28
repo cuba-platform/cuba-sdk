@@ -79,9 +79,7 @@ SDK tool has three repository scopes:
 By default the following repositories are configured:
 - **source scope:**
   - Local `m2`
-  - Jcenter
   - Maven central
-  - CUBA Bintray
   - CUBA Nexus   
 - **target scope:**
   - repository configured in `setup` command 
