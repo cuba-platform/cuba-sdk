@@ -53,7 +53,7 @@ CUBA SDK is a useful tool if it is required to develop applications with a limit
 
 ### Windows
 
-1. Download and run [EXE installer](https://github.com/cuba-platform/cuba-sdk/releases/download/1.0.6/cuba-sdk-1.0.6.exe). It will automatically register `cuba-sdk` in the PATH environment variable.
+1. Download and run [Windows installer](https://github.com/cuba-platform/cuba-sdk/releases/download/1.0.6/cuba-sdk-1.0.6.exe). It will automatically register `cuba-sdk` in the PATH environment variable.
 2. Open a terminal and run the `cuba-sdk` command to start cuba-sdk.
 
 ### Linux
