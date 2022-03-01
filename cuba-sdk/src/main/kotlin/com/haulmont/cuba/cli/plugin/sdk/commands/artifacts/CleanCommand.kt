@@ -25,6 +25,7 @@ import com.haulmont.cli.core.prompting.QuestionsList
 import com.haulmont.cuba.cli.plugin.sdk.commands.AbstractSdkCommand
 import com.haulmont.cuba.cli.plugin.sdk.commands.repository.StartCommand
 import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
+import com.haulmont.cuba.cli.plugin.sdk.dto.Component
 import com.haulmont.cuba.cli.plugin.sdk.event.SdkEvent
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusManager
 import com.haulmont.cuba.cli.plugin.sdk.nexus.NexusScriptManager
@@ -40,7 +41,7 @@ class CleanCommand : AbstractSdkCommand() {
 
     internal val nexusManager: NexusManager by sdkKodein.instance<NexusManager>()
     internal val repositoryManager: RepositoryManager by sdkKodein.instance<RepositoryManager>()
-    internal val artifactManager: ArtifactManager by lazy { ArtifactManager.instance()}
+    internal val artifactManager: ArtifactManager by lazy { ArtifactManager.instance() }
     internal val nexusScriptManager: NexusScriptManager by sdkKodein.instance<NexusScriptManager>()
     internal val componentManager: ComponentManager by sdkKodein.instance<ComponentManager>()
     private val metadataHolder: MetadataHolder by sdkKodein.instance<MetadataHolder>()
@@ -62,7 +63,10 @@ class CleanCommand : AbstractSdkCommand() {
         if (answers["confirmed"] as Boolean) {
             artifactManager.clean()
 
-            metadataHolder.getResolved().forEach {
+            val resolvedComponents = metadataHolder.getResolved()
+            val shallowComponentsCopy = resolvedComponents.toList()
+
+            shallowComponentsCopy.forEach {
                 bus.post(SdkEvent.BeforeRemoveEvent(it, false))
                 componentManager.remove(it, false)
                 bus.post(SdkEvent.AfterRemoveEvent(it, false))
