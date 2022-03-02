@@ -66,14 +66,16 @@ ext.osName = System.getProperty("os.name").toLowerCase()
 
 ext.javaHome = System.getenv("JAVA11_HOME") ?: System.getenv("JAVA_HOME")
 
-ext.targetOsPlatform = 'linux'
-if (ext.osName.contains('mac')) {
-    ext.targetOsPlatform = 'macos'
-} else if (ext.osName.contains('win')) {
-    ext.targetOsPlatform = 'windows'
-}
 if (project.hasProperty('targetOsPlatform')) {
     ext.targetOsPlatform = project['targetOsPlatform']
+} else {
+    if (ext.osName.contains('mac')) {
+        ext.targetOsPlatform = 'macos'
+    } else if (ext.osName.contains('win')) {
+        ext.targetOsPlatform = 'windows'
+    } else {
+        ext.targetOsPlatform = 'linux'
+    }
 }
 
 ext.bundlePlatform = ext.targetOsPlatform ? "-" + ext.targetOsPlatform : ""
@@ -180,13 +182,13 @@ if (project.hasProperty('buildDmgMac')) {
     def JARS_TO_REPACK = []
 
     for (jarFile in file("${bundleOutput}/plugins").listFiles()) {
-        def name = jarFile.name.substring(0,jarFile.name.lastIndexOf("."))
+        def name = jarFile.name.substring(0, jarFile.name.lastIndexOf("."))
         JARS_TO_REPACK.add(["name": name, "path": "plugins/${jarFile.name}", "nameTemplate": "*.*lib"])
     }
 
-    task copyJDK(type: Exec, dependsOn: subprojects.findResults {it.tasks.findByName("bundle")}.flatten()) {
+    task copyJDK(type: Exec, dependsOn: subprojects.findResults { it.tasks.findByName("bundle") }.flatten()) {
         def intellijJDKTargetDir = "${macBuildZipUnpackDir}/${-> project.macAppBundle.appName}.app/Contents"
-        def executableFolder = intellijJDKTargetDir+"/MacOS"
+        def executableFolder = intellijJDKTargetDir + "/MacOS"
         def intellijJDKPath = bundleOutput
         workingDir intellijJDKPath
 
@@ -211,7 +213,7 @@ if (project.hasProperty('buildDmgMac')) {
         copy {
             from "$rootDir/etc/Info.plist"
             into "${intellijJDKTargetDir}"
-            filter{ it.replaceAll('@@libVersion@@', buildVersion)}
+            filter { it.replaceAll('@@libVersion@@', buildVersion) }
         }
 
         inputs.dir(intellijJDKPath)
@@ -237,40 +239,40 @@ if (project.hasProperty('buildDmgMac')) {
 
     task codeSignJarContents(dependsOn: copyJDK) {
         def signJarContents = { jarName, jarPath, nameTemplate ->
-            def workDir = "${project.buildDir}/${->project.macAppBundle.appOutputDir}"
+            def workDir = "${project.buildDir}/${-> project.macAppBundle.appOutputDir}"
             exec {
                 workingDir workDir
-                commandLine "unzip", "-qq", "-o", "${->project.macAppBundle.appName}.app/Contents/$jarPath", "-d", "tmp/$jarName"
+                commandLine "unzip", "-qq", "-o", "${-> project.macAppBundle.appName}.app/Contents/$jarPath", "-d", "tmp/$jarName"
             }
             exec {
                 workingDir "$workDir/tmp"
-                def tmpCommandLine = [ "find", "$jarName", "-type", "f", "-name", "$nameTemplate", "-exec",
-                                       "codesign", "-f", "--timestamp", "--entitlements", "$rootDir/etc/sdk.entitlements",
-                                       "-s", "${->project.macAppBundle.certIdentity}", "--options", "runtime", "-v", "--verbose", "{}", ";" ]
+                def tmpCommandLine = ["find", "$jarName", "-type", "f", "-name", "$nameTemplate", "-exec",
+                                      "codesign", "-f", "--timestamp", "--entitlements", "$rootDir/etc/sdk.entitlements",
+                                      "-s", "${-> project.macAppBundle.certIdentity}", "--options", "runtime", "-v", "--verbose", "{}", ";"]
 
                 if (project.macAppBundle.keyChain) {
-                    tmpCommandLine << "--keychain" << "${->project.macAppBundle.keyChain}"
+                    tmpCommandLine << "--keychain" << "${-> project.macAppBundle.keyChain}"
                 }
 
                 commandLine tmpCommandLine
             }
             exec {
                 workingDir "$workDir/tmp/$jarName"
-                commandLine = [ "find", ".", "-maxdepth", "1", "-exec", "zip", "-r", "-q", "$workDir/tmp/${jarName}.jar", "{}", ";" ]
+                commandLine = ["find", ".", "-maxdepth", "1", "-exec", "zip", "-r", "-q", "$workDir/tmp/${jarName}.jar", "{}", ";"]
             }
             delete("$workDir/tmp/$jarName")
             exec {
                 workingDir workDir
-                commandLine "mv", "-f", "tmp/${jarName}.jar", "${->project.macAppBundle.appName}.app/Contents/plugins"
+                commandLine "mv", "-f", "tmp/${jarName}.jar", "${-> project.macAppBundle.appName}.app/Contents/plugins"
             }
         }
 
         doLast {
-            mkdir "${project.buildDir}/${->project.macAppBundle.appOutputDir}/tmp"
+            mkdir "${project.buildDir}/${-> project.macAppBundle.appOutputDir}/tmp"
             JARS_TO_REPACK.each {
                 entry -> signJarContents(entry.name, entry.path, entry.nameTemplate)
             }
-            delete("${project.buildDir}/${->project.macAppBundle.appOutputDir}/tmp")
+            delete("${project.buildDir}/${-> project.macAppBundle.appOutputDir}/tmp")
         }
     }
 
@@ -311,8 +313,8 @@ if (project.hasProperty('buildDmgMac')) {
         task notarizeDmg(type: Exec) {
             workingDir "${buildDir}/"
             commandLine "xcrun", "altool", "--notarize-app", "--primary-bundle-id", "com.haulmont.studio",
-                    "--username", developerId, "--password", developerIdPassword,
-                    "--file", "${dmgAppName}.dmg"
+                "--username", developerId, "--password", developerIdPassword,
+                "--file", "${dmgAppName}.dmg"
         }
     }
 }
