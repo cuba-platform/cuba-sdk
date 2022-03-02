@@ -76,10 +76,10 @@ if (project.hasProperty('targetOsPlatform')) {
     ext.targetOsPlatform = project['targetOsPlatform']
 }
 
-ext.bundlePlatform = '-' + ext.targetOsPlatform;
+ext.bundlePlatform = ext.targetOsPlatform ? "-" + ext.targetOsPlatform : ""
 
-ext.bundleOutput = file("${rootProject.buildDir}/bundle" + rootProject["bundlePlatform"])
-ext.nativeBundle = file("${ext.bundleOutput}/native" + rootProject["bundlePlatform"])
+ext.bundleOutput = file("${rootProject.buildDir}/bundle" + ext.bundlePlatform)
+ext.nativeBundle = file("${ext.bundleOutput}/native" + ext.bundlePlatform)
 def buildVersion = rootProject.hasProperty('buildVersion') ? rootProject['buildVersion'] : '1.0-SNAPSHOT'
 
 allprojects {
