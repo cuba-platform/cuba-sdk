@@ -320,7 +320,7 @@ task bundle(dependsOn: jarPatch, group: 'distribution', description: 'Builds bun
         def targetOsPlatform = 'linux'
         if (osName.contains('mac')) {
             targetOsPlatform = 'macos'
-        } else if (osName.contains('Win')) {
+        } else if (osName.contains('win')) {
             targetOsPlatform = 'windows'
         }
         if (project.hasProperty('targetOsPlatform')) {
