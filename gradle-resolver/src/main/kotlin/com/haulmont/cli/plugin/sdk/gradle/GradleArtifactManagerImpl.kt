@@ -141,7 +141,7 @@ class GradleArtifactManagerImpl : ArtifactManager {
 
     override fun readPom(artifact: MvnArtifact, classifier: Classifier): Model? {
         val gradleCoordinates = artifact.gradleCoordinates(classifier)
-        log.info("Read POM: $gradleCoordinates")
+        log.fine("Read POM: $gradleCoordinates")
 
         var pomFile: Path? = readFromCache(artifact, classifier)
 
@@ -179,7 +179,7 @@ class GradleArtifactManagerImpl : ArtifactManager {
                 }
             }
         }
-        log.info("POM does not exist: ${artifact.gradleCoordinates(classifier)}")
+        log.fine("POM does not exist: ${artifact.gradleCoordinates(classifier)}")
         return null
     }
 

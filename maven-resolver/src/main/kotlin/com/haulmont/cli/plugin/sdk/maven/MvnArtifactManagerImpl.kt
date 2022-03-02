@@ -191,7 +191,7 @@ class MvnArtifactManagerImpl : ArtifactManager {
     }
 
     override fun readPom(artifact: MvnArtifact, classifier: Classifier): Model? {
-        log.info("Read POM: ${artifact.mvnCoordinates(classifier)}")
+        log.fine("Read POM: ${artifact.mvnCoordinates(classifier)}")
         val pomFile = getArtifactPomFile(artifact, classifier)
 
         performance("Read POM") {
@@ -212,7 +212,7 @@ class MvnArtifactManagerImpl : ArtifactManager {
                 }
             }
         }
-        log.info("POM does not exist: ${artifact.mvnCoordinates(classifier)}")
+        log.fine("POM does not exist: ${artifact.mvnCoordinates(classifier)}")
         return null
     }
 
@@ -228,7 +228,7 @@ class MvnArtifactManagerImpl : ArtifactManager {
 
     private fun uploadToRepository(repository: Repository, artifact: MvnArtifact) {
         val mainClassifier = artifact.mainClassifier()
-        log.info("Uploading: ${artifact.mvnCoordinates(mainClassifier)}")
+        log.fine("Uploading: ${artifact.mvnCoordinates(mainClassifier)}")
 
         val files = ArrayList<String>()
         val classifiers = ArrayList<String>()
@@ -315,7 +315,7 @@ class MvnArtifactManagerImpl : ArtifactManager {
         classifier: Classifier,
         pomClassifier: Classifier = Classifier.pom()
     ): List<MvnArtifact> {
-        log.info("Resolve dependencies ${artifact.mvnCoordinates(classifier)}")
+        log.fine("Resolve dependencies ${artifact.mvnCoordinates(classifier)}")
         val commandResult = mvnExecutor.mvn(
             RepositoryTarget.SOURCE.getId(),
             "dependency:resolve",
@@ -352,7 +352,7 @@ class MvnArtifactManagerImpl : ArtifactManager {
     }
 
     override fun getArtifact(artifact: MvnArtifact, classifier: Classifier) {
-        log.info("Get with dependencies ${artifact.mvnCoordinates(classifier)}")
+        log.fine("Get with dependencies ${artifact.mvnCoordinates(classifier)}")
         performance("Get artifact") {
             mvnExecutor.mvn(
                 RepositoryTarget.SOURCE.getId(),
@@ -389,7 +389,7 @@ class MvnArtifactManagerImpl : ArtifactManager {
     ): Path? {
         val file = getArtifactFile(artifact, classifier)
         if (!Files.exists(file)) {
-            log.info("Download artifact again ${artifact.mvnCoordinates(classifier)}")
+            log.fine("Download artifact again ${artifact.mvnCoordinates(classifier)}")
             getArtifact(artifact, classifier)
         }
         return file

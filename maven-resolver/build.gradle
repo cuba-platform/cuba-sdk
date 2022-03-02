@@ -43,10 +43,6 @@ compileJava {
 task bundle(group: 'distribution', dependsOn: ['jar', ':cuba-sdk:bundle'], type: Copy) {
     inputs.files jar.outputs.files
 
-    def bundlePlatform = project.hasProperty('targetOsPlatform') ? '-' + project.property('targetOsPlatform') : '';
-
-    def bundleOutput = file("${rootProject.buildDir}/bundle" + bundlePlatform)
-
     jar.outputs.files.each {
         from it
     }
@@ -55,18 +51,18 @@ task bundle(group: 'distribution', dependsOn: ['jar', ':cuba-sdk:bundle'], type:
         from it
     }
 
-    def pluginsFolder = file("${bundleOutput}/plugins")
+    def pluginsFolder = file("${rootProject.bundleOutput}/plugins")
     pluginsFolder.mkdir()
 
     into pluginsFolder
 
-    if (bundleOutput.exists()) {
+    if (rootProject.bundleOutput.exists()) {
         def osName = System.getProperty("os.name").toLowerCase()
         if (osName.contains('nux')
                 || osName.contains('mac')) {
             exec {
                 executable 'chmod'
-                args = ['u+w', '-R', pluginsFolder]
+                args = ['u+w', pluginsFolder]
             }
         }
     }

@@ -174,7 +174,7 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
         val components = mutableSetOf<Component>()
         val searchThread = thread {
             nameVersions.split(",").map { coordinate ->
-                coordinate.split("-").let {
+                coordinate.split(">>").let {
                     val component = componentRegistry.providerByName(it[0]).resolveCoordinates(it[1]) ?: fail(
                         messages["component.unknown"].format(
                             it[0], it[1]
@@ -283,7 +283,7 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
             }
         }
         val split = nameVersion.split(":")
-        if (split.last().splitVersion() == null) {
+        if (split.size < 3 && split.last().splitVersion() == null) {
             val version = askVersion(nameVersion, null, versions)
             return "${nameVersion.toLowerCase()}:$version"
         }
