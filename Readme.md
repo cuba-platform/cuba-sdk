@@ -379,6 +379,26 @@ When CUBA SDK is installed and the local repository is configured run the `impor
 
 # Build information
 
+## How to build, run, and debug CUBA SDK locally (in Intellij IDEA)
+
+Below, `${platform}` is referred to as the current Operating System (OS) name (`windows`, `linux`, `macos` for Windows, 
+Linux, and macOS respectively).
+
+The build directory of the CUBA SDK project contains a script file (`.bat` for Windows or `.sh` for Linux/macOS under 
+`bundle-${platform}/bin`). Besides, there are two more directories inside: `native-${platform}` with a necessary Java 
+runtime image created with the use of jlink and `plugins` with some `.jar` files (including archives corresponding to all 
+the project modules). In order to generate a working build, one needs to run the Gradle task 
+`.\gradlew bundle` (here, Gradle Wrapper is used from the project root location). It is possible (but not mandatory) to 
+add `-PtargetOsPlatform=${platform}` as a command line parameter. It is
+worth noticing that this task (among other things) copies the content of one of the two files from `etc` directory
+(located in the same `cuba-sdk` module) to the script file created for a new build. Of course, the choice of the file is
+determined by the current OS (picked up as the `rootProject.targetOsPlatform` property value).
+
+Once the task is completed, it is enough to execute `cuba-sdk.bat` or `cuba-sdk.sh` in Terminal to **run** the build. If **debugging**
+is required, one must set `JLINK_VM_OPTIONS = -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005` and
+run the standard Remote JVM Debug configuration of Intellij IDEA to connect to the running JVM.
+
+
 ## How to build DMG image
 
 1. Execute `gradlew bundle`.
