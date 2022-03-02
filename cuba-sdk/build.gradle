@@ -1,6 +1,6 @@
-def moduleName = "com.haulmont.cuba.cli.plugin.sdk"
-
 apply plugin: 'application'
+
+def moduleName = "com.haulmont.cuba.cli.plugin.sdk"
 
 task sourceJar(type: Jar) {
     from file('src/main/java')
@@ -124,12 +124,7 @@ startScripts {
     }
 }
 
-def bundlePlatform = project.hasProperty('targetOsPlatform') ? '-' + project.property('targetOsPlatform') : '';
-
 def bundlesDir = file("bundles")
-def bundleOutput = file("${rootProject.buildDir}/bundle" + bundlePlatform)
-def nativeBundle = file("${bundleOutput}/native" + bundlePlatform)
-
 def modulesDir = file("${project.buildDir}/modules")
 def installedLibsDir = file("${buildDir}/install/${project.name}/lib")
 def patchLibsDir = file("${buildDir}/jar-patch")
@@ -192,12 +187,6 @@ task jarPatch(dependsOn: installDist, group: 'build',
             into patchLibsDir
         }
 
-        def javaHome = System.getenv('JAVA11_HOME')
-        if (javaHome == null
-                || javaHome.isEmpty()) {
-            throw new GradleException('JAVA_HOME is not set')
-        }
-
         for (moduleItem in modulesConfig) {
             def moduleItemName = moduleItem.key
             def moduleItemJar = moduleItem.value
@@ -214,11 +203,11 @@ task jarPatch(dependsOn: installDist, group: 'build',
                 workingDir modulesDir
 
                 commandLine(
-                        "${javaHome}/bin/javac",
+                        "${rootProject.javaHome}/bin/javac",
                         '-p', patchLibsDir.absolutePath,
                         '-d', compiledModuleDir.absolutePath,
                         '--patch-module', "${moduleItemName}=${jarFile.absolutePath}",
-                        new File(project.file("bundles"), "${moduleItemName}/module-info.java").absolutePath
+                        new File(bundlesDir, "${moduleItemName}/module-info.java").absolutePath
                 )
 
                 standardOutput = System.out
@@ -231,7 +220,7 @@ task jarPatch(dependsOn: installDist, group: 'build',
                 workingDir patchLibsDir
 
                 commandLine(
-                        "${javaHome}/bin/jar",
+                        "${rootProject.javaHome}/bin/jar",
                         'uf',
                         jarFile.absolutePath,
                         '-C',
@@ -247,26 +236,20 @@ task jarPatch(dependsOn: installDist, group: 'build',
 }
 
 task bundle(dependsOn: jarPatch, group: 'distribution', description: 'Builds bundle with custom JRE') {
-    outputs.dir bundleOutput
+    outputs.dir rootProject.bundleOutput
     inputs.dir patchLibsDir
 
     ext.appModulePaths = [patchLibsDir]
 
     doLast {
-        delete bundleOutput
+        delete rootProject.bundleOutput
 
         logger.info("Linking")
-
-        def javaHome = System.getenv('JAVA11_HOME')
-        if (javaHome == null
-                || javaHome.isEmpty()) {
-            throw new GradleException('JAVA_HOME is not set')
-        }
 
         def targetOsJavaHome = project.hasProperty('targetOsJavaHome') ? project.property('targetOsJavaHome') : null
         if (targetOsJavaHome == null
                 || targetOsJavaHome.isEmpty()) {
-            targetOsJavaHome = javaHome
+            targetOsJavaHome = rootProject.javaHome
         }
 
         logger.info('Target JAVA_HOME ' + targetOsJavaHome)
@@ -276,10 +259,10 @@ task bundle(dependsOn: jarPatch, group: 'distribution', description: 'Builds bun
             workingDir buildDir
 
             commandLine(
-                    "${javaHome}/bin/jlink",
+                    "${rootProject.javaHome}/bin/jlink",
                     '--module-path', (["${targetOsJavaHome}/jmods"] + ext.appModulePaths).grep().join(File.pathSeparator),
                     '--add-modules', moduleName,
-                    '--output', bundleOutput,
+                    '--output', rootProject.bundleOutput,
                     '--launcher', "cuba-sdk=$mainClassModuleName/$mainClassName",
                     '--compress=2',
                     '--no-header-files',
@@ -295,8 +278,8 @@ task bundle(dependsOn: jarPatch, group: 'distribution', description: 'Builds bun
 
         logger.info("Remove standard launcher script")
 
-        def cubacliFile = new File(bundleOutput, "bin/cuba-sdk")
-        def cubacliBatFile = new File(bundleOutput, "bin/cuba-sdk.bat")
+        def cubacliFile = new File(rootProject.bundleOutput, "bin/cuba-sdk")
+        def cubacliBatFile = new File(rootProject.bundleOutput, "bin/cuba-sdk.bat")
 
         if (cubacliFile.exists()) {
             cubacliFile.delete()
@@ -306,56 +289,42 @@ task bundle(dependsOn: jarPatch, group: 'distribution', description: 'Builds bun
         }
 
         logger.info("Fix permissions")
-
-        // fix non-writable files in 'legal/'
-        def osName = System.getProperty("os.name").toLowerCase()
         if (osName.contains('nux')
                 || osName.contains('mac')) {
             exec {
                 executable 'chmod'
-                args = ['u+w', '-R', bundleOutput]
+                args = ['u+w', rootProject.bundleOutput]
             }
         }
-
-        def targetOsPlatform = 'linux'
-        if (osName.contains('mac')) {
-            targetOsPlatform = 'macos'
-        } else if (osName.contains('win')) {
-            targetOsPlatform = 'windows'
-        }
-        if (project.hasProperty('targetOsPlatform')) {
-            targetOsPlatform = project['targetOsPlatform']
-        }
-
         // create nested folder
 
-        nativeBundle.mkdir()
-        bundleOutput.eachFile { file ->
-            if (file.name != nativeBundle.name) {
-                file.renameTo(new File(nativeBundle, file.name))
+        rootProject.nativeBundle.mkdir()
+        rootProject.bundleOutput.eachFile { file ->
+            if (file.name != rootProject.nativeBundle.name) {
+                file.renameTo(new File(rootProject.nativeBundle, file.name))
             }
         }
 
         // create custom launcher script
 
-        def binFolder = new File(bundleOutput, 'bin')
+        def binFolder = new File(rootProject.bundleOutput, 'bin')
         binFolder.mkdir()
 
-        if (targetOsPlatform == 'linux' || targetOsPlatform == 'macos') {
+        if (rootProject.targetOsPlatform == 'linux' || rootProject.targetOsPlatform == 'macos') {
             def cubaCliScript = new File(binFolder, 'cuba-sdk')
             cubaCliScript.text = project.file('etc/cuba-sdk-unix').text
-        } else if (targetOsPlatform == 'windows') {
+        } else if (rootProject.targetOsPlatform == 'windows') {
             def cubaCliScript = new File(binFolder, 'cuba-sdk.bat')
             cubaCliScript.text = project.file('etc/cuba-sdk-windows.bat').text
         }
 
         // set executable flag
 
-        if (osName.contains('nux')
-                || osName.contains('mac')) {
+        if (rootProject.osName.contains('nux')
+                || rootProject.osName.contains('mac')) {
             exec {
                 executable 'chmod'
-                args = ['a+x', '-R', binFolder]
+                args = ['a+x', binFolder]
             }
         }
 
@@ -367,7 +336,7 @@ task bundle(dependsOn: jarPatch, group: 'distribution', description: 'Builds bun
 
 task buildWinSetup(dependsOn: bundle, group: 'distribution', description: 'Builds Windows installer') {
     doLast {
-        if (project.hasProperty('targetOsPlatform') && project['targetOsPlatform'] == 'windows') {
+        if (targetOsPlatform == 'windows') {
             def setupScriptDir = "${rootProject.projectDir}"
             def setupScriptFile = "${setupScriptDir}/win-setup.iss"
 

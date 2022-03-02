@@ -192,7 +192,7 @@ Remove command removes the component with dependencies from the local *m2* repos
 - `remove cuba-addon`/`remove jmix-addon`
 - `remove lib`
 
-Component coordinates for bulk commands can be passed with ','. For example: `install --c cuba-7.2.1,cuba-addon-dashboard:3.2.1`.
+Component coordinates for bulk commands can be passed with ','. For example: `install --c cuba>>7.2.1,cuba-addon>>dashboard:3.2.1`.
 
 Export command exports the component with dependencies as an archive to the `sdkproperties[sdk.export.home]` directory. If the component is not resolved yet, then SDK will ask to resolve the component.  
 - `export` - exports all resolved SDK components.
@@ -376,3 +376,17 @@ When CUBA SDK is installed and the local repository is configured run the `impor
 
 ![import](img/import.png)
 
+
+# Build information
+
+## How to build DMG image
+
+1. Execute `gradlew bundle`.
+2. To build .dmg for MAC OS execute `buildDmgMac` task with gradle property `buildDmgMac`. 
+
+`gradlew buildDmgMac -PbuildDmgMac`
+
+For production build following properties should be passed
+`-PcertIdentity= -PdeveloperId= -PdeveloperIdPassword=`
+
+3. Find distributions in `build/distributions`.

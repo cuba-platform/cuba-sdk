@@ -52,7 +52,7 @@ abstract class AbstractRepositorySearch : RepositorySearch {
 
         result.fold(
             success = {
-                log.info("Component found in ${repository}: ${component}")
+                log.fine("Component found in ${repository}: ${component}")
                 return handleResultJson(Gson().fromJson(it, JsonElement::class.java), component)
             },
             failure = { error ->

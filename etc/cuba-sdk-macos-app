@@ -1,0 +1,3 @@
+#!/bin/bash
+scriptPath=$(dirname "$0")'/../bin/cuba-sdk'
+osascript -e 'tell app "Terminal" to do script "\"'"$scriptPath"'\""'
