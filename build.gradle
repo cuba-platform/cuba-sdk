@@ -41,6 +41,10 @@ buildscript {
     repositories {
         mavenLocal()
         mavenCentral()
+        gradlePluginPortal()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
         maven {
             credentials {
                 username System.getenv('HAULMONT_REPOSITORY_USER') ?: 'cuba'
@@ -51,10 +55,37 @@ buildscript {
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$versions.kotlin"
+        classpath "edu.sc.seis:macAppBundle:2.3.0"
     }
 }
 
 apply plugin: 'base'
+
+// fix non-writable files in 'legal/'
+ext.osName = System.getProperty("os.name").toLowerCase()
+
+ext.javaHome = System.getProperty("JAVA_HOME")
+
+if (ext.javaHome == null
+        || ext.javaHome.isEmpty()) {
+    throw new GradleException('JAVA_HOME is not set')
+}
+
+ext.targetOsPlatform = 'linux'
+if (ext.osName.contains('mac')) {
+    ext.targetOsPlatform = 'macos'
+} else if (ext.osName.contains('win')) {
+    ext.targetOsPlatform = 'windows'
+}
+if (project.hasProperty('targetOsPlatform')) {
+    ext.targetOsPlatform = project['targetOsPlatform']
+}
+
+ext.bundlePlatform = '-' + ext.targetOsPlatform;
+
+ext.bundleOutput = file("${rootProject.buildDir}/bundle" + rootProject["bundlePlatform"])
+ext.nativeBundle = file("${ext.bundleOutput}/native" + rootProject["bundlePlatform"])
+def buildVersion = rootProject.hasProperty('buildVersion') ? rootProject['buildVersion'] : '1.0-SNAPSHOT'
 
 allprojects {
     repositories {
@@ -80,7 +111,7 @@ subprojects {
     targetCompatibility = 11
 
     group 'com.haulmont.cli.sdk'
-    version rootProject.hasProperty('buildVersion') ? rootProject['buildVersion'] : '1.0-SNAPSHOT'
+    version buildVersion
 
     dependencies {
         implementation "org.jetbrains.kotlin:kotlin-reflect:$versions.kotlin"
@@ -120,5 +151,173 @@ subprojects {
 
     [compileKotlin, compileTestKotlin].each {
         it.kotlinOptions.jvmTarget = '1.8'
+    }
+}
+
+///////////////////MAC OS/////////////////
+
+if (project.hasProperty('buildDmgMac')) {
+
+    def macBuildZipUnpackDirName = "app-mac"
+    def macBuildZipUnpackDir = "${project.buildDir}/${macBuildZipUnpackDirName}"
+    def postfix = buildVersion
+    def dmgAppName = "cuba-sdk-${postfix}"
+
+    apply plugin: "edu.sc.seis.macAppBundle"
+    // do not create .app on dmg creation, we have .app from bundle task
+    createApp.enabled = false
+    createApp.dependsOn.each { t -> t.enabled = false }
+
+    macAppBundle {
+        appName = "CUBA SDK"
+        volumeName = "cuba-sdk-${postfix}"
+        appOutputDir = macBuildZipUnpackDirName
+        dmgName = dmgAppName
+        backgroundImage = "etc/img/background.png"
+        icon = "etc/img/cuba-sdk.icns"
+        certIdentity = project.property('certIdentity').replace('"', '')
+
+        if (project.hasProperty('keyChain')) {
+            keyChain = project.property('keyChain').replace('"', '')
+        }
+    }
+
+    def JARS_TO_REPACK = []
+
+    for (jarFile in file("${bundleOutput}/plugins").listFiles()) {
+        def name = jarFile.name.substring(0,jarFile.name.lastIndexOf("."))
+        JARS_TO_REPACK.add(["name": name, "path": "plugins/${jarFile.name}", "nameTemplate": "*.*lib"])
+    }
+
+    task copyJDK(type: Exec, dependsOn: subprojects.findResults {it.tasks.findByName("bundle")}.flatten()) {
+        def intellijJDKTargetDir = "${macBuildZipUnpackDir}/${-> project.macAppBundle.appName}.app/Contents"
+        def executableFolder = intellijJDKTargetDir+"/MacOS"
+        def intellijJDKPath = bundleOutput
+        workingDir intellijJDKPath
+
+        file(intellijJDKTargetDir).deleteDir()
+
+        commandLine "cp", "-R", ".", "${intellijJDKTargetDir}"
+
+        mkdir(executableFolder)
+        copy {
+            from "$rootDir/etc/cuba-sdk-macos-app"
+            into "${executableFolder}"
+            rename { String fileName ->
+                project.macAppBundle.appName
+            }
+        }
+
+        copy {
+            from "$rootDir/etc/img/cuba-sdk.icns"
+            into "${intellijJDKTargetDir}/Resources"
+        }
+
+        copy {
+            from "$rootDir/etc/Info.plist"
+            into "${intellijJDKTargetDir}"
+            filter{ it.replaceAll('@@libVersion@@', buildVersion)}
+        }
+
+        inputs.dir(intellijJDKPath)
+        outputs.dir(intellijJDKTargetDir)
+
+        doLast {
+            if (osName.contains('mac')) {
+                exec {
+                    executable 'chmod'
+                    args = ['-R', '777', "$intellijJDKTargetDir"]
+                }
+                exec {
+                    executable 'chmod'
+                    args = ['a+x', "$executableFolder/${project.macAppBundle.appName}"]
+                }
+                exec {
+                    executable 'chmod'
+                    args = ['a+x', "$intellijJDKTargetDir/bin/cuba-sdk"]
+                }
+            }
+        }
+    }
+
+    task codeSignJarContents(dependsOn: copyJDK) {
+        def signJarContents = { jarName, jarPath, nameTemplate ->
+            def workDir = "${project.buildDir}/${->project.macAppBundle.appOutputDir}"
+            exec {
+                workingDir workDir
+                commandLine "unzip", "-qq", "-o", "${->project.macAppBundle.appName}.app/Contents/$jarPath", "-d", "tmp/$jarName"
+            }
+            exec {
+                workingDir "$workDir/tmp"
+                def tmpCommandLine = [ "find", "$jarName", "-type", "f", "-name", "$nameTemplate", "-exec",
+                                       "codesign", "-f", "--timestamp", "--entitlements", "$rootDir/etc/sdk.entitlements",
+                                       "-s", "${->project.macAppBundle.certIdentity}", "--options", "runtime", "-v", "--verbose", "{}", ";" ]
+
+                if (project.macAppBundle.keyChain) {
+                    tmpCommandLine << "--keychain" << "${->project.macAppBundle.keyChain}"
+                }
+
+                commandLine tmpCommandLine
+            }
+            exec {
+                workingDir "$workDir/tmp/$jarName"
+                commandLine = [ "find", ".", "-maxdepth", "1", "-exec", "zip", "-r", "-q", "$workDir/tmp/${jarName}.jar", "{}", ";" ]
+            }
+            delete("$workDir/tmp/$jarName")
+            exec {
+                workingDir workDir
+                commandLine "mv", "-f", "tmp/${jarName}.jar", "${->project.macAppBundle.appName}.app/Contents/plugins"
+            }
+        }
+
+        doLast {
+            mkdir "${project.buildDir}/${->project.macAppBundle.appOutputDir}/tmp"
+            JARS_TO_REPACK.each {
+                entry -> signJarContents(entry.name, entry.path, entry.nameTemplate)
+            }
+            delete("${project.buildDir}/${->project.macAppBundle.appOutputDir}/tmp")
+        }
+    }
+
+
+    task codeSignContents(type: Exec, dependsOn: codeSignJarContents) {
+        workingDir "${project.buildDir}/${-> project.macAppBundle.appOutputDir}"
+        def tmpCommandLine = ["find", "${-> project.macAppBundle.appName}.app", "-type", "f", "-exec",
+                              "codesign", "-f", "--timestamp", "--entitlements", "$rootDir/etc/sdk.entitlements",
+                              "-s", "${-> project.macAppBundle.certIdentity}", "--options", "runtime", "-v", "--verbose", "{}", ";"]
+
+        if (project.macAppBundle.keyChain) {
+            tmpCommandLine << "--keychain" << "${-> project.macAppBundle.keyChain}"
+        }
+
+        commandLine tmpCommandLine
+    }
+
+    task codeSignApp(type: Exec, dependsOn: codeSignContents) {
+        workingDir "${project.buildDir}/${-> project.macAppBundle.appOutputDir}"
+        def tmpCommandLine = ["codesign", "-f", "--timestamp", "--entitlements", "$rootDir/etc/sdk.entitlements",
+                              "-s", "${-> project.macAppBundle.certIdentity}", "--options", "runtime", "-v", "--verbose",
+                              "${-> project.macAppBundle.appName}.app"]
+
+        if (project.macAppBundle.keyChain) {
+            tmpCommandLine << "--keychain" << "${-> project.macAppBundle.keyChain}"
+        }
+
+        commandLine tmpCommandLine
+    }
+
+    createDmg.mustRunAfter codeSignApp
+
+    task buildDmgMac(dependsOn: [codeSignApp, generatePlist, createDmg]) {
+        doLast {}
+    }
+
+    if (project.hasProperty('developerId') && project.hasProperty('developerIdPassword')) {
+        task notarizeDmg(type: Exec) {
+            workingDir "${buildDir}/"
+            commandLine "xcrun", "altool", "--notarize-app", "--primary-bundle-id", "com.haulmont.studio",
+                    "--username", developerId, "--password", developerIdPassword,
+                    "--file", "${dmgAppName}.dmg"
+        }
     }
 }

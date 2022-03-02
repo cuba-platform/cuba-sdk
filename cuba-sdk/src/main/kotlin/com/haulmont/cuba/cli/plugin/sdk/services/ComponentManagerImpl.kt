@@ -84,7 +84,7 @@ class ComponentManagerImpl : ComponentManager {
     override fun resolve(component: Component, progress: ResolveProgressCallback?): Component? {
         progress?.let { it(component, 0f, 1) }
         if (component.components.isNotEmpty()) {
-            log.info("Resolve complex component: ${component}")
+            log.fine("Resolve complex component: ${component}")
             val resolvedComponents = ArrayList<Component>()
             val total = component.components.size
             val resolved = AtomicInteger(0)
@@ -104,7 +104,7 @@ class ComponentManagerImpl : ComponentManager {
             component.components.clear()
             component.components.addAll(resolvedComponents)
         } else {
-            log.info("Resolve component: ${component}")
+            log.fine("Resolve component: ${component}")
             resolveDependencies(component, progress)
         }
         return component
@@ -227,7 +227,7 @@ class ComponentManagerImpl : ComponentManager {
     private fun resolveDependencies(component: Component, progress: ResolveProgressCallback? = null): Component? {
         if (component.url == null) {
             var progressCount = 0
-            log.info("Resolve component dependencies: ${component}")
+            log.fine("Resolve component dependencies: ${component}")
             val artifact = MvnArtifact(
                 component.groupId,
                 component.artifactId,

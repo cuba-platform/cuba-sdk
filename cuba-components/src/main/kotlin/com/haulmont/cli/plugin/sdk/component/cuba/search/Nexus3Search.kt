@@ -72,7 +72,7 @@ class Nexus3Search(repository: Repository) : AbstractRepositorySearch(repository
                     component.components.add(it)
                 }
             }
-        log.info("Component found in ${repository}: $component")
+        log.fine("Component found in ${repository}: $component")
         return component
     }
 }

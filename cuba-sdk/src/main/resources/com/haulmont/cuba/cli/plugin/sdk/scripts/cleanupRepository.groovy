@@ -32,6 +32,6 @@ if (targetRepository != null) {
 }
 repository.createMavenHosted(repoName, BlobStoreManager.DEFAULT_BLOBSTORE_NAME, true, VersionPolicy.MIXED,
         WritePolicy.ALLOW, LayoutPolicy.STRICT)
-log.info("Repository $repoName created")
+log.fine("Repository $repoName created")
 
 return groovy.json.JsonOutput.toJson([result: 'Repository cleaned'])

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>English</string>
+
+    <key>CFBundleIconFile</key>
+    <string>cuba-sdk.icns</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>@@libVersion@@</string>
+    <key>CFBundleName</key>
+    <string>CUBA SDK</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.haulmont.cuba.cli.sdk</string>
+
+    <key>CFBundleGetInfoString</key>
+    <string>CUBA SDK @@libVersion@@</string>
+    <key>CFBundleShortVersionString</key>
+    <string>@@libVersion@@</string>
+    <key>CFBundleVersion</key>
+    <string>@@libVersion@@</string>
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.developer-tools</string>
+  </dict>
+</plist>
