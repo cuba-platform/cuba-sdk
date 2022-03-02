@@ -64,7 +64,7 @@ apply plugin: 'base'
 // fix non-writable files in 'legal/'
 ext.osName = System.getProperty("os.name").toLowerCase()
 
-ext.javaHome = System.getProperty("JAVA_HOME") ?: System.getProperty("JAVA11_HOME")
+ext.javaHome = System.getenv("JAVA11_HOME") ?: System.getenv("JAVA_HOME")
 
 ext.targetOsPlatform = 'linux'
 if (ext.osName.contains('mac')) {
