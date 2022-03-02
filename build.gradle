@@ -66,11 +66,6 @@ ext.osName = System.getProperty("os.name").toLowerCase()
 
 ext.javaHome = project.hasProperty('targetOsJavaHome') ? project.property('targetOsJavaHome') : System.getProperty("JAVA_HOME") ?: System.getProperty("JAVA11_HOME")
 
-if (ext.javaHome == null
-        || ext.javaHome.isEmpty()) {
-    throw new GradleException('JAVA_HOME is not set')
-}
-
 ext.targetOsPlatform = 'linux'
 if (ext.osName.contains('mac')) {
     ext.targetOsPlatform = 'macos'

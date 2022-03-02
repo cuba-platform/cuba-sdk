@@ -187,6 +187,11 @@ task jarPatch(dependsOn: installDist, group: 'build',
             into patchLibsDir
         }
 
+        if (rootProject.javaHome == null
+            || rootProject.javaHome.isEmpty()) {
+            throw new GradleException('JAVA_HOME is not set')
+        }
+
         for (moduleItem in modulesConfig) {
             def moduleItemName = moduleItem.key
             def moduleItemJar = moduleItem.value
@@ -245,6 +250,11 @@ task bundle(dependsOn: jarPatch, group: 'distribution', description: 'Builds bun
         delete rootProject.bundleOutput
 
         logger.info("Linking")
+
+        if (rootProject.javaHome == null
+            || rootProject.javaHome.isEmpty()) {
+            throw new GradleException('JAVA_HOME is not set')
+        }
 
         def targetOsJavaHome = project.hasProperty('targetOsJavaHome') ? project.property('targetOsJavaHome') : null
         if (targetOsJavaHome == null
