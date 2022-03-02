@@ -152,7 +152,7 @@ subprojects {
 
 ///////////////////MAC OS/////////////////
 
-if (project.hasProperty('buildDmgMac')) {
+if (project.hasProperty('buildDmg')) {
 
     def macBuildZipUnpackDirName = "app-mac"
     def macBuildZipUnpackDir = "${project.buildDir}/${macBuildZipUnpackDirName}"
@@ -304,7 +304,7 @@ if (project.hasProperty('buildDmgMac')) {
 
     createDmg.mustRunAfter codeSignApp
 
-    task buildDmgMac(dependsOn: [codeSignApp, generatePlist, createDmg]) {
+    task buildDmg(dependsOn: [codeSignApp, generatePlist, createDmg]) {
         doLast {}
     }
 

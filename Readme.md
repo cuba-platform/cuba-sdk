@@ -404,7 +404,7 @@ run the standard Remote JVM Debug configuration of Intellij IDEA to connect to t
 1. Execute `gradlew bundle`.
 2. To build .dmg for MAC OS execute `buildDmgMac` task with gradle property `buildDmgMac`. 
 
-`gradlew buildDmgMac -PbuildDmgMac`
+`gradlew buildDmg -PbuildDmg`
 
 For production build following properties should be passed
 `-PcertIdentity= -PdeveloperId= -PdeveloperIdPassword=`
