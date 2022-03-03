@@ -186,19 +186,20 @@ if (project.hasProperty('buildDmg')) {
     }
 
     task copyJDK(type: Exec, dependsOn: subprojects.findResults { it.tasks.findByName("bundle") }.flatten()) {
-        def intellijJDKTargetDir = "${macBuildZipUnpackDir}/${-> project.macAppBundle.appName}.app/Contents"
-        def executableFolder = intellijJDKTargetDir + "/MacOS"
-        def intellijJDKPath = bundleOutput
-        workingDir intellijJDKPath
+        def appContentDir = "${macBuildZipUnpackDir}/${project.macAppBundle.appName}.app/Contents"
+        def executableDir = appContentDir + "/MacOS"
+        def jdkPath = bundleOutput
+        workingDir jdkPath
 
-        file(intellijJDKTargetDir).deleteDir()
+        file(appContentDir).deleteDir()
 
-        commandLine "cp", "-R", ".", "${intellijJDKTargetDir}"
+        commandLine "cp", "-R", ".", "${appContentDir}"
 
-        mkdir(executableFolder)
+        mkdir(executableDir)
+
         project.copy {
             from "$rootDir/etc/cuba-sdk-macos-app"
-            into "${executableFolder}"
+            into "${executableDir}"
             rename { String fileName ->
                 project.macAppBundle.appName
             }
@@ -206,35 +207,40 @@ if (project.hasProperty('buildDmg')) {
 
         project.copy {
             from "$rootDir/etc/img/cuba-sdk.icns"
-            into "${intellijJDKTargetDir}/Resources"
+            into "${appContentDir}/Resources"
         }
 
         project.copy {
             from "$rootDir/etc/Info.plist"
-            into "${intellijJDKTargetDir}"
+            into "${appContentDir}"
             filter { it.replaceAll('@@libVersion@@', buildVersion) }
         }
 
-        inputs.dir(intellijJDKPath)
-        outputs.dir(intellijJDKTargetDir)
+        inputs.dir(jdkPath)
+        outputs.dir(appContentDir)
+    }
 
+    task markExecutable(dependsOn: copyJDK) {
         doLast {
+            def appContentDir = "${macBuildZipUnpackDir}/${project.macAppBundle.appName}.app/Contents"
+            def executableDir = appContentDir + "/MacOS"
+
             exec {
                 executable 'chmod'
-                args = ['-R', '777', "$intellijJDKTargetDir"]
+                args = ['-R', '777', "$appContentDir"]
             }
             exec {
                 executable 'chmod'
-                args = ['a+x', "$executableFolder/${project.macAppBundle.appName}"]
+                args = ['a+x', "$executableDir/${project.macAppBundle.appName}"]
             }
             exec {
                 executable 'chmod'
-                args = ['a+x', "$intellijJDKTargetDir/bin/cuba-sdk"]
+                args = ['a+x', "$appContentDir/bin/cuba-sdk"]
             }
         }
     }
 
-    task codeSignJarContents(dependsOn: copyJDK) {
+    task codeSignJarContents(dependsOn: markExecutable) {
         def signJarContents = { jarName, jarPath, nameTemplate ->
             def workDir = "${project.buildDir}/${-> project.macAppBundle.appOutputDir}"
             exec {
