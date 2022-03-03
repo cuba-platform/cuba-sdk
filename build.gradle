@@ -186,39 +186,29 @@ if (project.hasProperty('buildDmg')) {
         JARS_TO_REPACK.add(["name": name, "path": "plugins/${jarFile.name}", "nameTemplate": "*.*lib"])
     }
 
-    task copyJDK(type: Exec, dependsOn: subprojects.findResults { it.tasks.findByName("bundle") }.flatten()) {
-        def appContentDir = "${macBuildZipUnpackDir}/${project.macAppBundle.appName}.app/Contents"
-        def executableDir = appContentDir + "/MacOS"
-        def jdkPath = bundleOutput
-        workingDir jdkPath
+    task copyJDK(dependsOn: subprojects.findResults { it.tasks.findByName("bundle") }.flatten()) {
+        inputs.dir(rootProject.bundleOutput)
+        outputs.dir("${macBuildZipUnpackDir}/${project.macAppBundle.appName}.app/")
 
-        file(appContentDir).deleteDir()
+        doLast {
+            def appContentDir = "${macBuildZipUnpackDir}/${project.macAppBundle.appName}.app/Contents"
 
-        commandLine "cp", "-R", ".", "${appContentDir}"
+            file(appContentDir).deleteDir()
 
-        mkdir(executableDir)
-
-        project.copy {
-            from "$rootDir/etc/cuba-sdk-macos-app"
-            into "${executableDir}"
-            rename { String fileName ->
-                project.macAppBundle.appName
+            ant.copy(todir: appContentDir) {
+                fileset(dir: "$rootProject.bundleOutput", defaultexcludes: "no")
             }
-        }
 
-        project.copy {
-            from "$rootDir/etc/img/cuba-sdk.icns"
-            into "${appContentDir}/Resources"
-        }
+            ant.copy(todir: appContentDir) {
+                fileset(dir: "$rootDir/etc/OSX", defaultexcludes: "no")
+            }
 
-        project.copy {
-            from "$rootDir/etc/Info.plist"
-            into "${appContentDir}"
-            filter { it.replaceAll('@@libVersion@@', buildVersion) }
+            ant.replace (
+                file: "$appContentDir/Info.plist",
+                token: '@@libVersion@@',
+                value: buildVersion
+            )
         }
-
-        inputs.dir(jdkPath)
-        outputs.dir(appContentDir)
     }
 
     task markExecutable(dependsOn: copyJDK) {
