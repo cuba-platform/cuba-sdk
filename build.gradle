@@ -219,19 +219,17 @@ if (project.hasProperty('buildDmg')) {
         outputs.dir(intellijJDKTargetDir)
 
         doLast {
-            if (osName.contains('mac')) {
-                exec {
-                    executable 'chmod'
-                    args = ['-R', '777', "$intellijJDKTargetDir"]
-                }
-                exec {
-                    executable 'chmod'
-                    args = ['a+x', "$executableFolder/${project.macAppBundle.appName}"]
-                }
-                exec {
-                    executable 'chmod'
-                    args = ['a+x', "$intellijJDKTargetDir/bin/cuba-sdk"]
-                }
+            exec {
+                executable 'chmod'
+                args = ['-R', '777', "$intellijJDKTargetDir"]
+            }
+            exec {
+                executable 'chmod'
+                args = ['a+x', "$executableFolder/${project.macAppBundle.appName}"]
+            }
+            exec {
+                executable 'chmod'
+                args = ['a+x', "$intellijJDKTargetDir/bin/cuba-sdk"]
             }
         }
     }
