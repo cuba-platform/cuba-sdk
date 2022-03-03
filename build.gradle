@@ -196,7 +196,7 @@ if (project.hasProperty('buildDmg')) {
         commandLine "cp", "-R", ".", "${intellijJDKTargetDir}"
 
         mkdir(executableFolder)
-        copy {
+        project.copy {
             from "$rootDir/etc/cuba-sdk-macos-app"
             into "${executableFolder}"
             rename { String fileName ->
@@ -204,12 +204,12 @@ if (project.hasProperty('buildDmg')) {
             }
         }
 
-        copy {
+        project.copy {
             from "$rootDir/etc/img/cuba-sdk.icns"
             into "${intellijJDKTargetDir}/Resources"
         }
 
-        copy {
+        project.copy {
             from "$rootDir/etc/Info.plist"
             into "${intellijJDKTargetDir}"
             filter { it.replaceAll('@@libVersion@@', buildVersion) }
