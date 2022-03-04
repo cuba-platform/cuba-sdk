@@ -6,7 +6,6 @@
 
 - [Overview](#overview)
 - [Installation](#installation)
-- [Configuration](#configuration)
 - [Commands Reference](#commands-reference)
     - [Common SDK Commands](#common-sdk-commands)
     - [Embedded Nexus Repository Commands](#embedded-nexus-repository-commands)
@@ -19,7 +18,7 @@
     - [How to Export Artifacts](#how-to-export-artifacts)
     - [How to Import Artifacts](#how-to-import-artifacts)
 
-# 1. Overview <a name="overview"></a>
+# Overview <a name="overview"></a>
 
 CUBA SDK is a command-line tool that provides an ability to resolve, export and upload to an external repository all dependencies
 for CUBA framework, add-ons or any external library with a few simple commands. SDK can be used as an embedded repository. This tool has a built-in [Nexus 3 repository](https://www.sonatype.com/nexus-repository-oss).
@@ -44,13 +43,13 @@ CUBA SDK is a useful tool if it is required to develop applications with a limit
 - Integrated with CUBA add-ons marketplace.
 - Supports different profiles for one CUBA SDK instance.
 
-# 2. Installation <a name="installation"></a>
+# Installation <a name="installation"></a>
 
-## Download links:
+## Download and Install
 
 - [Windows installer](https://github.com/cuba-platform/cuba-sdk/releases/download/1.0.6/cuba-sdk-1.0.6.exe)
 - [Linux](https://github.com/cuba-platform/cuba-sdk/releases/download/1.0.6/cuba-sdk-1.0.6-linux.zip)
-- [Mac OS](https://github.com/cuba-platform/cuba-sdk/releases/download/1.0.6/cuba-sdk-1.0.6.dmg)
+- [macOS](https://github.com/cuba-platform/cuba-sdk/releases/download/1.0.6/cuba-sdk-1.0.6.dmg)
 
 ### Windows
 
@@ -59,24 +58,22 @@ CUBA SDK is a useful tool if it is required to develop applications with a limit
 
 ### Linux
 
-1. Download and unpack the [`cuba-sdk-1.0.6-linux.zip`](https://github.com/cuba-platform/cuba-sdk/releases/download/1.0.6/cuba-sdk-1.0.6-linux.zip) archive.
+1. Download and unpack the [ZIP archive](https://github.com/cuba-platform/cuba-sdk/releases/download/1.0.6/cuba-sdk-1.0.6-linux.zip).
 2. Add location of `cuba-sdk/bin` directory to the PATH environment variable.
 3. Open a terminal and run the `cuba-sdk` command to start cuba-sdk.
 
 ### macOS
 
-1. Download and install [cuba-sdk-1.0.6.dmg](https://github.com/cuba-platform/cuba-sdk/releases/download/1.0.6/cuba-sdk-1.0.6.dmg).
-2. Run cuba-sdk from Applications or open a terminal and run the `open "/Applications/CUBA SDK.app"` to start cuba-sdk.
-    
-    The app is not signed at the moment, so macOS refuses to run it at the first attempt. You have to open *Preferences -> Security and Privacy* and click *Open Anyway*.
+1. Download and install [DMG](https://github.com/cuba-platform/cuba-sdk/releases/download/1.0.6/cuba-sdk-1.0.6.dmg).
+2. Run CUBA SDK from Applications or open a terminal and run the `open "/Applications/CUBA SDK.app"` to start cuba-sdk.
 
-# 3. Configuration <a name="configuration"></a>
+## Initialization
 
-SDK should be configured before the first usage. To configure SDK run the `init` command.
+On the first run, SDK is automatically initialized. You can also do it at any time by running `init` command.
 
-# 4. Commands Reference <a name="commands-reference"></a>
+# Commands Reference <a name="commands-reference"></a>
 
-## 4.1. Common SDK Commands <a name="common-sdk-commands"></a>
+## Common SDK Commands <a name="common-sdk-commands"></a>
 
 - `sdk` - prints a current SDK status.
 - `properties` - prints configured SDK properties. Specific properties can be printed with `--n` or `--name` additional parameters, for example,  `properties --n sdk.export.path`
@@ -87,12 +84,12 @@ SDK should be configured before the first usage. To configure SDK run the `init`
 - `set-license` - sets the license key and configures Premium repositories for the *source* repository.
 - `check-updates` - checks available minor updates for framework and add-ons.  Specific target repository can be configured with `--r` or `--repository` additional parameters, for example, `import --r sdk2`. If `--no-upload` additional parameter is presented, then SDK archive will be imported only to the local *m2* repository.
 
-## 4.2. Embedded Nexus Repository Commands <a name="embedded-nexus-repository-commands"></a>
+## Embedded Nexus Repository Commands <a name="embedded-nexus-repository-commands"></a>
 
 - `start` - starts embedded repository.
 - `stop` - stops embedded repository.
 
-## 4.3. Manage Repositories <a name="manage-repositories"></a>
+## Manage Repositories <a name="manage-repositories"></a>
 
 SDK tool has three repository scopes:
 - **source** - source repository for components. Dependencies will be downloaded from these repositories.
@@ -119,7 +116,7 @@ By default the following repositories are configured:
 - `repository remove target` - removes target repository.
 - `repository remove source` - removes source repository.
 
-## 4.4. Manage Components <a name="manage-components"></a>
+## Manage Components <a name="manage-components"></a>
 
 ### Component Commands
 
@@ -176,7 +173,7 @@ Import command imports exported SDK archive to the current SDK and upload it to 
 - `--info` - prints Gradle output. Please note, that in this case the command will be executed in the single-thread mode.
 - `--o` or `--option` - additional Gradle execution options.
 
-# 5. SDK Settings <a name="sdk-settings"></a>
+# SDK Settings <a name="sdk-settings"></a>
 
 Configured SDK settings by default are located in the `<User.home>/cli/sdk/sdk.properties` file. Current configured settings can be printed with `properties` command.
 
@@ -208,7 +205,7 @@ Following parameters can be applied to all commands:
 - `--s` or `--settings` - path to the custom settings file. All settings from this file override the default setting properties. This feature can be useful to create SDK profiles.
 - `--sp` or `--setting-property` override default setting parameter, for example `--sp maven.local.repo=/home/user/other-m2`.
 
-# 6. SDK Plugins <a name="plugins"></a>
+# SDK Plugins <a name="plugins"></a>
 
 CUBA SDK supports external plugins. Plugins are similar to [CUBA CLI](https://github.com/cuba-platform/cuba-cli) plugins.
 Please check more info about plugin development in [CUBA CLI documentation](https://github.com/cuba-platform/cuba-cli/wiki/Plugin-Development).
