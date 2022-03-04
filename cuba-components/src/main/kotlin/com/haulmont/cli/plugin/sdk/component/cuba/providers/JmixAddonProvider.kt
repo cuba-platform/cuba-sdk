@@ -45,6 +45,7 @@ class JmixAddonProvider : JmixProvider() {
     override fun components() = componentVersionsManager
         .addons()
         .sortedBy { it.id }
+        .filter { it.id != "minio-file-storage" }
         .map { initAddonTemplate(it, "\${version}") }
         .toList()
 

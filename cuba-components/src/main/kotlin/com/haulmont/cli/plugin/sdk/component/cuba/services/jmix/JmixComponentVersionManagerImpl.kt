@@ -78,6 +78,7 @@ class JmixComponentVersionManagerImpl : JmixComponentVersionManager {
                 }
                 return@map addon
             }
+//            .filter { it.dependencies.isNotEmpty() }  // excludes addons without dependencies
             .toList()
     }
 
