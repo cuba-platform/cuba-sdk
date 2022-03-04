@@ -233,6 +233,7 @@ class SetupNexusCommand : AbstractSdkCommand() {
                 printWriter.println(messages["setup.nexusConfigured"].green())
             }
         }
+
     }
 
     private fun runNexusConfigurationScript(answers: Answers, login: String, password: String): Boolean {
@@ -283,17 +284,15 @@ class SetupNexusCommand : AbstractSdkCommand() {
     }
 
     private fun createNexusScript(login: String, password: String, script: String): Boolean {
-        nexusScriptManager.create(login, password, "sdk.init", script)
-            .also {
-                if (it.statusCode != 204) {
-                    printWriter.println(
-                        messages["setup.repositoryCanNotBeConfiguredAutomatically"].format(it.responseMessage).red()
-                    )
-                    return false
-                }
-                return true
-            }
-        return false
+        val response = nexusScriptManager.create(login, password, "sdk.init", script)
+
+        if (response.statusCode != 204) {
+            printWriter.println(
+                messages["setup.repositoryCanNotBeConfiguredAutomatically"].format(response.responseMessage).red()
+            )
+            return false
+        }
+        return true
     }
 
     private fun runNexusScript(answers: Answers, login: String, password: String): Boolean {
@@ -352,6 +351,7 @@ class SetupNexusCommand : AbstractSdkCommand() {
 
         properties["application-port"] = port
         properties["nexus.scripts.allowCreation"] = "true"
+        properties["nexus.onboarding.enabled"] = "false"
         FileWriter(nexusConfig.toString()).use {
             properties.store(it, "Nexus properties")
         }

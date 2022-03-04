@@ -76,6 +76,7 @@ class NexusScriptManagerImpl : NexusScriptManager {
                 .httpDelete()
                 .authentication().basic(login, password)
                 .header(Headers.ACCEPT, "application/json")
+                .header(Headers.CONTENT_TYPE, "application/json")
                 .response()
         return response
     }

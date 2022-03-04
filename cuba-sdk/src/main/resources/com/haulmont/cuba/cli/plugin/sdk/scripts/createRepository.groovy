@@ -22,6 +22,8 @@ import org.sonatype.nexus.repository.maven.LayoutPolicy
 import org.sonatype.nexus.repository.maven.VersionPolicy
 import org.sonatype.nexus.repository.storage.WritePolicy
 
+import org.sonatype.nexus.security.user.UserNotFoundException;
+
 def sdkConfig = new JsonSlurper().parseText(args)
 
 def login = sdkConfig.login
@@ -31,13 +33,13 @@ def repoName = sdkConfig.repoName
 security.setAnonymousAccess(false)
 log.info('Anonymous access disabled')
 
-def user = security.getSecuritySystem().getUser(login)
-if (user == null) {
-    security.addUser(login, login, '', null, true, password, ['nx-admin'])
-    log.info("User $login created")
-} else {
+try {
+    security.getSecuritySystem().getUser(login)
     security.getSecuritySystem().changePassword(login, password)
     log.info("User $login updated")
+} catch(UserNotFoundException ignored) {
+    security.addUser(login, login, '', '', true, password, ['nx-admin'])
+    log.info("User $login created")
 }
 
 if (repository.getRepositoryManager().get(repoName) == null) {
