@@ -169,7 +169,7 @@ if (project.hasProperty('buildDmg')) {
         volumeName = "cuba-sdk-${postfix}"
         appOutputDir = macBuildZipUnpackDirName
         dmgName = dmgAppName
-        //backgroundImage = "etc/img/background.png"
+        backgroundImage = "etc/img/background.png"
         icon = "etc/img/cuba-sdk.icns"
         certIdentity = project.property('certIdentity').replace('"', '')
 
