@@ -18,6 +18,9 @@
   - [How to Organize Local Repository](#how-to-organize-local-repository)
   - [How to Export Artifacts](#how-to-export-artifacts)
   - [How to Import Artifacts](#how-to-import-artifacts)
+  - [Build Information](#build-information)
+    - [How to build, run, and debug CUBA SDK locally (in Intellij IDEA)](#how-to-build-cuba-sdk)
+    - [How to build DMG image](#how-to-build-dmg-image)
 
 # 1. Overview <a name="overview"></a>
 
@@ -379,7 +382,7 @@ When CUBA SDK is installed and the local repository is configured run the `impor
 
 # Build information
 
-## How to build, run, and debug CUBA SDK locally (in Intellij IDEA)
+## How to build, run, and debug CUBA SDK locally (in Intellij IDEA) <a name="how-to-build-cuba-sdk"></a>
 
 Below, `${platform}` is referred to as the current Operating System (OS) name (`windows`, `linux`, `macos` for Windows, 
 Linux, and macOS respectively).
