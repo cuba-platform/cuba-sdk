@@ -101,7 +101,8 @@ class ImportCommand : BaseComponentCommand() {
             components.forEach { component ->
                 componentManager.upload(
                     component,
-                    repositories
+                    repositories,
+                    true
                 ) { artifact, _, _ ->
                     printProgress(
                         messages["upload.progress"].format(artifact.mvnCoordinates()),

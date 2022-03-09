@@ -154,7 +154,7 @@ class ComponentManagerImpl : ComponentManager {
     }
 
 
-    override fun upload(component: Component, repositories: List<Repository>, progress: UploadProcessCallback?) {
+    override fun upload(component: Component, repositories: List<Repository>, isImported: Boolean, progress: UploadProcessCallback?) {
         val artifacts = component.collectAllDependencies()
 
         val total = artifacts.size
@@ -165,7 +165,7 @@ class ComponentManagerImpl : ComponentManager {
                 !alreadyUploaded(it, artifact)
             }
             if (repositoriesToUpload.isNotEmpty()) {
-                artifactManager.upload(repositories, artifact)
+                artifactManager.upload(repositories, artifact, isImported)
             }
             progress?.let { it(artifact, uploaded.incrementAndGet(), total) }
         }

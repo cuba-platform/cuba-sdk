@@ -37,13 +37,13 @@ interface ArtifactManager {
 
     fun readPom(artifact: MvnArtifact, classifier: Classifier = Classifier.pom()): Model?
 
-    fun upload(repositories: List<Repository>, artifact: MvnArtifact)
+    fun upload(repositories: List<Repository>, artifact: MvnArtifact, isImported: Boolean = false)
 
     fun getArtifact(artifact: MvnArtifact, classifier: Classifier)
 
     fun getArtifactFile(artifact: MvnArtifact, classifier: Classifier = Classifier.jar()): Path?
 
-    fun getOrDownloadArtifactFile(artifact: MvnArtifact, classifier: Classifier): Path?
+    fun getOrDownloadArtifactFile(artifact: MvnArtifact, classifier: Classifier, isImported: Boolean = false): Path?
 
     fun getOrDownloadArtifactWithClassifiers(artifact: MvnArtifact, classifiers:Collection<Classifier>)
 

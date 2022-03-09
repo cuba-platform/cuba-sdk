@@ -220,7 +220,7 @@ class MvnArtifactManagerImpl : ArtifactManager {
         return artifact.localPath(Path.of(sdkSettings["maven.local.repo"]), classifier)
     }
 
-    override fun upload(repositories: List<Repository>, artifact: MvnArtifact) {
+    override fun upload(repositories: List<Repository>, artifact: MvnArtifact, isImported: Boolean) {
         repositories.forEach {
             uploadToRepository(it, artifact)
         }
@@ -385,7 +385,8 @@ class MvnArtifactManagerImpl : ArtifactManager {
 
     override fun getOrDownloadArtifactFile(
         artifact: MvnArtifact,
-        classifier: Classifier
+        classifier: Classifier,
+        isImported: Boolean
     ): Path? {
         val file = getArtifactFile(artifact, classifier)
         if (!Files.exists(file)) {

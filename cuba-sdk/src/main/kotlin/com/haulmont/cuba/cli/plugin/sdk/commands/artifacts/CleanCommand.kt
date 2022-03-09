@@ -81,6 +81,7 @@ class CleanCommand : AbstractSdkCommand() {
                 )
             }
         }
+
         printWriter.println(messages["cleanup.finished"].green())
     }
 

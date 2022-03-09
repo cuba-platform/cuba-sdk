@@ -34,7 +34,7 @@ interface ComponentManager {
 
     fun searchForAdditionalComponents(component: Component): Set<Component>
 
-    fun upload(component: Component, repositories: List<Repository>, progress: UploadProcessCallback? = null)
+    fun upload(component: Component, repositories: List<Repository>, isImported: Boolean = false,  progress: UploadProcessCallback? = null)
 
     fun remove(componentToRemove: Component, removeFromRepo: Boolean, progress: RemoveProcessCallback? = null)
 

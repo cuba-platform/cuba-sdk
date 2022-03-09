@@ -24,6 +24,7 @@ import com.haulmont.cuba.cli.plugin.sdk.di.sdkKodein
 import com.haulmont.cuba.cli.plugin.sdk.dto.*
 import com.haulmont.cuba.cli.plugin.sdk.services.ArtifactManager
 import com.haulmont.cuba.cli.plugin.sdk.services.DbProvider
+import com.haulmont.cuba.cli.plugin.sdk.services.RepositoryManager
 import com.haulmont.cuba.cli.plugin.sdk.services.SdkSettingsHolder
 import com.haulmont.cuba.cli.plugin.sdk.utils.FileUtils
 import com.haulmont.cuba.cli.plugin.sdk.utils.copyInputStreamToFile
@@ -31,13 +32,11 @@ import com.haulmont.cuba.cli.plugin.sdk.utils.performance
 import org.apache.maven.model.Model
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
 import org.kodein.di.generic.instance
-import java.io.FileReader
-import java.io.InputStream
-import java.io.InputStreamReader
-import java.io.PrintWriter
+import java.io.*
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardCopyOption
 import java.util.*
 import java.util.logging.Logger
 
@@ -49,6 +48,7 @@ class GradleArtifactManagerImpl : ArtifactManager {
     internal val messages by localMessages()
     internal val sdkSettings: SdkSettingsHolder by sdkKodein.instance<SdkSettingsHolder>()
     internal val dbProvider: DbProvider by sdkKodein.instance<DbProvider>()
+    internal val repositoryManager: RepositoryManager by sdkKodein.instance<RepositoryManager>()
     internal val gradleConnector by lazy { SdkGradleConnector.instance() }
 
     override val name = "gradle"
@@ -183,29 +183,77 @@ class GradleArtifactManagerImpl : ArtifactManager {
         return null
     }
 
-    private fun readFromCache(artifact: MvnArtifact, classifier: Classifier = Classifier.jar()): Path? {
-        dbProvider["gradle"][artifact.gradleCoordinates(classifier)].also {
-            if (it != null) {
-                return Path.of(sdkSettings["gradle.cache"], it)
+    private fun readFromCache(
+        artifact: MvnArtifact,
+        classifier: Classifier = Classifier.jar(),
+        isImported: Boolean = false
+    ): Path? {
+        if (!isImported) {
+            dbProvider["gradle"][artifact.gradleCoordinates(classifier)].also {
+                if (it != null) {
+                    return Path.of(sdkSettings["gradle.cache"], it)
+                }
             }
+            return null
         }
+
+        val localRepository = repositoryManager.getRepository("sdk-local", RepositoryTarget.SOURCE)
+            ?: throw IllegalStateException("\"sdk-local\" source repository does not exists")
+        return artifact.localPath(Path.of(localRepository.url), classifier)
+    }
+
+    private fun writeToCache(
+        artifact: MvnArtifact,
+        classifier: Classifier,
+        source: Path
+    ): Path? {
+        val cachedArtifactLocalPathString = dbProvider["gradle"][artifact.gradleCoordinates(classifier)]
+
+        if (cachedArtifactLocalPathString != null) {
+            val artifactCachePath = Path.of(sdkSettings["gradle.cache"], cachedArtifactLocalPathString)
+            if (!Files.exists(artifactCachePath)) {
+                Files.createDirectories(artifactCachePath.parent)
+                if (Files.exists(artifactCachePath)) {
+                    Files.delete(artifactCachePath)
+                }
+                Files.createFile(artifactCachePath)
+            }
+
+            Files.copy(source, artifactCachePath, StandardCopyOption.REPLACE_EXISTING)
+
+            return artifactCachePath
+        }
+
+        log.fine(
+            "The path to the ${artifact.gradleCoordinates(classifier)} artifact in the Gradle cache has not " +
+                    "been set"
+        )
+
         return null
     }
 
-    override fun upload(repositories: List<Repository>, artifact: MvnArtifact) {
+
+    override fun upload(repositories: List<Repository>, artifact: MvnArtifact, isImported: Boolean) {
         val descriptors = artifact.classifiers.distinct()
             .filter { it != Classifier.pom() }
             .map {
-                UploadDescriptor(
-                    artifact, it,
-                    artifactPath(artifact, it)
-                )
+                if (isImported) {
+                    UploadDescriptor(
+                        artifact, it,
+                        artifactPath(artifact, it, true)
+                    )
+                } else {
+                    UploadDescriptor(
+                        artifact, it,
+                        artifactPath(artifact, it)
+                    )
+                }
             }
             .toList()
 
         var pomDescriptor: String? = null
         if (artifact.classifiers.contains(Classifier.pom())) {
-            pomDescriptor = artifactPath(artifact, Classifier.pom())
+            pomDescriptor = artifactPath(artifact, Classifier.pom(), isImported)
         }
         try {
             gradleConnector.runTask(
@@ -228,8 +276,9 @@ class GradleArtifactManagerImpl : ArtifactManager {
 
     private fun artifactPath(
         artifact: MvnArtifact,
-        it: Classifier
-    ) = (getOrDownloadArtifactFile(artifact, it)?.toString()
+        it: Classifier,
+        isImported: Boolean = false
+    ) = (getOrDownloadArtifactFile(artifact, it, isImported)?.toString()
         ?: throw IllegalStateException("Unable to download ${artifact.gradleCoordinates(it)}"))
 
     override fun getArtifact(artifact: MvnArtifact, classifier: Classifier) {
@@ -266,7 +315,8 @@ class GradleArtifactManagerImpl : ArtifactManager {
             entry.value.asJsonObject.entrySet().forEach { classifierEntry ->
                 val filePath = classifierEntry.value
                 if (!filePath.isJsonNull) {
-                    val relativePath = Path.of(sdkSettings["gradle.cache"]).relativize(Path.of(filePath.asString))
+                    val relativePath =
+                        Path.of(sdkSettings["gradle.cache"]).relativize(Path.of(filePath.asString))
                     val split = classifierEntry.key.split("@")
                     dbProvider["gradle"][mvnArtifact.gradleCoordinates(Classifier(split[0], split[1]))] =
                         relativePath.toString()
@@ -276,16 +326,45 @@ class GradleArtifactManagerImpl : ArtifactManager {
         return result
     }
 
-    override fun getOrDownloadArtifactFile(artifact: MvnArtifact, classifier: Classifier): Path? {
-        var file: Path? = readFromCache(artifact, classifier)
-        if (file == null || !Files.exists(file)) {
-            getArtifact(artifact, classifier)
+    override fun getOrDownloadArtifactFile(
+        artifact: MvnArtifact,
+        classifier: Classifier,
+        isImported: Boolean
+    ): Path? {
+        var file: Path?
+        if (isImported) {
+            file = readFromCache(artifact, classifier, true)
+            file = when (file != null) {
+                true -> writeToCache(artifact, classifier, file)
+                false -> null
+            }
+        } else {
             file = readFromCache(artifact, classifier)
         }
+        if (file == null || !Files.exists(file)) {
+            if (artifact.artifactId == "gradle" && artifact.groupId == "gradle") {
+                val gradleVersion = artifact.version
+                uploadComponentToLocalCache(
+                    Component(
+                        groupId = "gradle",
+                        artifactId = "gradle",
+                        url = sdkSettings["gradle.downloadLink"].format(gradleVersion),
+                        version = gradleVersion,
+                        classifiers = mutableSetOf(Classifier("", "zip"), Classifier(""))
+                    )
+                )
+            } else {
+                getArtifact(artifact, classifier)
+            }
+        }
+        file = readFromCache(artifact, classifier)
         return file
     }
 
-    override fun getOrDownloadArtifactWithClassifiers(artifact: MvnArtifact, classifiers: Collection<Classifier>) {
+    override fun getOrDownloadArtifactWithClassifiers(
+        artifact: MvnArtifact,
+        classifiers: Collection<Classifier>
+    ) {
         val componentsToResolve = mutableListOf<String>()
         for (classifier in classifiers) {
             if (!listOf(Classifier.jar(), Classifier.sources(), Classifier.pom()).contains(classifier)) {
@@ -300,8 +379,8 @@ class GradleArtifactManagerImpl : ArtifactManager {
                     "getArtifact", mapOf(
                         "toResolve" to componentsToResolve.joinToString(separator = ";"),
                         if (artifact.groupId.startsWith("io.jmix.")) {
-                        "jmixVersion" to artifact.version                         }
-                        else {
+                            "jmixVersion" to artifact.version
+                        } else {
                             "jmixVersion" to ""
                         },
                         "transitive" to false,
@@ -318,7 +397,7 @@ class GradleArtifactManagerImpl : ArtifactManager {
                 "resolve", mapOf(
                     "toResolve" to artifact.gradleCoordinates(classifier),
                     if (artifact.groupId.startsWith("io.jmix.")) {
-                    "jmixVersion" to artifact.version
+                        "jmixVersion" to artifact.version
                     } else {
                         "jmixVersion" to ""
                     }
