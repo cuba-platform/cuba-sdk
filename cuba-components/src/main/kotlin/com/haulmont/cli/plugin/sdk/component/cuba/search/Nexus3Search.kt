@@ -44,8 +44,7 @@ class Nexus3Search(repository: Repository) : AbstractRepositorySearch(repository
                     },
             "name" to
                     if (!searchUrl.equals(cubaNexus3RepoUrl))
-                        ((component as JmixComponent).starterModule()?.artifactId?.substringBefore("-starter")
-                            ?: "") + "*"
+                        "jmix-*"
                     else
                         ((component as CubaComponent).globalModule()?.artifactId?.substringBefore("-global")
                             ?: "") + "*",

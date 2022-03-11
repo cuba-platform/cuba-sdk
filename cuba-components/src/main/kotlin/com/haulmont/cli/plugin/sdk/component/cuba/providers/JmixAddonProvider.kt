@@ -45,7 +45,12 @@ class JmixAddonProvider : JmixProvider() {
     override fun components() = componentVersionsManager
         .addons()
         .sortedBy { it.id }
-        .filter { it.id != "minio-file-storage" }
+        .filter {
+            it.id != "minio-file-storage" && it.id != "application-settings" &&
+            it.id != "business-calendars" && it.id != "notifications" &&
+            it.id != "quartz" && it.id != "openid-connect" &&
+            it.id != "email-templates"
+        }   // exclude filtering when proper dependencies of these addons are included
         .map { initAddonTemplate(it, "\${version}") }
         .toList()
 
@@ -78,10 +83,10 @@ class JmixAddonProvider : JmixProvider() {
             }
         )
             .apply {
-            when (componentName) {
-                "bpm" -> this.components.add(Component(packageName, "jmix-bpm-modeler", version))
+                when (componentName) {
+                    "bpm" -> this.components.add(JmixComponent(packageName, "jmix-bpm-modeler", version))
+                }
             }
-        }
     }
 
     private fun addonComponents(version: String): MutableSet<Component> {
@@ -89,10 +94,10 @@ class JmixAddonProvider : JmixProvider() {
         val name = "jmix"
 
         return mutableSetOf(
-            Component("${packageName}.core", "$name-core-starter", version),
-            Component("${packageName}.data", "$name-eclipselink-starter", version),
-            Component("${packageName}.ui", "$name-ui-starter", version),
-            Component("${packageName}.ui", "$name-ui-themes", version)
+            JmixComponent("${packageName}.core", "$name-core-starter", version),
+            JmixComponent("${packageName}.data", "$name-eclipselink-starter", version),
+            JmixComponent("${packageName}.ui", "$name-ui-starter", version),
+            JmixComponent("${packageName}.ui", "$name-ui-themes", version)
         )
     }
 
@@ -178,7 +183,7 @@ class JmixAddonProvider : JmixProvider() {
     private fun jmixAddon(dependency: Dependency): Component? {
         if (dependency.version != null) {
             return createFromTemplate(
-                Component(
+                JmixComponent(
                     dependency.groupId,
                     dependency.artifactId,
                     dependency.version

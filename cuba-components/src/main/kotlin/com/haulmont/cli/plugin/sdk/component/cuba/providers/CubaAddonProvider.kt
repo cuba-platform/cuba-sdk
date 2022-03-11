@@ -76,9 +76,9 @@ class CubaAddonProvider : CubaProvider() {
             components = addonComponents(packageName, name, version)
         ).apply {
             if (componentName == "bproc") {
-                this.components.add(Component(packageName, "$name-modeler", version))
+                this.components.add(CubaComponent(packageName, "$name-modeler", version))
             } else if (componentName == "maps") {
-                this.components.add(Component(packageName, "$name-web-toolkit", version).apply {
+                this.components.add(CubaComponent(packageName, "$name-web-toolkit", version).apply {
                     classifiers.add(Classifier("web", "zip"))
                 })
             }
@@ -87,13 +87,13 @@ class CubaAddonProvider : CubaProvider() {
 
     private fun addonComponents(packageName: String, name: String, version: String): MutableSet<Component> {
         return mutableSetOf(
-            Component(packageName, "$name-global", version),
-            Component(packageName, "$name-gui", version),
-            Component(packageName, "$name-portal", version),
-            Component(packageName, "$name-core", version).apply {
+            CubaComponent(packageName, "$name-global", version),
+            CubaComponent(packageName, "$name-gui", version),
+            CubaComponent(packageName, "$name-portal", version),
+            CubaComponent(packageName, "$name-core", version).apply {
                 classifiers.add(Classifier("db", "zip"))
             },
-            Component(packageName, "$name-web", version).apply {
+            CubaComponent(packageName, "$name-web", version).apply {
                 classifiers.addAll(
                     listOf(
                         Classifier.javadoc(),
@@ -102,8 +102,8 @@ class CubaAddonProvider : CubaProvider() {
                     )
                 )
             },
-            Component(packageName, "$name-web-themes", version),
-            Component(packageName, "$name-web-toolkit", version).apply {
+            CubaComponent(packageName, "$name-web-themes", version),
+            CubaComponent(packageName, "$name-web-toolkit", version).apply {
                 classifiers.add(Classifier.client())
             }
         )
@@ -192,7 +192,7 @@ class CubaAddonProvider : CubaProvider() {
 
     private fun cubaAddon(dependency: Dependency): Component? {
         return createFromTemplate(
-            Component(
+            CubaComponent(
                 dependency.groupId,
                 dependency.artifactId.substringBeforeLast("-global"),
                 dependency.version

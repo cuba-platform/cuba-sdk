@@ -358,6 +358,7 @@ abstract class BaseComponentCommand : AbstractSdkCommand() {
                     .filter { it.id != null }
                     .filter { it.category == if (category == "Others") null else category }
                     .map { Option(it.id!!, it.name ?: it.id, it.id!!) }
+                    .distinctBy { it.id }
                     .toList()
                 val id = Prompts.create {
                     options("name", messages["ask.name"].format(msgPrefix), components)
