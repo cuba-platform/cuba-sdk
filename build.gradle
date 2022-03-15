@@ -1,6 +1,6 @@
 buildscript {
     ext.versions = [
-        kotlin               : "1.4.0",
+        kotlin               : "1.4.32",
         cliCore              : "1.0.1",
         velocity             : "1.7",
         jCommander           : "1.72",
