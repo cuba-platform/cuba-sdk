@@ -6,7 +6,6 @@
 
 - [Overview](#overview) 
 - [Installation](#installation)
-- [Configuration](#configuration)
 - [Commands Reference](#commands-reference)
   - [Common SDK Commands](#common-sdk-commands)
   - [Embedded Nexus Repository Commands](#embedded-nexus-repository-commands)
@@ -22,7 +21,7 @@
     - [How to build, run, and debug CUBA SDK locally (in Intellij IDEA)](#how-to-build-cuba-sdk)
     - [How to build DMG image](#how-to-build-dmg-image)
 
-# 1. Overview <a name="overview"></a>
+# Overview <a name="overview"></a>
 
 CUBA SDK is a command-line tool that provides an ability to resolve, export and upload to an external repository all dependencies 
 for CUBA and Jmix frameworks, add-ons or any external library with a few simple commands. SDK can be used as an embedded repository. This tool has a built-in [Nexus 3 repository](https://www.sonatype.com/nexus-repository-oss). 
@@ -36,7 +35,7 @@ CUBA SDK is a useful tool if it is required to develop applications with a limit
 - Can be installed on CI server.
 - Automatically collects and resolves all artifact dependencies.
 - Automatically downloads and resolves artifact sources. 
-- User friendly command-line interface.
+- User-friendly command-line interface.
 - Supports external plugins.
 - Uses Gradle to resolve artifact dependencies.
 - Checks for new artifacts versions and can install them automatically with all dependencies.
@@ -47,71 +46,39 @@ CUBA SDK is a useful tool if it is required to develop applications with a limit
 - Integrated with CUBA add-ons marketplace. 
 - Supports different profiles for one CUBA SDK instance. 
 
-# 2. Installation <a name="installation"></a>
+# Installation <a name="installation"></a>
 
-## Download links:
+## Download and Install
 
-- [Windows installer](https://cuba-platform.bintray.com/tools/cuba-sdk/1.0.4/cuba-sdk-1.0.4.exe)
-- [Windows](https://cuba-platform.bintray.com/tools/cuba-sdk/1.0.4/cuba-sdk-1.0.4-windows.zip)
-- [Linux](https://cuba-platform.bintray.com/tools/cuba-sdk/1.0.4/cuba-sdk-1.0.4-linux.zip)
-- [MacOS](https://cuba-platform.bintray.com/tools/cuba-sdk/1.0.4/cuba-sdk-1.0.4-macos.zip)
+- [Windows installer](https://github.com/cuba-platform/cuba-sdk/releases/download/1.2.1/cuba-sdk-1.2.1.exe)
+- [Linux](https://github.com/cuba-platform/cuba-sdk/releases/download/1.2.1/cuba-sdk-1.2.1-linux.zip)
+- [macOS](https://github.com/cuba-platform/cuba-sdk/releases/download/1.2.1/cuba-sdk-1.2.1.dmg)
 
 ### Windows
 
-1. Use [EXE installer](https://cuba-platform.bintray.com/tools/cuba-sdk/1.0.4/cuba-sdk-1.0.4.exe). It will automatically register `cuba-sdk` in the PATH environment variable.
-2. Open a terminal and run the `cuba-sdk` command to start cuba-sdk.
-
-### Mac OS
-
-1. Install the CUBA CLI via Homebrew:
-    ```
-    $ brew install cuba-platform/tools/cuba-sdk
-    ```
-2. Run the `cuba-sdk` command to start cuba-sdk
+1. Download and run [Windows installer](https://github.com/cuba-platform/cuba-sdk/releases/download/1.2.1/cuba-sdk-1.2.1.exe). It will automatically register `cuba-sdk` in the PATH environment variable.
+2. Open a terminal and run the `cuba-sdk` command.
 
 ### Linux
 
-1. Unpack the [`cuba-sdk-1.0.4-linux.zip`](https://cuba-platform.bintray.com/tools/cuba-sdk/1.0.4/cuba-sdk-1.0.4-linux.zip) archive
-```
-unzip cuba-sdk-1.0.4-linux.zip
-mv ./cuba-sdk-1.0.4 ~/cuba-sdk-1.0
-```
+1. Download and unpack the [ZIP archive](https://github.com/cuba-platform/cuba-sdk/releases/download/1.2.1/cuba-sdk-1.2.1-linux.zip).
+2. Add location of `cuba-sdk/bin` directory to the PATH environment variable.
+3. Open a terminal and run the `cuba-sdk` command.
 
-2. Create local `~/.haulmont/bin` folder if not exists
-```
-mkdir -p ~/.haulmont/bin
-```
+### macOS
 
-4. Add the path to the `~/.haulmont/bin/` folder to the `PATH` variable and to your `~/.bashrc` file:
-```
-nano ~/.bashrc
-```
-Add to the end of file:
-```
-PATH="$PATH:/home/$USER/.haulmont/bin/"
-```
+1. Download and install [DMG](https://github.com/cuba-platform/cuba-sdk/releases/download/1.2.1/cuba-sdk-1.2.1.dmg).
+2. Run CUBA SDK from Applications or add `/Applications/CUBA SDK.app/Contents/bin` to the PATH environment variable and run `cuba-sdk` in the terminal.
 
-In order to update the path variable for the current session, run:
-```
-source ~/.bashrc
-```
+     The app is not signed at the moment, so macOS refuses to run it at the first attempt. You have to open *Preferences -> Security and Privacy* and click *Open Anyway*.
 
-5. Add symlink to `cuba-sdk`
-```
-ln -sf ~/cuba-sdk-1.0/bin/cuba-sdk ~/.haulmont/bin/cuba-sdk
-```
+## Initialization
 
-6. Run the `cuba-sdk` command to start cuba-sdk.
+On the first run, SDK is automatically initialized. You can also do it at any time by running `init` command.
 
-Now you can use `cuba-sdk` from any directory.
+# Commands Reference <a name="commands-reference"></a>
 
-# 3. Configuration <a name="configuration"></a>
-
-SDK should be configured before the first usage. To configure SDK run the `init` command. 
-
-# 4. Commands Reference <a name="commands-reference"></a>
-
-## 4.1. Common SDK Commands <a name="common-sdk-commands"></a>
+## Common SDK Commands <a name="common-sdk-commands"></a>
 
 - `sdk` - prints a current SDK status.
 - `properties` - prints configured SDK properties. Specific properties can be printed with `--n` or `--name` additional parameters, for example,  `properties --n sdk.export.path`
@@ -122,12 +89,12 @@ SDK should be configured before the first usage. To configure SDK run the `init`
 - `set-license` - sets the license key and configures Premium repositories for the *source* repository. 
 - `check-updates` - checks available minor updates for framework and add-ons.  Specific target repository can be configured with `--r` or `--repository` additional parameters, for example, `import --r sdk2`. If `--no-upload` additional parameter is presented, then SDK archive will be imported only to the local *m2* repository.
 
-## 4.2. Embedded Nexus Repository Commands <a name="embedded-nexus-repository-commands"></a>
+## Embedded Nexus Repository Commands <a name="embedded-nexus-repository-commands"></a>
 
 - `start` - starts embedded repository.
 - `stop` - stops embedded repository. 
 
-## 4.3. Manage Repositories <a name="manage-repositories"></a>
+## Manage Repositories <a name="manage-repositories"></a>
 
 SDK tool has three repository scopes:
 - **source** - source repository for components. Dependencies will be downloaded from these repositories.  
@@ -155,7 +122,7 @@ By default the following repositories are configured:
 - `repository remove target` - removes target repository.
 - `repository remove source` - removes source repository.
 
-## 4.4. Manage Components <a name="manage-components"></a>
+## Manage Components <a name="manage-components"></a>
 
 ### Component Commands 
 
@@ -212,7 +179,7 @@ Import command imports exported SDK archive to the current SDK and upload it to 
 - `--info` - prints Gradle output. Please note, that in this case the command will be executed in the single-thread mode.
 - `--o` or `--option` - additional Gradle execution options.
 
-# 5. SDK Settings <a name="sdk-settings"></a>
+# SDK Settings <a name="sdk-settings"></a>
 
 Configured SDK settings by default are located in the `<User.home>/cli/sdk/sdk.properties` file. Current configured settings can be printed with `properties` command.
 
@@ -244,7 +211,7 @@ Following parameters can be applied to all commands:
 - `--s` or `--settings` - path to the custom settings file. All settings from this file override the default setting properties. This feature can be useful to create SDK profiles.
 - `--sp` or `--setting-property` override default setting parameter, for example `--sp maven.local.repo=/home/user/other-m2`.
 
-# 6. SDK Plugins <a name="plugins"></a>
+# SDK Plugins <a name="plugins"></a>
 
 CUBA SDK supports external plugins. Plugins are similar to [CUBA CLI](https://github.com/cuba-platform/cuba-cli) plugins. 
 Please check more info about plugin development in [CUBA CLI documentation](https://github.com/cuba-platform/cuba-cli/wiki/Plugin-Development).
@@ -401,15 +368,3 @@ Once the task is completed, it is enough to execute `cuba-sdk.bat` or `cuba-sdk.
 is required, one must set `JLINK_VM_OPTIONS = -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005` and
 run the standard Remote JVM Debug configuration of Intellij IDEA to connect to the running JVM.
 
-
-## How to build DMG image
-
-1. Execute `gradlew bundle`.
-2. To build .dmg for MAC OS execute `buildDmgMac` task with gradle property `buildDmgMac`. 
-
-`gradlew buildDmg -PbuildDmg`
-
-For production build following properties should be passed
-`-PcertIdentity= -PdeveloperId= -PdeveloperIdPassword=`
-
-3. Find distributions in `build/distributions`.
