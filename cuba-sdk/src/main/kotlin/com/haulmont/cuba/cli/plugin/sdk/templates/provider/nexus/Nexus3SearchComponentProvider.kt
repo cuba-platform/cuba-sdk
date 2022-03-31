@@ -36,7 +36,7 @@ abstract class Nexus3SearchComponentProvider(framework: String) : BaseComponentP
                         .groupBy { it.major }
                         .entries
                         .asSequence()
-                        .map { it.value.filter { it.minor!=null }.maxByOrNull { v -> v.minor!! } }
+                        .map { it.value.filter { it.minor!=null && it.qualifier == null }.maxByOrNull { v -> v.minor!! } }
                         .filterNotNull()
                         .sortedByDescending { it.major }
                         .map { it.version }

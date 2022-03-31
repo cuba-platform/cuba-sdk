@@ -308,6 +308,9 @@ buildscript {
     repositories {
         maven {
             url 'http:/localhost:8085/repository/cuba-sdk'
+            credentials {
+            ...
+            }
         }
         ...
     }
@@ -317,8 +320,13 @@ buildscript {
 }
 ```
 
+The `credentials` section contains the `username` and `password` fields. Their values must be filled with the repository 
+authentication data provided in the p. #3. By the way, [CUBA Plugin](https://plugins.jetbrains.com/plugin/7249-cuba) detects the embedded repository and provides the necessary 
+information to the CUBA project `build.gradle` file.
+
 **NB**: as Jmix projects contain a newer Gradle Wrapper than CUBA projects do (by default), it is necessary to add `allowInsecureProtocol(true)`
-line to the local Nexus OSS repository declaration in `build.gradle`. Thus, the access to the repository artifacts via the HTTP protocol is granted. 
+line to the local Nexus OSS repository declaration in `build.gradle`. 
+Thus, the access to the repository artifacts via the HTTP protocol is granted. 
 ****The other steps for organizing the local repository for work with Jmix
 projects and addons are the same as for CUBA except of replacing `cuba` with `jmix` in CLI commands.****
 

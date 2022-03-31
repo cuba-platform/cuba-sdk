@@ -153,19 +153,16 @@ task getArtifact() {
 
         if (jmixVersion != "") {
             dependencies {
-                compileClasspath platform("io.jmix.bom:jmix-bom:${project.ext.properties["jmixVersion"]}")
-                runtimeClasspath platform("io.jmix.bom:jmix-bom:${project.ext.properties["jmixVersion"]}")
+                implementation platform("io.jmix.bom:jmix-bom:${project.ext.properties["jmixVersion"]}")
             }
         }
 
         def resolved = [:]
         project.ext.properties["toResolve"].tokenize(';').each {
-            dependencies.add 'compileClasspath', it
-            dependencies.add 'runtimeClasspath', it
+            dependencies.add 'implementation', it
         }
 
-        configurations.compileClasspath.transitive(Boolean.valueOf(project.ext.properties["transitive"] ?: "true"))
-        configurations.runtimeClasspath.transitive(Boolean.valueOf(project.ext.properties["transitive"] ?: "true"))
+        configurations.implementation.transitive(Boolean.valueOf(project.ext.properties["transitive"] ?: "true"))
 
         configurations.all.collect {
             if (it.canBeResolved) {
@@ -198,14 +195,12 @@ task resolve() {
 
         if (jmixVersion != "") {
             dependencies {
-                compileClasspath platform("io.jmix.bom:jmix-bom:${project.ext.properties["jmixVersion"]}")
-                runtimeClasspath platform("io.jmix.bom:jmix-bom:${project.ext.properties["jmixVersion"]}")
+                implementation platform("io.jmix.bom:jmix-bom:${project.ext.properties["jmixVersion"]}")
             }
         }
 
         project.ext.properties["toResolve"].tokenize(';').each {
-            dependencies.add 'compileClasspath', it
-            dependencies.add 'runtimeClasspath', it
+            dependencies.add 'implementation', it
 
         }
         def resolved = [:]
