@@ -50,24 +50,24 @@ CUBA SDK is a useful tool if it is required to develop applications with a limit
 
 ## Download and Install
 
-- [Windows installer](https://github.com/cuba-platform/cuba-sdk/releases/download/1.2.1/cuba-sdk-1.2.1.exe)
-- [Linux](https://github.com/cuba-platform/cuba-sdk/releases/download/1.2.1/cuba-sdk-1.2.1-linux.zip)
-- [macOS](https://github.com/cuba-platform/cuba-sdk/releases/download/1.2.1/cuba-sdk-1.2.1.dmg)
+- [Windows installer](https://github.com/cuba-platform/cuba-sdk/releases/download/1.2.6/cuba-sdk-1.2.6.exe)
+- [Linux](https://github.com/cuba-platform/cuba-sdk/releases/download/1.2.6/cuba-sdk-1.2.6-linux.zip)
+- [macOS](https://github.com/cuba-platform/cuba-sdk/releases/download/1.2.6/cuba-sdk-1.2.6.dmg)
 
 ### Windows
 
-1. Download and run [Windows installer](https://github.com/cuba-platform/cuba-sdk/releases/download/1.2.1/cuba-sdk-1.2.1.exe). It will automatically register `cuba-sdk` in the PATH environment variable.
+1. Download and run [Windows installer](https://github.com/cuba-platform/cuba-sdk/releases/download/1.2.6/cuba-sdk-1.2.6.exe). It will automatically register `cuba-sdk` in the PATH environment variable.
 2. Open a terminal and run the `cuba-sdk` command.
 
 ### Linux
 
-1. Download and unpack the [ZIP archive](https://github.com/cuba-platform/cuba-sdk/releases/download/1.2.1/cuba-sdk-1.2.1-linux.zip).
+1. Download and unpack the [ZIP archive](https://github.com/cuba-platform/cuba-sdk/releases/download/1.2.6/cuba-sdk-1.2.6-linux.zip).
 2. Add location of `cuba-sdk/bin` directory to the PATH environment variable.
 3. Open a terminal and run the `cuba-sdk` command.
 
 ### macOS
 
-1. Download and install [DMG](https://github.com/cuba-platform/cuba-sdk/releases/download/1.2.1/cuba-sdk-1.2.1.dmg).
+1. Download and install [DMG](https://github.com/cuba-platform/cuba-sdk/releases/download/1.2.6/cuba-sdk-1.2.6.dmg).
 2. Run CUBA SDK from Applications or add `/Applications/CUBA SDK.app/Contents/bin` to the PATH environment variable and run `cuba-sdk` in the terminal.
 
      The app is not signed at the moment, so macOS refuses to run it at the first attempt. You have to open *Preferences -> Security and Privacy* and click *Open Anyway*.
