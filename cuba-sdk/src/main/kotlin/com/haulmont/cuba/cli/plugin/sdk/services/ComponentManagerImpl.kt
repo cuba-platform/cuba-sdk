@@ -154,7 +154,12 @@ class ComponentManagerImpl : ComponentManager {
     }
 
 
-    override fun upload(component: Component, repositories: List<Repository>, isImported: Boolean, progress: UploadProcessCallback?) {
+    override fun upload(
+        component: Component,
+        repositories: List<Repository>,
+        isImported: Boolean,
+        progress: UploadProcessCallback?
+    ) {
         val artifacts = component.collectAllDependencies()
 
         val total = artifacts.size
@@ -278,6 +283,21 @@ class ComponentManagerImpl : ComponentManager {
                 }.let { dependencies ->
                     val list = dependencies.toMutableSet()
 
+                    performance("Read unresolved dependencies") {
+                        val unresolvedDependencies = collectUnresolvedDependencies(dependencies.toMutableSet())
+                        unresolvedDependencies.forEach {
+                            artifactManager.getOrDownloadArtifactWithClassifiers(it, it.classifiers)
+
+                            for (classifier in it.classifiers) {
+                                artifactManager.getOrDownloadArtifactFile(it, classifier)?.let { _ ->
+                                    it.classifiers.add(classifier)
+                                }
+                            }
+                        }
+
+                        list.addAll(unresolvedDependencies)
+                    }
+
                     pomModel.dependencies.filter { it.groupId == "org.codehaus.groovy" && it.artifactId == "groovy-all" }
                         .forEach { list.add(MvnArtifact(it.groupId, it.artifactId, it.version)) }
 
@@ -360,6 +380,36 @@ class ComponentManagerImpl : ComponentManager {
         }
 
         return emptyList()
+    }
+
+    private fun collectUnresolvedDependencies(mvnArtifacts: Collection<MvnArtifact>): Set<MvnArtifact> {
+        val dependencies = mutableSetOf<MvnArtifact>()
+
+        mvnArtifacts.parallelStream().forEach {
+            artifactManager.readPom(it)
+                ?.dependencies
+                ?.filter { dependency ->
+                    dependency.version != null && !dependency.version.contains("$")
+                }
+                ?.filter { dependency ->
+                    mvnArtifacts.none { mvnArtifact ->
+                        mvnArtifact.groupId == dependency.groupId
+                                && mvnArtifact.artifactId == dependency.artifactId
+                    }
+                }
+                ?.forEach { dependency ->
+                    dependencies.add(
+                        MvnArtifact(
+                            dependency.groupId,
+                            dependency.artifactId,
+                            dependency.version,
+                            mutableSetOf(Classifier.jar(), Classifier.pom())
+                        )
+                    )
+                }
+        }
+
+        return dependencies
     }
 
     private fun searchAdditionalDependencies(artifact: MvnArtifact, prevArtifact: MvnArtifact?): List<MvnArtifact> {
