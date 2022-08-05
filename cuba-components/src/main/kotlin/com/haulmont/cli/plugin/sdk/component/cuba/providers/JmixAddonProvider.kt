@@ -42,17 +42,15 @@ class JmixAddonProvider : JmixProvider() {
         )
     }
 
-    override fun components() = componentVersionsManager
-        .addons()
-        .sortedBy { it.id }
-        .filter {
-            it.id != "minio-file-storage" && it.id != "application-settings" &&
-            it.id != "business-calendars" && it.id != "notifications" &&
-            it.id != "quartz" && it.id != "openid-connect" &&
-            it.id != "email-templates"
-        }   // exclude filtering when proper dependencies of these addons are included
-        .map { initAddonTemplate(it, "\${version}") }
-        .toList()
+    override fun components() : List<Component> {
+        val ignoredComponents = sdkSettings["jmix.addon.ignoredComponents"].split(",")
+        return componentVersionsManager
+            .addons()
+            .sortedBy { it.id }
+            .filter {!ignoredComponents.contains(it.id)}
+            .map { initAddonTemplate(it, "\${version}") }
+            .toList()
+    }
 
     private fun initAddonTemplate(addon: JmixMarketplaceAddon, version: String): Component {
         val artifact = addon.dependencies[0]
