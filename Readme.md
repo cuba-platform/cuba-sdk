@@ -50,18 +50,18 @@ CUBA SDK is a useful tool if it is required to develop applications with a limit
 
 ## Download and Install
 
-- [Windows installer](https://github.com/cuba-platform/cuba-sdk/releases/download/1.2.6/cuba-sdk-1.2.6.exe)
-- [Linux](https://github.com/cuba-platform/cuba-sdk/releases/download/1.2.6/cuba-sdk-1.2.6-linux.zip)
+- [Windows installer](https://github.com/cuba-platform/cuba-sdk/releases/download/1.2.8/cuba-sdk-1.2.8.exe)
+- [Linux](https://github.com/cuba-platform/cuba-sdk/releases/download/1.2.8/cuba-sdk-1.2.8-linux.zip)
 - [macOS](https://github.com/cuba-platform/cuba-sdk/releases/download/1.2.6/cuba-sdk-1.2.6.dmg)
 
 ### Windows
 
-1. Download and run [Windows installer](https://github.com/cuba-platform/cuba-sdk/releases/download/1.2.6/cuba-sdk-1.2.6.exe). It will automatically register `cuba-sdk` in the PATH environment variable.
+1. Download and run [Windows installer](https://github.com/cuba-platform/cuba-sdk/releases/download/1.2.8/cuba-sdk-1.2.8.exe). It will automatically register `cuba-sdk` in the PATH environment variable.
 2. Open a terminal and run the `cuba-sdk` command.
 
 ### Linux
 
-1. Download and unpack the [ZIP archive](https://github.com/cuba-platform/cuba-sdk/releases/download/1.2.6/cuba-sdk-1.2.6-linux.zip).
+1. Download and unpack the [ZIP archive](https://github.com/cuba-platform/cuba-sdk/releases/download/1.2.8/cuba-sdk-1.2.8-linux.zip).
 2. Add location of `cuba-sdk/bin` directory to the PATH environment variable.
 3. Open a terminal and run the `cuba-sdk` command.
 
