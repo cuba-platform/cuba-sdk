@@ -334,10 +334,10 @@ class GradleArtifactManagerImpl : ArtifactManager {
         var file: Path?
         if (isImported) {
             file = readFromCache(artifact, classifier, true)
-            file = when (file != null) {
-                true -> writeToCache(artifact, classifier, file)
-                false -> null
-            }
+//            file = when (file != null) {
+//                true -> writeToCache(artifact, classifier, file)
+//                false -> null
+//            }
         } else {
             file = readFromCache(artifact, classifier)
         }
@@ -357,7 +357,9 @@ class GradleArtifactManagerImpl : ArtifactManager {
                 getArtifact(artifact, classifier)
             }
         }
-        file = readFromCache(artifact, classifier)
+        if (file == null) {
+            file = readFromCache(artifact, classifier)
+        }
         return file
     }
 
